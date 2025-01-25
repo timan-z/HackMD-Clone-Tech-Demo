@@ -1,0 +1,49 @@
+
+.content-editable {
+  outline: none;
+
+
+  background-color:lightgray; /* DEBUG: Tentative setting -- just so I can see the space I'm working with. */
+
+
+
+  /* NOTE-TO-SELF: The styling below is necessary to incorporate typed text wraparound:
+  - "word-wrap" and "overflow-wrap" make sure typed text wraps around.
+  - "width", "max-width", and "box-sizing" are for ensuring text doesn't flow beyond the container. */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  width:100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+
+
+.editor-textBold {
+  font-weight: bold;
+}
+
+/* new stuff to add: */
+.line-numbers {
+  width: 40px; /* Set a fixed width for the line numbers column */
+  text-align: right;
+  margin-top:15px; /* DEBUG: Adding some padding so the first line number aligns with the text editor space... */
+  margin-right: 10px; /* DEBUG: Adjust spacing between line numbers and content */
+}
+
+.editor-wrapper {
+  /* NOTE-TO-SELF: So, "display:flex" will organize the display such that items are sorted horizontally from left
+  to right. I want this to make sure that the line numbers for the text editor appear top-to-bottom to the left of 
+  the text editor itself. */
+  display:flex;
+}
+
+.editor-container {
+  flex-grow: 1; /* Expand the content area to take up the remaining space */
+
+
+
+
+}
+
+
