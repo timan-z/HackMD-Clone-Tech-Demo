@@ -139,6 +139,7 @@ function Toolbar() {
             if($isRangeSelection(selection)) {
                 // Get the current line:
                 const currentLine = selection.anchor.getNode();
+                const currentLineF = selection.focus.getNode();
                 const currentLineT = currentLine.getTextContent();
 
                 // If the line is currently empty -> {```\n}cursor{\n```}:
@@ -147,12 +148,54 @@ function Toolbar() {
                     selection.insertText(wrappedText);
                 } else {
 
+
+
+                    // If the line is not empty and there is some text that is highlighted ->{`}highlighted_text{`}:
+                    // NOTE: The cursor would be right after the last char of the highlighted text (prior to the {`})...  
+                    if(currentLine.offset !== currentLineF.offset || currentLine.getNode() !== currentLineF.getNode()) {
+                        // Ensuring the selection is within the same node...
+                        // DEBUG: For now, I want to get single line functionality working (LEAVE MULTI-LINE FUNCTIONALITY FOR LATER!!!)
+                        /*if(currentLine === currentLineF) {
+                            const anchorOffset = selection.anchor.offset;
+                            const focusOffset = selection.focus.offset;
+                            // Determine beginning and end of the highlight selection:
+                            const [start, end] = anchorOffset < focusOffset ? [anchorOffset, focusOffset] : [focusOffset, anchorOffset];
+
+                            // Get the highlighted text:
+                            const highlightedText = currentLine.getTextContent().slice(start, end);
+                            // Breaking the node into three parts (1. pre-highlight part, 2. highlighted part, 3. post-highlight part):
+                            const preHighlightT = currentLine.getTextContent().slice(0, start);
+                            const postHighlightT = currentLine.getTextContent().slice(end);
+
+                            // Updating the node's content:
+                            selection.insertText(`${beforeText}[BEFORE]${selectedText}[AFTER]${afterText}`);
+                        }*/
+
+                        // DEBUG-SUNDAY MORNING: ^ this is probably all a load of rubbish -- I'm tired and none of this makes sense.
+
+
+                    } else {
+                        // If the line is non-empty and there was not any highlighted text -> line_text{``}:
+                        // NOTE: The cursor would be inbetween the ` marks, so {`cursor`}...
+
+
+
+                    }
+
+
+
+
+
+
                     /* DEBUG: Now I would need to discern how to tell the difference between an empty line
                     and a line where text is highlighted and then apply the different markdown formatting from there...
                     This should be pretty easy, but the tricky part is getting the cursor where I want it to be.
 
                     - ALSO don't forget Friday morning or Thursday night, I should dedicate time for learning how to 
                     properly log iteratively my work to GitHub... (This is something I *need* to get into the habit of doing). */
+
+                    /* NOTE: I also need to take care of situations where the code button is clicked within a code block (or
+                    any other type of formatting for that matter). */
 
                 }
 
@@ -185,6 +228,11 @@ function Toolbar() {
         <button onClick={()=>{
             applyMarkdownFormatHead(editor)
         }}>H</button>
+
+
+
+
+
 
         {/* Creating the button that responds to "code" (adding the ```code``` etc block thing, which will require a seperate function) */}
         <button onClick={()=>{
