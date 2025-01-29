@@ -122,20 +122,21 @@ function Toolbar() {
     };
     
     // Sep Function for applying "Code" since it works differently depending on the context of the line:
+    /*
     const applyMarkdownFormatCode = (editor) => {
         editor.update(() => {
             const selection = $getSelection();
             const selectedText = selection.getTextContent();
             let wrappedText = null;
 
-            /* Markdown Logic:
+             Markdown Logic:
             - If the currently selected line is an empty line, I want to append "```\n" and "\n```" to the left and right of the cursor position.
             - If the currently selected line has text (including padded whitespace), I'm just appending "`" and "`" to the right of the recent text (cursor inbetween them).
             - If the currently selected line had text highlighted, I'm just appending "`" and "`" to the left and right of the highlighted text.
             - DEBUG: For highlighted text spanning multiple lines, I'm basically just doing the first point (but come back to this).
             - DEBUG: Upon page load, I should also remember to make the editor be automatically selected (otherwise, if I just load the page
             and click the Code button nothing will happen, same with the others, but this is understandable for now).
-            */
+            
             if($isRangeSelection(selection)) {
                 // Get the current line:
                 const currentLine = selection.anchor.getNode();
@@ -155,7 +156,7 @@ function Toolbar() {
                     if(currentLine.offset !== currentLineF.offset || currentLine.getNode() !== currentLineF.getNode()) {
                         // Ensuring the selection is within the same node...
                         // DEBUG: For now, I want to get single line functionality working (LEAVE MULTI-LINE FUNCTIONALITY FOR LATER!!!)
-                        /*if(currentLine === currentLineF) {
+                        if(currentLine === currentLineF) {
                             const anchorOffset = selection.anchor.offset;
                             const focusOffset = selection.focus.offset;
                             // Determine beginning and end of the highlight selection:
@@ -169,7 +170,7 @@ function Toolbar() {
 
                             // Updating the node's content:
                             selection.insertText(`${beforeText}[BEFORE]${selectedText}[AFTER]${afterText}`);
-                        }*/
+                        }
 
                         // DEBUG-SUNDAY MORNING: ^ this is probably all a load of rubbish -- I'm tired and none of this makes sense.
 
@@ -187,22 +188,22 @@ function Toolbar() {
 
 
 
-                    /* DEBUG: Now I would need to discern how to tell the difference between an empty line
+                    DEBUG: Now I would need to discern how to tell the difference between an empty line
                     and a line where text is highlighted and then apply the different markdown formatting from there...
                     This should be pretty easy, but the tricky part is getting the cursor where I want it to be.
 
                     - ALSO don't forget Friday morning or Thursday night, I should dedicate time for learning how to 
-                    properly log iteratively my work to GitHub... (This is something I *need* to get into the habit of doing). */
+                    properly log iteratively my work to GitHub... (This is something I *need* to get into the habit of doing). 
 
-                    /* NOTE: I also need to take care of situations where the code button is clicked within a code block (or
-                    any other type of formatting for that matter). */
+                     NOTE: I also need to take care of situations where the code button is clicked within a code block (or
+                    any other type of formatting for that matter). 
 
                 }
 
 
             }
         })
-    };
+    };*/
 
 
 
