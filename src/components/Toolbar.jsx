@@ -39,7 +39,7 @@ function Toolbar() {
             if($isRangeSelection(selection)) {
                 // Get the current line:
                 const currentLine = selection.anchor.getNode();
-                const currentLineT = currentLine.getTextContent();
+                const currentLineT = currentLine.getTextContent();  // DEBUG: Think the past two lines might've been redundant (could've just done "selection.getTextContent()").
                 let updatedLineT = null;
                 
                 /* So I want to count the number of "#" characters at the start of this line.
@@ -121,36 +121,70 @@ function Toolbar() {
         });
     };
     
+
+
+
+
+
     // Sep Function for applying "Code" since it works differently depending on the context of the line:
-    /*
+    /* Markdown Logic:
+    - If the currently selected line is an empty line, I want to append "```\n" and "\n```" to the left and right of the cursor position.
+    - If the currently selected line has text (including padded whitespace), I'm just appending "`" and "`" to the right of the recent text (cursor inbetween them).
+    - If the currently selected line had text highlighted, I'm just appending "`" and "`" to the left and right of the highlighted text.
+    - DEBUG: For highlighted text spanning multiple lines, I'm basically just doing the first point (but come back to this).
+    - DEBUG: Upon page load, I should also remember to make the editor be automatically selected (otherwise, if I just load the page
+    and click the Code button nothing will happen, same with the others, but this is understandable for now). */
     const applyMarkdownFormatCode = (editor) => {
         editor.update(() => {
             const selection = $getSelection();
             const selectedText = selection.getTextContent();
+            const {anchor, focus} = selection;
+            const anchorNode = anchor.getNode();
+            const focusNode = focus.getNode();
             let wrappedText = null;
 
-             Markdown Logic:
-            - If the currently selected line is an empty line, I want to append "```\n" and "\n```" to the left and right of the cursor position.
-            - If the currently selected line has text (including padded whitespace), I'm just appending "`" and "`" to the right of the recent text (cursor inbetween them).
-            - If the currently selected line had text highlighted, I'm just appending "`" and "`" to the left and right of the highlighted text.
-            - DEBUG: For highlighted text spanning multiple lines, I'm basically just doing the first point (but come back to this).
-            - DEBUG: Upon page load, I should also remember to make the editor be automatically selected (otherwise, if I just load the page
-            and click the Code button nothing will happen, same with the others, but this is understandable for now).
-            
             if($isRangeSelection(selection)) {
-                // Get the current line:
-                const currentLine = selection.anchor.getNode();
-                const currentLineF = selection.focus.getNode();
-                const currentLineT = currentLine.getTextContent();
+                // Scenario: If the line is currently empty -> {```\n}cursor{\n```}:
 
-                // If the line is currently empty -> {```\n}cursor{\n```}:
-                if(currentLine === "") {
-                    wrappedText = `${"'```\n"}${selectedText}${"\n```"}`;
+                /* When selectedText is "", that implies that no text was highlighted (in this case anchorNode and focusNode will be the same
+                since selection is collapsed). Thus, I can ensure the line is empty, and I will be applying the appropriate markdown structuring,
+                by checking if selectedText is "" but moreover doing an equivalence check between it and anchorNode's text content (focusNode would work too). */
+                if(selectedText === "" && selectedText === anchorNode.getTextContent()) {
+                    wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
                     selection.insertText(wrappedText);
                 } else {
+                    // This "else" branch will catch all scenarios where the line is NOT empty.
+
+                    if(selectedText !== "") {
+                        // Scenario: There is highlighted text ->{`}highlighted_text{`} (also NOTE: cursor would be moved prior to the second {`}):
+                        console.log("DEBUG: This is the scenario in which there  ");
 
 
 
+                    } else {
+                        // Scenario: No highlighted text but the line is NOT empty:
+                        console.log("DEBUG: This is the scenario in which there is no highlighted text ");
+
+
+                        
+                    }
+
+
+
+
+                    // DEBUG: Basically want to see if the highlghted text equals the full line...
+                    console.log("The value of selectedText is: [", selectedText, "]");
+
+                }
+            }
+        })
+    }
+
+
+
+
+    /*
+            
                     // If the line is not empty and there is some text that is highlighted ->{`}highlighted_text{`}:
                     // NOTE: The cursor would be right after the last char of the highlighted text (prior to the {`})...  
                     if(currentLine.offset !== currentLineF.offset || currentLine.getNode() !== currentLineF.getNode()) {
@@ -174,19 +208,10 @@ function Toolbar() {
 
                         // DEBUG-SUNDAY MORNING: ^ this is probably all a load of rubbish -- I'm tired and none of this makes sense.
 
-
                     } else {
                         // If the line is non-empty and there was not any highlighted text -> line_text{``}:
                         // NOTE: The cursor would be inbetween the ` marks, so {`cursor`}...
-
-
-
                     }
-
-
-
-
-
 
                     DEBUG: Now I would need to discern how to tell the difference between an empty line
                     and a line where text is highlighted and then apply the different markdown formatting from there...
@@ -197,10 +222,7 @@ function Toolbar() {
 
                      NOTE: I also need to take care of situations where the code button is clicked within a code block (or
                     any other type of formatting for that matter). 
-
                 }
-
-
             }
         })
     };*/
