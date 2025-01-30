@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $getSelection, $isRangeSelection, $setSelection, COMMAND_PRIORITY_CRITICAL } from "lexical";
+import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, COMMAND_PRIORITY_CRITICAL } from "lexical";
 
 /* ^ NOTE-TO-SELF:
 - $getSelection is pretty self explanatory
@@ -126,6 +126,8 @@ function Toolbar() {
 
 
 
+
+
     // Sep Function for applying "Code" since it works differently depending on the context of the line:
     /* Markdown Logic:
     - If the currently selected line is an empty line, I want to append "```\n" and "\n```" to the left and right of the cursor position.
@@ -134,6 +136,8 @@ function Toolbar() {
     - DEBUG: For highlighted text spanning multiple lines, I'm basically just doing the first point (but come back to this).
     - DEBUG: Upon page load, I should also remember to make the editor be automatically selected (otherwise, if I just load the page
     and click the Code button nothing will happen, same with the others, but this is understandable for now). */
+
+    // DEBUG: When I'm done writing this function. try to break it with multi-line stuff...
     const applyMarkdownFormatCode = (editor) => {
         editor.update(() => {
             const selection = $getSelection();
@@ -142,6 +146,8 @@ function Toolbar() {
             const anchorNode = anchor.getNode();
             const focusNode = focus.getNode();
             let wrappedText = null;
+            let newCursorPos = null;
+            let newSelection = null;
 
             if($isRangeSelection(selection)) {
                 // Scenario: If the line is currently empty -> {```\n}cursor{\n```}:
@@ -157,75 +163,60 @@ function Toolbar() {
 
                     if(selectedText !== "") {
                         // Scenario: There is highlighted text ->{`}highlighted_text{`} (also NOTE: cursor would be moved prior to the second {`}):
-                        console.log("DEBUG: This is the scenario in which there  ");
-
-
+                        wrappedText = `${"`"}${selectedText}${"`"}`;
+                        selection.insertText(wrappedText);
+                        
+                        // After inserting the new text in place of the highlighted text, the cursor position will be right after the second {`}.
+                        newCursorPos = selection.anchor.offset - 1;
+                        // Using the value of newCursorPos, the position can be shifted to where I need it be:
+                        newSelection = $createRangeSelection();
+                        newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+                        $setSelection(newSelection);
 
                     } else {
-                        // Scenario: No highlighted text but the line is NOT empty:
-                        console.log("DEBUG: This is the scenario in which there is no highlighted text ");
+                        // Scenario: No highlighted text but the line is NOT empty -> existing_line{`cursor_pos`}:
+                        wrappedText = `${selectedText}${"``"}`;
+                        selection.insertText(wrappedText);
 
+                        newCursorPos = selection.anchor.offset - 1;
+                        newSelection = $createRangeSelection();
+                        newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+                        $setSelection(newSelection);
 
-                        
+                        // Getting the indices of the highlighted text:
+                        /*const anchorOffset = selection.anchor.offset;
+                        const focusOffset = selection.focus.offset;
+                        const [start, end] = anchorOffset < focusOffset ? [anchorOffset, focusOffset] : [focusOffset, anchorOffset];
+
+                        // Extract the highlighted text:
+                        const highlightedText = anchorNode.getTextContent().slice(start, end);
+
+                        wrappedText = `${"`"}${highlightedText}${"`"}`;
+
+                        selection.insertText(wrappedText);
+                        // Get the pre and post-text:
+                        const preHText = anchorNode.getTextContent().slice(0, start);
+                        const postHText = anchorNode.getTextContent().slice(end);
+
+                        // Updating the text:
+                        selection.deleteLine();
+                        selection.insertText(`${preHText}[BEFORE]${highlightedText}[AFTER]${postHText}`);
+
+                        console.log("The value of selection.anchor.offset is: [", selection.anchor.offset, "]");
+                        console.log("The value of selection.focus.offset is: [", selection.focus.offset, "]");
+                        console.log("The value of highlightedText is: [", highlightedText, "]");
+                        console.log("The value of preHText is: [", preHText, "]");
+                        console.log("The value of postHText is: [", postHText, "]");*/
+
                     }
-
-
-
 
                     // DEBUG: Basically want to see if the highlghted text equals the full line...
                     console.log("The value of selectedText is: [", selectedText, "]");
-
                 }
             }
         })
     }
 
-
-
-
-    /*
-            
-                    // If the line is not empty and there is some text that is highlighted ->{`}highlighted_text{`}:
-                    // NOTE: The cursor would be right after the last char of the highlighted text (prior to the {`})...  
-                    if(currentLine.offset !== currentLineF.offset || currentLine.getNode() !== currentLineF.getNode()) {
-                        // Ensuring the selection is within the same node...
-                        // DEBUG: For now, I want to get single line functionality working (LEAVE MULTI-LINE FUNCTIONALITY FOR LATER!!!)
-                        if(currentLine === currentLineF) {
-                            const anchorOffset = selection.anchor.offset;
-                            const focusOffset = selection.focus.offset;
-                            // Determine beginning and end of the highlight selection:
-                            const [start, end] = anchorOffset < focusOffset ? [anchorOffset, focusOffset] : [focusOffset, anchorOffset];
-
-                            // Get the highlighted text:
-                            const highlightedText = currentLine.getTextContent().slice(start, end);
-                            // Breaking the node into three parts (1. pre-highlight part, 2. highlighted part, 3. post-highlight part):
-                            const preHighlightT = currentLine.getTextContent().slice(0, start);
-                            const postHighlightT = currentLine.getTextContent().slice(end);
-
-                            // Updating the node's content:
-                            selection.insertText(`${beforeText}[BEFORE]${selectedText}[AFTER]${afterText}`);
-                        }
-
-                        // DEBUG-SUNDAY MORNING: ^ this is probably all a load of rubbish -- I'm tired and none of this makes sense.
-
-                    } else {
-                        // If the line is non-empty and there was not any highlighted text -> line_text{``}:
-                        // NOTE: The cursor would be inbetween the ` marks, so {`cursor`}...
-                    }
-
-                    DEBUG: Now I would need to discern how to tell the difference between an empty line
-                    and a line where text is highlighted and then apply the different markdown formatting from there...
-                    This should be pretty easy, but the tricky part is getting the cursor where I want it to be.
-
-                    - ALSO don't forget Friday morning or Thursday night, I should dedicate time for learning how to 
-                    properly log iteratively my work to GitHub... (This is something I *need* to get into the habit of doing). 
-
-                     NOTE: I also need to take care of situations where the code button is clicked within a code block (or
-                    any other type of formatting for that matter). 
-                }
-            }
-        })
-    };*/
 
 
 
