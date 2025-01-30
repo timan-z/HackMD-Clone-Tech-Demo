@@ -31,29 +31,6 @@ function Toolbar() {
         });
     };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // Sep Function for applying "Heading" since it works differently than the others (prepends a "# " string and "builds" on repeated clicks):
     const applyMarkdownFormatHead = (editor) => {
         editor.update(() => {
@@ -145,6 +122,23 @@ function Toolbar() {
     };
     
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Sep Function for applying "Code" since it works differently depending on the context of the line:
     /* Markdown Logic:
     - If the currently selected line is an empty line, I want to append "```\n" and "\n```" to the left and right of the cursor position.
@@ -167,15 +161,42 @@ function Toolbar() {
             let newSelection = null;
 
             if($isRangeSelection(selection)) {
-                // Scenario: If the line is currently empty -> {```\n}cursor{\n```}:
 
                 /* When selectedText is "", that implies that no text was highlighted (in this case anchorNode and focusNode will be the same
                 since selection is collapsed). Thus, I can ensure the line is empty, and I will be applying the appropriate markdown structuring,
                 by checking if selectedText is "" but moreover doing an equivalence check between it and anchorNode's text content (focusNode would work too). */
                 if(selectedText === "" && selectedText === anchorNode.getTextContent()) {
+                    // Scenario 1. If the line is currently empty -> {```\n}cursor{\n```}:
                     wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
                     selection.insertText(wrappedText);
+
+                    // Move the cursor position to be just before the last set of backticks:
+                    newCursorPos = selection.anchor.offset - 4;
+                    newSelection = $createRangeSelection();
+                    newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+                    $setSelection(newSelection);
+
+                } else if(selectedText.includes("\n")) {
+                    // Scenario 2. Multi-line selection -> {```\n}highlighted_space{\n```}:
+                    wrappedText = `\`\`\`\n${selectedText}\n\`\`\``;
+                    selection.insertText(wrappedText);
+
+                    console.log("Debug: the value of selection.anchor.offset is: ", selection.anchor.offset);
+                    // Move cursor just after the closing ```
+                    newCursorPos = selection.anchor.offset - 4;
+                    newSelection = $createRangeSelection();
+                    newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+                    $setSelection(newSelection);
+                    /* OKAY I KNOW HOW TO FIX THIS BUT I HAVE NO ENERGY -- 
+                    I GOT THE MULTI-LINE STUFF WORKING -- FOR THE NEW CURSOR POSITIONING, I JUST NEED:
+                    GET LENGTH OF THE TEXT EDITOR TEXT *AFTER* THE HIGHLIGHTED TEXT, THEN DO
+                    newCursorPos = selection.anchor.offset - THAT - 4; THEN I CAN MERGE THIS WHOLE BRANCH
+                    WITH THE ONE ABOVE AND JUST ADD ANOTHER MINI IF-BRANCH INSIDE... (OR MAYBE THAT'S LESS EFFICIENT)
+                    ANYWAYS I GOT THIS ONE DONE. JUST FIX THE OTHER FUNCTION TOO BUT I HAVE NO ENERGY RIGHT NOW. */
+
+                    
                 } else {
+
                     // This "else" branch will catch all scenarios where the line is NOT empty.
 
                     if(selectedText !== "") {
