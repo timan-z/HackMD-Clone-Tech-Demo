@@ -139,6 +139,14 @@ function Toolbar() {
 
 
 
+
+
+
+
+
+
+
+
     // Sep Function for applying "Code" since it works differently depending on the context of the line:
     /* Markdown Logic:
     - If the currently selected line is an empty line, I want to append "```\n" and "\n```" to the left and right of the cursor position.
@@ -147,6 +155,7 @@ function Toolbar() {
     - DEBUG: For highlighted text spanning multiple lines, I'm basically just doing the first point (but come back to this).
     - DEBUG: Upon page load, I should also remember to make the editor be automatically selected (otherwise, if I just load the page
     and click the Code button nothing will happen, same with the others, but this is understandable for now). */
+    // DEBUG: ^ DON'T DELETE THIS COMMENT, IT'S VALUABLE AND GOOD FOR MY README DOC!!!
 
     // DEBUG: When I'm done writing this function. try to break it with multi-line stuff...
     const applyMarkdownFormatCode = (editor) => {
@@ -165,60 +174,53 @@ function Toolbar() {
                 /* When selectedText is "", that implies that no text was highlighted (in this case anchorNode and focusNode will be the same
                 since selection is collapsed). Thus, I can ensure the line is empty, and I will be applying the appropriate markdown structuring,
                 by checking if selectedText is "" but moreover doing an equivalence check between it and anchorNode's text content (focusNode would work too). */
-                if(selectedText === "" && selectedText === anchorNode.getTextContent()) {
-                    // Scenario 1. If the line is currently empty -> {```\n}cursor{\n```}:
+                if((selectedText === "" && selectedText === anchorNode.getTextContent()) || selectedText.includes("\n")) {
+                    // Scenario 1. If the line is currently empty -> {```\n}cursor{\n```} OR multi-line text highlighted -> {```\n}text{\n```}:
                     wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
                     selection.insertText(wrappedText);
 
-                    // Move the cursor position to be just before the last set of backticks:
-                    newCursorPos = selection.anchor.offset - 4;
-                    newSelection = $createRangeSelection();
-                    newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                    $setSelection(newSelection);
-
-                } else if(selectedText.includes("\n")) {
-                    // Scenario 2. Multi-line selection -> {```\n}highlighted_space{\n```}:
-                    wrappedText = `\`\`\`\n${selectedText}\n\`\`\``;
-                    selection.insertText(wrappedText);
-
-                    console.log("Debug: the value of selection.anchor.offset is: ", selection.anchor.offset);
-                    // Move cursor just after the closing ```
-                    newCursorPos = selection.anchor.offset - 4;
-                    newSelection = $createRangeSelection();
-                    newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                    $setSelection(newSelection);
-                    /* OKAY I KNOW HOW TO FIX THIS BUT I HAVE NO ENERGY -- 
-                    I GOT THE MULTI-LINE STUFF WORKING -- FOR THE NEW CURSOR POSITIONING, I JUST NEED:
-                    GET LENGTH OF THE TEXT EDITOR TEXT *AFTER* THE HIGHLIGHTED TEXT, THEN DO
-                    newCursorPos = selection.anchor.offset - THAT - 4; THEN I CAN MERGE THIS WHOLE BRANCH
-                    WITH THE ONE ABOVE AND JUST ADD ANOTHER MINI IF-BRANCH INSIDE... (OR MAYBE THAT'S LESS EFFICIENT)
-                    ANYWAYS I GOT THIS ONE DONE. JUST FIX THE OTHER FUNCTION TOO BUT I HAVE NO ENERGY RIGHT NOW. */
-
-                    
+                    // Moving the cursor position to just before the second set of backticks (`):
+                    if(selectedText == "") {
+                        // Scenario 1a (line is empty):
+                        newCursorPos = anchor.offset - 4;
+                    } else {
+                        // Scenario 1b (multi-line highlighted):
+                        newCursorPos = anchor.offset - (anchor.offset - wrappedText.length);    // wrapped.length returns wrappedText length and everything before it.
+                    }
                 } else {
-
                     // This "else" branch will catch all scenarios where the line is NOT empty.
 
                     if(selectedText !== "") {
-                        // Scenario: There is highlighted text ->{`}highlighted_text{`} (also NOTE: cursor would be moved prior to the second {`}):
+                        // Scenario 2. There is highlighted text ->{`}highlighted_text{`} (also NOTE: cursor would be moved prior to the second {`}):
                         wrappedText = `${"`"}${selectedText}${"`"}`;
 
                     } else {
-                        // Scenario: No highlighted text but the line is NOT empty -> existing_line{`cursor_pos`}:
+                        // Scenario 3: No highlighted text but the line is NOT empty -> existing_line{`cursor_pos`}:
                         wrappedText = `${selectedText}${"``"}`;
                     }
-                    // DEBUG: I'm going to move this section of code outside of the branches above since both use them (may change with added func):
                     selection.insertText(wrappedText);
                     // After inserting the new text in place of the highlighted text, the cursor position will be right after the second {`}.
                     newCursorPos = selection.anchor.offset - 1;
-                    // Using the value of newCursorPos, the position can be shifted to where I need it be:
-                    newSelection = $createRangeSelection();
-                    newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                    $setSelection(newSelection);
                 }
+                // Applying new cursor position using value of newCursorPos (steps are the samae for all branch-condition outcomes):
+                newSelection = $createRangeSelection();
+                newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+                $setSelection(newSelection);
             }
         })
     }
+
+
+    
+    /* DEBUG: ^ So applyMarkdownFormatCode is basically DONE -- the only minor bug I need to tweak and adjust for is
+    when I highlight the WHOLE editor space and click the code button, the cursor position isn't moving where I want it to be
+    (but this is an easy fix and I should just need to change the newCursorPos assignment equation for when the selected text
+    is equivalent to the entire editor!!! -- should just be subtracting by four in that scenario I'm pretty sure).
+    */
+    // DEBUG: ALSO ^ There's some weird behavior when I'm selecting text that has ` within it <-- look into this (but also HackMD handles this weirdly too).
+    // DEBUG: Okay wait no there's still some problems with getting the cursor position where I want it to be regardless of ` characters...
+    // DEBUG: ^ fix this Thursday night -- shouldn't be super hard, it's just a mathematical logic thing...
+
 
 
 
