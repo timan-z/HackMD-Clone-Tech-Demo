@@ -31,6 +31,29 @@ function Toolbar() {
         });
     };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Sep Function for applying "Heading" since it works differently than the others (prepends a "# " string and "builds" on repeated clicks):
     const applyMarkdownFormatHead = (editor) => {
         editor.update(() => {
@@ -122,12 +145,6 @@ function Toolbar() {
     };
     
 
-
-
-
-
-
-
     // Sep Function for applying "Code" since it works differently depending on the context of the line:
     /* Markdown Logic:
     - If the currently selected line is an empty line, I want to append "```\n" and "\n```" to the left and right of the cursor position.
@@ -164,58 +181,49 @@ function Toolbar() {
                     if(selectedText !== "") {
                         // Scenario: There is highlighted text ->{`}highlighted_text{`} (also NOTE: cursor would be moved prior to the second {`}):
                         wrappedText = `${"`"}${selectedText}${"`"}`;
-                        selection.insertText(wrappedText);
-                        
-                        // After inserting the new text in place of the highlighted text, the cursor position will be right after the second {`}.
-                        newCursorPos = selection.anchor.offset - 1;
-                        // Using the value of newCursorPos, the position can be shifted to where I need it be:
-                        newSelection = $createRangeSelection();
-                        newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                        $setSelection(newSelection);
 
                     } else {
                         // Scenario: No highlighted text but the line is NOT empty -> existing_line{`cursor_pos`}:
                         wrappedText = `${selectedText}${"``"}`;
-                        selection.insertText(wrappedText);
-
-                        newCursorPos = selection.anchor.offset - 1;
-                        newSelection = $createRangeSelection();
-                        newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                        $setSelection(newSelection);
-
-                        // Getting the indices of the highlighted text:
-                        /*const anchorOffset = selection.anchor.offset;
-                        const focusOffset = selection.focus.offset;
-                        const [start, end] = anchorOffset < focusOffset ? [anchorOffset, focusOffset] : [focusOffset, anchorOffset];
-
-                        // Extract the highlighted text:
-                        const highlightedText = anchorNode.getTextContent().slice(start, end);
-
-                        wrappedText = `${"`"}${highlightedText}${"`"}`;
-
-                        selection.insertText(wrappedText);
-                        // Get the pre and post-text:
-                        const preHText = anchorNode.getTextContent().slice(0, start);
-                        const postHText = anchorNode.getTextContent().slice(end);
-
-                        // Updating the text:
-                        selection.deleteLine();
-                        selection.insertText(`${preHText}[BEFORE]${highlightedText}[AFTER]${postHText}`);
-
-                        console.log("The value of selection.anchor.offset is: [", selection.anchor.offset, "]");
-                        console.log("The value of selection.focus.offset is: [", selection.focus.offset, "]");
-                        console.log("The value of highlightedText is: [", highlightedText, "]");
-                        console.log("The value of preHText is: [", preHText, "]");
-                        console.log("The value of postHText is: [", postHText, "]");*/
-
                     }
-
-                    // DEBUG: Basically want to see if the highlghted text equals the full line...
-                    console.log("The value of selectedText is: [", selectedText, "]");
+                    // DEBUG: I'm going to move this section of code outside of the branches above since both use them (may change with added func):
+                    selection.insertText(wrappedText);
+                    // After inserting the new text in place of the highlighted text, the cursor position will be right after the second {`}.
+                    newCursorPos = selection.anchor.offset - 1;
+                    // Using the value of newCursorPos, the position can be shifted to where I need it be:
+                    newSelection = $createRangeSelection();
+                    newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+                    $setSelection(newSelection);
                 }
             }
         })
     }
+
+
+
+    /* Before I stop programming for the day, I want to COMPLETE the applyMarkdownFormatCode function and 
+    the applyMarkdownFormatHead function -- if I can do this, it's been a day well spent. I think I can.
+    I need to adjust them to be able to work with multiple lines... (NOTE: The "applyMarkdownFormatBIS" function integrates perfectly).
+
+    - Code Button + Multiple Lines: I'm just doing {```\n}[highlighted space]{\n```} in all scenarios.
+    - Header Button + Multiple Lines: I'm just adding # to each individual line encompassed in the highlighted space.
+    */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
