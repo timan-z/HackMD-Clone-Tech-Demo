@@ -186,6 +186,11 @@ function Toolbar() {
                     } else {
                         // Scenario 1b (multi-line highlighted):
                         newCursorPos = anchor.offset - (anchor.offset - wrappedText.length);    // wrapped.length returns wrappedText length and everything before it.
+
+                        console.log("DEBUG: The value of anchor.offset is: [", anchor.offset, "]");
+                        console.log("DEBUG: The value of wrappedText.length is: [", wrappedText.length, "]");
+                        // DEBUG: ^ friday morning use these commands to figure out what's going on and what i can do to fix the logic -- lazy and want to watch a movie tonight.
+
                     }
                 } else {
                     // This "else" branch will catch all scenarios where the line is NOT empty.
