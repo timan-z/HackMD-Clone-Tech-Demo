@@ -271,8 +271,20 @@ function Toolbar() {
                 
                 console.log("FELLER: The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
                 console.log("FELLER: The value of anchorNode.getTextContent().length is: [", anchorNode.getTextContent().length, "]");
+                
+                let anchorNodeTextCont = anchorNode.getTextContent(); 
+                let anchorNodeTextLength = anchorNode.getTextContent().length;
+
                 // debug: testing when anchorNode.getTextContent() is "soemthing\n":
                 // so I basically just want to test when anchorNode.getTextContent() == "" OR last char of it is "\n"
+                console.log("FELLER: The last value of anchorNode.getTextContent() is: [", anchorNodeTextCont.substr(anchorNodeTextLength-1, anchorNodeTextLength) , "]");
+
+                let anchorNodeTextFinalChar = anchorNodeTextCont.substr(anchorNodeTextLength-1, anchorNodeTextLength);
+                if(anchorNodeTextFinalChar === "\n") {
+                    // RIGHT now i know what I have to check for!!!
+                    console.log("AAAHHH: Okay.");
+                }  
+
 
 
                 /* When selectedText is "", that implies that no text was highlighted (in this case anchorNode and focusNode will be the same
