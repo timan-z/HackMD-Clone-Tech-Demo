@@ -186,6 +186,12 @@ function Toolbar() {
                         // Scenario 1a (line is empty):
                         newCursorPos = anchor.offset - 4;
 
+
+
+
+
+
+                        
                         console.log("debug: The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
                         console.log("debug: The value of anchorNode.offset is: [", anchorNode.offset, "]");
                         console.log("debug: The value of anchorNode.getTextContent().length is: [", anchorNode.getTextContent().length.text, "]");
@@ -198,8 +204,16 @@ function Toolbar() {
                         console.log("debug2: ", anchorNode.getTextContent());
                         console.log("debug3: ", String(anchorNode.getTextContent()).length);
                         console.log("debug4: ", String(anchorNode.getTextContent()).trim().length);
-
-
+                        console.log("ahhhhhhhhhhhhhhhhhhhhhhhhhh");
+                        let text = String(anchorNode.getTextContent());
+                        console.log("debag1: ", [...text].map(c => c.charCodeAt(0)));
+                        console.log("debag2: ", [...text].map(c => c.charCodeAt(1)));
+                        console.log("debag3: ", [...text].map(c => c.charCodeAt(2)));
+                        console.log("debag4: ", [...text].map(c => c.charCodeAt(3)));
+                        console.log("debag5: ", [...text].map(c => c.charCodeAt(4)));
+                        console.log("debag6: ", [...text].map(c => c.charCodeAt(5)));
+                        console.log("debag7: ", [...text].map(c => c.charCodeAt(6)));
+                        console.log("debag8: ", [...text].map(c => c.charCodeAt(7)));
 
                         // debug: test...
                         newSelection = $createRangeSelection();
