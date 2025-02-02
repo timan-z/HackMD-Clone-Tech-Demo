@@ -263,9 +263,19 @@ function Toolbar() {
             const selectedText = selection.getTextContent();
             let {anchor, focus} = selection;
             let anchorNode = anchor.getNode();
+            let editorTextFull = anchorNode.getTextContent();
+            let editorTextLength = editorTextFull.length;
+            let editorTextLastChar = editorTextFull.substr(editorTextLength-1, editorTextLength);
+
 
             // NOTE-TO-SELF: $isRangeSelection() is a type checking function, determines if "selection" exists within the editor (simple).
             if($isRangeSelection(selection)) {
+
+                if(selectedText.includes("\n") || (selectedText === "" && (selectedText === anchorNode.getTextContent() || editorTextLastChar === "\n"))) {
+                    console.log("OKAY THIS CAPTURES WHAT I WANT...");
+                }
+                return;
+
 
 
                 
@@ -285,24 +295,15 @@ function Toolbar() {
                     console.log("AAAHHH: Okay.");
                 }  
 
-
-
                 /* When selectedText is "", that implies that no text was highlighted (in this case anchorNode and focusNode will be the same
                 since selection is collapsed). Thus, I can ensure the line is empty, and I will be applying the appropriate markdown structuring,
                 by checking if selectedText is "" but moreover doing an equivalence check between it and anchorNode's text content (focusNode would work too). */
-
                 /*if((selectedText === "" && selectedText === anchorNode.getTextContent()) || selectedText.includes("\n")) {
-
-
-
                     // I see the issue here... when anchorNode.getTextContent() is "", this doesn't work!
-                    // So I want the length of "anchorNode.getTextContent()" and then I want to dissect characters from it...
-
-
-
-
-
+                    // So I want the length of "anchorNode.getTextContent()" and then I want to dissect characters from it..
                 }*/
+
+
 
 
             }
