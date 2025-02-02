@@ -168,10 +168,9 @@ function Toolbar() {
             let wrappedText = null;
             let newCursorPos = null;
             let newSelection = null;
+            let updatedSelection = null;
 
             if($isRangeSelection(selection)) {
-
-                console.log("DEBUG: The error occurs in the condition check on line 179...");
 
                 /* When selectedText is "", that implies that no text was highlighted (in this case anchorNode and focusNode will be the same
                 since selection is collapsed). Thus, I can ensure the line is empty, and I will be applying the appropriate markdown structuring,
@@ -183,116 +182,15 @@ function Toolbar() {
 
                     // Moving the cursor position to just before the second set of backticks (`):
                     if(selectedText == "") {
+                        newCursorPos = String(anchorNode.getTextContent()).length - 4;  // Calculating new cursor position (prior to first `, after last \n).
 
-                        console.log("DEBUG: anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
-                        
-                        const currentSelection = $getSelection();
-                        console.log("AAAAHHHHHHHH: Current selection is: ", currentSelection);
-                        const anchorNodeDebug = currentSelection.anchor.getNode();
-                        const textContentDebug = anchorNodeDebug.getTextContent();
-                        const newSelectionDebug = $createRangeSelection();
-                        newSelectionDebug.setTextNodeRange(anchorNodeDebug, 4, anchorNodeDebug, 4);
-                        $setSelection(newSelectionDebug);
-
-
-                        /*newSelection = $createRangeSelection();
-                        newSelection.setTextNodeRange(anchorNode,  newCursorPos, anchorNode, newCursorPos);
-                        $setSelection(newSelection);*/
-
-                        /*newSelection = $createRangeSelection();
-
-                        console.log("DEBUG: The problem is the line below for sure...");
-
-                        newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                        $setSelection(newSelection);*/
-
-
-                        /*const clonedSelection = selection.clone();
-                        const rootNode = $getRoot();
-                        const lastTextNode = rootNode.getLastChild();
-                        clonedSelection.setTextNodeRange(lastTextNode, lastTextNode.getTextContent().length, lastTextNode, lastTextNode.getTextContent().length);
-                        $setSelection(clonedSelection);*/
-                        //$setSelection(0);
-                        /*const root = $getRoot();
-                        const lastTextNode = root.getLastChild();
-                        $setSelection(lastTextNode, lastTextNode.getTextContent().length);*/
-
-
-
-                        return;
-
-
-
-
-
-                        // Scenario 1a (line is empty):
-                        newCursorPos = String(anchorNode.getTextContent()).length - 4;
-
-                        let newTextNode = $createTextNode("");
-                        anchorNode.append(newTextNode);
-                        anchorNode = newTextNode;
-                        //const newSelectionTest = $createRangeSelection();
-
-                        console.log("The value of newCursorPos is: ", newCursorPos);
-
-                        //newSelectionTest.setTextNodeRange(anchorNode, 2, anchorNode, 2);
-                        /*newSelectionTest.anchor.set(anchorNode.getKey(), 0, "text");
-                        newSelectionTest.focus.set(anchorNode.getKey(), 0, "text");
-                        $setSelection(newSelectionTest);*/
-
-
-                        newSelection = $createRangeSelection();
-
-                        console.log("DEBUG: The problem is the line below for sure...");
-
-                        newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                        $setSelection(newSelection, newCursorPos);
-
-                        return;
-
-
-                        
-
-
-                        console.log("The value of newCursorPos is: ", newCursorPos);
-                        console.log("The value of anchorNode is: ", anchorNode);
-
-
-
-                        
-                        /* DEBUG: Get rid of this code block below later...
-                        
-                        console.log("debug: The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
-                        console.log("debug: The value of anchorNode.offset is: [", anchorNode.offset, "]");
-                        console.log("debug: The value of anchorNode.getTextContent().length is: [", anchorNode.getTextContent().length.text, "]");
-
-                        let textbuffer = anchorNode.getTextContent();
-                        console.log("DEBUG: The value of textbuffer is [", textbuffer, "]");
-
-                        // DEBUG: trying to debug the error where anchorNode.offset/getTextContent().length returns undefined (although text does exist)...
-                        console.log("debug1: ", typeof anchorNode.getTextContent());
-                        console.log("debug2: ", anchorNode.getTextContent());
-                        console.log("debug3: ", String(anchorNode.getTextContent()).length);
-                        console.log("debug4: ", String(anchorNode.getTextContent()).trim().length);
-                        console.log("ahhhhhhhhhhhhhhhhhhhhhhhhhh");
-                        let text = String(anchorNode.getTextContent());
-                        console.log("debag1: ", [...text].map(c => c.charCodeAt(0)));
-                        console.log("debag2: ", [...text].map(c => c.charCodeAt(1)));
-                        console.log("debag3: ", [...text].map(c => c.charCodeAt(2)));
-                        console.log("debag4: ", [...text].map(c => c.charCodeAt(3)));
-                        console.log("debag5: ", [...text].map(c => c.charCodeAt(4)));
-                        console.log("debag6: ", [...text].map(c => c.charCodeAt(5)));
-                        console.log("debag7: ", [...text].map(c => c.charCodeAt(6)));
-                        console.log("debag8: ", [...text].map(c => c.charCodeAt(7)));*/
-
-
-
-
-                        // debug: test... (get rid of the block before after)
-                        /*newSelection = $createRangeSelection();
-                        newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                        $setSelection(newSelection);*/
-                        // debug: test...
+                        /* NOTE: The two subsequent lines of code are critical here...
+                        I am relying on function setTextNodeRange(...) to move the cursor position after inserText(...) but this is
+                        the branch for where the "</>" code button is clicked on an empty line. The issue is that setTextNodeRange(...)
+                        won't work properly unless there is existing non-"" empty string text to be dealt with, and that's why I need to
+                        re-get the selection via $getSelection() to update it with the text that was inserted earlier. */
+                        updatedSelection = $getSelection();
+                        anchorNode = updatedSelection.anchor.getNode();
 
                     } else {
                         // Scenario 1b (multi-line highlighted):
@@ -323,12 +221,12 @@ function Toolbar() {
 
 
                 // Applying new cursor position using value of newCursorPos (steps are the samae for all branch-condition outcomes):
-                /*newSelection = $createRangeSelection();
+                newSelection = $createRangeSelection();
 
                 console.log("DEBUG: The problem is the line below for sure...");
 
                 newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                $setSelection(newSelection);*/
+                $setSelection(newSelection);
                 // ^ DEBUG: This conflicts with when there's an empty line and I'm clicking it for the empty line...
             }
         })
