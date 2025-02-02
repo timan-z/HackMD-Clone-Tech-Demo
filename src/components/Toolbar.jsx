@@ -158,7 +158,7 @@ function Toolbar() {
     // DEBUG: ^ DON'T DELETE THIS COMMENT, IT'S VALUABLE AND GOOD FOR MY README DOC!!!
 
     // DEBUG: When I'm done writing this function. try to break it with multi-line stuff...
-    const applyMarkdownFormatCode = (editor) => {
+    const applyMarkdownFormatCodeOLD = (editor) => {
         editor.update(() => {
             const selection = $getSelection();
             const selectedText = selection.getTextContent();
@@ -180,6 +180,11 @@ function Toolbar() {
                     wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
                     selection.insertText(wrappedText);
 
+                    updatedSelection = $getSelection();
+
+                    let updatedSelectedText = updatedSelection.getTextContent();
+                    console.log("DEBAG: The value of updatedSelection.getTextContent() is: [", updatedSelectedText, "]");
+
                     // Moving the cursor position to just before the second set of backticks (`):
                     if(selectedText == "") {
                         newCursorPos = String(anchorNode.getTextContent()).length - 4;  // Calculating new cursor position (prior to first `, after last \n).
@@ -189,8 +194,16 @@ function Toolbar() {
                         the branch for where the "</>" code button is clicked on an empty line. The issue is that setTextNodeRange(...)
                         won't work properly unless there is existing non-"" empty string text to be dealt with, and that's why I need to
                         re-get the selection via $getSelection() to update it with the text that was inserted earlier. */
-                        updatedSelection = $getSelection();
+                        // updatedSelection = $getSelection();  <-- UPDATE: moved this outside of this branch.
                         anchorNode = updatedSelection.anchor.getNode();
+
+
+
+                        // debug: get rid of these debug statements afterwards...
+                        console.log("debugs: the value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
+                        console.log("debugs: the value of anchorNode.getTextContent().length is: [", anchorNode.getTextContent().length, "]");
+
+
 
                     } else {
                         // Scenario 1b (multi-line highlighted):
@@ -230,6 +243,60 @@ function Toolbar() {
                 // ^ DEBUG: This conflicts with when there's an empty line and I'm clicking it for the empty line...
             }
         })
+    }
+
+
+
+
+
+
+
+
+
+    const applyMarkdownFormatCode = (editor) => {
+
+        editor.update(() => {
+            /* NOTE-TO-SELF:
+            - selection refers to the actual stretch of text IN the text editor "highlighted" when the button was clicked (including "" aka nothing).
+            - selectedText refers to the actual string of text referred to above. */
+            const selection = $getSelection();  
+            const selectedText = selection.getTextContent();
+            let {anchor, focus} = selection;
+            let anchorNode = anchor.getNode();
+
+            // NOTE-TO-SELF: $isRangeSelection() is a type checking function, determines if "selection" exists within the editor (simple).
+            if($isRangeSelection(selection)) {
+
+
+                
+                console.log("FELLER: The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
+                console.log("FELLER: The value of anchorNode.getTextContent().length is: [", anchorNode.getTextContent().length, "]");
+                // debug: testing when anchorNode.getTextContent() is "soemthing\n":
+                // so I basically just want to test when anchorNode.getTextContent() == "" OR last char of it is "\n"
+
+
+                /* When selectedText is "", that implies that no text was highlighted (in this case anchorNode and focusNode will be the same
+                since selection is collapsed). Thus, I can ensure the line is empty, and I will be applying the appropriate markdown structuring,
+                by checking if selectedText is "" but moreover doing an equivalence check between it and anchorNode's text content (focusNode would work too). */
+
+                /*if((selectedText === "" && selectedText === anchorNode.getTextContent()) || selectedText.includes("\n")) {
+
+
+
+                    // I see the issue here... when anchorNode.getTextContent() is "", this doesn't work!
+                    // So I want the length of "anchorNode.getTextContent()" and then I want to dissect characters from it...
+
+
+
+
+
+                }*/
+
+
+            }
+
+        })
+
     }
 
 
