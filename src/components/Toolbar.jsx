@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, $createTextNode, COMMAND_PRIORITY_CRITICAL } from "lexical";
+import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, $createTextNode, $getRoot, COMMAND_PRIORITY_CRITICAL } from "lexical";
 
 /* ^ NOTE-TO-SELF:
 - $getSelection is pretty self explanatory
@@ -183,12 +183,50 @@ function Toolbar() {
 
                     // Moving the cursor position to just before the second set of backticks (`):
                     if(selectedText == "") {
+
+                        console.log("DEBUG: anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
+                        
+                        const currentSelection = $getSelection();
+                        console.log("AAAAHHHHHHHH: Current selection is: ", currentSelection);
+                        const anchorNodeDebug = currentSelection.anchor.getNode();
+                        const textContentDebug = anchorNodeDebug.getTextContent();
+                        const newSelectionDebug = $createRangeSelection();
+                        newSelectionDebug.setTextNodeRange(anchorNodeDebug, 4, anchorNodeDebug, 4);
+                        $setSelection(newSelectionDebug);
+
+
+                        /*newSelection = $createRangeSelection();
+                        newSelection.setTextNodeRange(anchorNode,  newCursorPos, anchorNode, newCursorPos);
+                        $setSelection(newSelection);*/
+
+                        /*newSelection = $createRangeSelection();
+
+                        console.log("DEBUG: The problem is the line below for sure...");
+
+                        newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+                        $setSelection(newSelection);*/
+
+
+                        /*const clonedSelection = selection.clone();
+                        const rootNode = $getRoot();
+                        const lastTextNode = rootNode.getLastChild();
+                        clonedSelection.setTextNodeRange(lastTextNode, lastTextNode.getTextContent().length, lastTextNode, lastTextNode.getTextContent().length);
+                        $setSelection(clonedSelection);*/
+                        //$setSelection(0);
+                        /*const root = $getRoot();
+                        const lastTextNode = root.getLastChild();
+                        $setSelection(lastTextNode, lastTextNode.getTextContent().length);*/
+
+
+
+                        return;
+
+
+
+
+
                         // Scenario 1a (line is empty):
                         newCursorPos = String(anchorNode.getTextContent()).length - 4;
-
-                        console.log("debug: The value of newCursorPos is: ", newCursorPos);
-                        console.log("debug: The value of anchorNode.getTextContent() is: ", anchorNode.getTextContent());
-                        console.log("debug: The value of anchorNode.getTextContent().length is: ", anchorNode.getTextContent().length);
 
                         let newTextNode = $createTextNode("");
                         anchorNode.append(newTextNode);
