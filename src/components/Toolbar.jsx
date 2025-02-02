@@ -193,21 +193,27 @@ function Toolbar() {
                         let newTextNode = $createTextNode("");
                         anchorNode.append(newTextNode);
                         anchorNode = newTextNode;
-                        const newSelectionTest = $createRangeSelection();
-                        newSelectionTest.anchor.set(anchorNode.getKey(), newCursorPos, "text");
-                        newSelectionTest.focus.set(anchorNode.getKey(), newCursorPos, "text");
-                        $setSelection(newSelectionTest);
+                        //const newSelectionTest = $createRangeSelection();
+
+                        console.log("The value of newCursorPos is: ", newCursorPos);
+
+                        //newSelectionTest.setTextNodeRange(anchorNode, 2, anchorNode, 2);
+                        /*newSelectionTest.anchor.set(anchorNode.getKey(), 0, "text");
+                        newSelectionTest.focus.set(anchorNode.getKey(), 0, "text");
+                        $setSelection(newSelectionTest);*/
 
 
-                        /*newSelection = $createRangeSelection();
+                        newSelection = $createRangeSelection();
 
                         console.log("DEBUG: The problem is the line below for sure...");
 
                         newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                        $setSelection(newSelection);*/
-
+                        $setSelection(newSelection, newCursorPos);
 
                         return;
+
+
+                        
 
 
                         console.log("The value of newCursorPos is: ", newCursorPos);
