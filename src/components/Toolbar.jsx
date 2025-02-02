@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, COMMAND_PRIORITY_CRITICAL } from "lexical";
+import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, $createTextNode, COMMAND_PRIORITY_CRITICAL } from "lexical";
 
 /* ^ NOTE-TO-SELF:
 - $getSelection is pretty self explanatory
@@ -163,7 +163,7 @@ function Toolbar() {
             const selection = $getSelection();
             const selectedText = selection.getTextContent();
             const {anchor, focus} = selection;
-            const anchorNode = anchor.getNode();
+            let anchorNode = anchor.getNode();
             const focusNode = focus.getNode();
             let wrappedText = null;
             let newCursorPos = null;
@@ -184,13 +184,39 @@ function Toolbar() {
                     // Moving the cursor position to just before the second set of backticks (`):
                     if(selectedText == "") {
                         // Scenario 1a (line is empty):
-                        newCursorPos = anchor.offset - 4;
+                        newCursorPos = String(anchorNode.getTextContent()).length - 4;
+
+                        console.log("debug: The value of newCursorPos is: ", newCursorPos);
+                        console.log("debug: The value of anchorNode.getTextContent() is: ", anchorNode.getTextContent());
+                        console.log("debug: The value of anchorNode.getTextContent().length is: ", anchorNode.getTextContent().length);
+
+                        let newTextNode = $createTextNode("");
+                        anchorNode.append(newTextNode);
+                        anchorNode = newTextNode;
+                        const newSelectionTest = $createRangeSelection();
+                        newSelectionTest.anchor.set(anchorNode.getKey(), newCursorPos, "text");
+                        newSelectionTest.focus.set(anchorNode.getKey(), newCursorPos, "text");
+                        $setSelection(newSelectionTest);
+
+
+                        /*newSelection = $createRangeSelection();
+
+                        console.log("DEBUG: The problem is the line below for sure...");
+
+                        newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+                        $setSelection(newSelection);*/
+
+
+                        return;
+
+
+                        console.log("The value of newCursorPos is: ", newCursorPos);
+                        console.log("The value of anchorNode is: ", anchorNode);
 
 
 
-
-
-
+                        
+                        /* DEBUG: Get rid of this code block below later...
                         
                         console.log("debug: The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
                         console.log("debug: The value of anchorNode.offset is: [", anchorNode.offset, "]");
@@ -213,12 +239,15 @@ function Toolbar() {
                         console.log("debag5: ", [...text].map(c => c.charCodeAt(4)));
                         console.log("debag6: ", [...text].map(c => c.charCodeAt(5)));
                         console.log("debag7: ", [...text].map(c => c.charCodeAt(6)));
-                        console.log("debag8: ", [...text].map(c => c.charCodeAt(7)));
+                        console.log("debag8: ", [...text].map(c => c.charCodeAt(7)));*/
 
-                        // debug: test...
-                        newSelection = $createRangeSelection();
+
+
+
+                        // debug: test... (get rid of the block before after)
+                        /*newSelection = $createRangeSelection();
                         newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                        $setSelection(newSelection);
+                        $setSelection(newSelection);*/
                         // debug: test...
 
                     } else {
@@ -247,8 +276,13 @@ function Toolbar() {
                     // After inserting the new text in place of the highlighted text, the cursor position will be right after the second {`}.
                     newCursorPos = selection.anchor.offset - 1;
                 }
+
+
                 // Applying new cursor position using value of newCursorPos (steps are the samae for all branch-condition outcomes):
                 /*newSelection = $createRangeSelection();
+
+                console.log("DEBUG: The problem is the line below for sure...");
+
                 newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
                 $setSelection(newSelection);*/
                 // ^ DEBUG: This conflicts with when there's an empty line and I'm clicking it for the empty line...
