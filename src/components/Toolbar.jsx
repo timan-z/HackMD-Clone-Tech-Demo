@@ -171,6 +171,8 @@ function Toolbar() {
 
             if($isRangeSelection(selection)) {
 
+                console.log("DEBUG: The error occurs in the condition check on line 179...");
+
                 /* When selectedText is "", that implies that no text was highlighted (in this case anchorNode and focusNode will be the same
                 since selection is collapsed). Thus, I can ensure the line is empty, and I will be applying the appropriate markdown structuring,
                 by checking if selectedText is "" but moreover doing an equivalence check between it and anchorNode's text content (focusNode would work too). */
@@ -183,9 +185,33 @@ function Toolbar() {
                     if(selectedText == "") {
                         // Scenario 1a (line is empty):
                         newCursorPos = anchor.offset - 4;
+
+                        console.log("debug: The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
+                        console.log("debug: The value of anchorNode.offset is: [", anchorNode.offset, "]");
+                        console.log("debug: The value of anchorNode.getTextContent().length is: [", anchorNode.getTextContent().length.text, "]");
+
+                        let textbuffer = anchorNode.getTextContent();
+                        console.log("DEBUG: The value of textbuffer is [", textbuffer, "]");
+
+                        // DEBUG: trying to debug the error where anchorNode.offset/getTextContent().length returns undefined (although text does exist)...
+                        console.log("debug1: ", typeof anchorNode.getTextContent());
+                        console.log("debug2: ", anchorNode.getTextContent());
+                        console.log("debug3: ", String(anchorNode.getTextContent()).length);
+                        console.log("debug4: ", String(anchorNode.getTextContent()).trim().length);
+
+
+
+                        // debug: test...
+                        newSelection = $createRangeSelection();
+                        newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+                        $setSelection(newSelection);
+                        // debug: test...
+
                     } else {
                         // Scenario 1b (multi-line highlighted):
-                        newCursorPos = anchor.offset - (anchor.offset - wrappedText.length);    // wrapped.length returns wrappedText length and everything before it.
+                        newCursorPos = anchor.offset - (anchor.offset - wrappedText.length);    
+                        
+                        // wrapped.length returns wrappedText length and everything before it. <-- idk if this is true...
 
                         console.log("DEBUG: The value of anchor.offset is: [", anchor.offset, "]");
                         console.log("DEBUG: The value of wrappedText.length is: [", wrappedText.length, "]");
@@ -208,9 +234,10 @@ function Toolbar() {
                     newCursorPos = selection.anchor.offset - 1;
                 }
                 // Applying new cursor position using value of newCursorPos (steps are the samae for all branch-condition outcomes):
-                newSelection = $createRangeSelection();
+                /*newSelection = $createRangeSelection();
                 newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                $setSelection(newSelection);
+                $setSelection(newSelection);*/
+                // ^ DEBUG: This conflicts with when there's an empty line and I'm clicking it for the empty line...
             }
         })
     }
