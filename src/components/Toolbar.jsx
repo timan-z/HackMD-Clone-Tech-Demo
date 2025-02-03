@@ -302,6 +302,19 @@ function Toolbar() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
             // MONDAY MORNING -- COME HERE, I NEED TO FIGURE OUT HOW TO CALCULATE ABSOLUTE INDEX POSITION AND ALL MY ISSUES ARE SAVED
             // I'M MAKING MASSIVE PROGRESS!!!
 
@@ -315,11 +328,17 @@ function Toolbar() {
                     const textNodes = paragraph.getChildren();
 
                     for(const textNode of textNodes) {
-                        console.log("loop is entered...");
                         if($isTextNode(textNode)) {
+
+                            
+
+
                             console.log("if-branch is entered..., the value of textNode is: [", textNode, "]");
                             console.log("AHHHH: the value of textNode.getTextContent() is: [", textNode.getTextContent(), "]");
                             console.log("AHHHH: the value of textNode.getTextContent().length is: ", textNode.getTextContent().length, "]");
+
+
+
                             if(textNode === anchorNode) {
                                 console.log("innermost if-branch is entered... and the value of textNode.getTextContent = [", textNode.getTextContent(), "]");
                                 break;
@@ -330,10 +349,36 @@ function Toolbar() {
                     }
                 }
             }
-            console.log("PWEASE: The value of absolutePosition is: ", absolutePosition);
+            console.log("PWEASE: The value of cursorPosition is: ", cursorPosition);
+            console.log("PWEASE: The PRE-final value of absolutePosition is: ", absolutePosition);
+            absolutePosition += cursorPosition; 
+            console.log("PWEASE: The FINAL value of absolutePosition is: ", absolutePosition);
+            // OKAY LETS SEE WHAT THE PROBLEM IS...
+            console.log("Anchor Node: [", anchorNode, "]");
+            
+            console.log("Anchor Node Text: [", anchorNode.getTextContent(), "]");
+            console.log("Anchor Node Text LENGTH: [", anchorNode.getTextContent().length, "]");
+            console.log("Full Document Text: [", $getRoot().getTextContent(), "]");
+            console.log("Full Document Text LENGTH: [", $getRoot().getTextContent().length, "]");
+
+
 
             // debug block 2 end.
-            
+    
+            absolutePosition = absolutePosition - 1; // <-- DO NOT DELETE.
+            console.log("DEBUG: Value of absolutePosition is: ", absolutePosition);
+            console.log("DEBUG: Value of editorTextLength is: ", editorTextLength);
+            if(editorTextLength === absolutePosition) {
+                console.log("DEBUG: editorTextLength MATCHES absolutePosition!!!");
+            }
+
+
+
+
+
+
+
+
 
 
 
@@ -356,7 +401,7 @@ function Toolbar() {
 
                 // DEBUG: Try and get rid of the "editorTextLastChar===\n" condition -- it seems redundant and might add undesired behavior.
 
-                if(selectedText.includes("\n") || (selectedText === "" && (selectedText === anchorNode.getTextContent() || cursorPosChar === "\n" || (editorTextLastChar === "\n" && editorTextLength === cursorPosition)))) {
+                if(selectedText.includes("\n") || (selectedText === "" && (selectedText === anchorNode.getTextContent() || cursorPosChar === "\n" || (editorTextLastChar === "\n" && editorTextLength === absolutePosition)))) {
                     // Scenario 1. If the current line is empty -> {```\n}cursor{\n```} OR multi-line text highlighted -> {```\n}text{\n```}: 
                     wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
                     selection.insertText(wrappedText);  // This inserts wrappedText into the space referred to by selection.
