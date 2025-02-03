@@ -267,34 +267,14 @@ function Toolbar() {
             let editorTextLength = editorTextFull.length;
             let editorTextLastChar = editorTextFull.substr(editorTextLength-1, editorTextLength);
             let cursorPosition = anchor.offset;
+            let cursorPosChar = editorTextFull.charAt(cursorPosition); 
             let wrappedText = null;
             let updatedSelection = null;
 
-
-
-
-            console.log("REEF: The value of anchorNode.offset is: [", anchorNode.offset, "]")
-            if($isTextNode(anchorNode)) {
-                console.log("anchorNode is a text node.");
-                console.log("The value of anchorNode.offset is: ", anchor.offset);
-
-            } else {
-                console.log("anchorNode is NOT a text node.");
-                if($isParagraphNode(anchorNode)) {
-                    console.log("anchorNode IS a paragraph node.");
-
-                    anchorNode2 = anchorNode.getFirstChild();
-                    if($isTextNode(anchorNode2)) {
-                        console.log("DID IT WORK???");
-                    } else {
-                        console.log("IT DID NOT WORK!!!");
-                    }
-
-                } else {
-                    console.log("anchorNode is NOT a paragraph node.");
-                }
+            
+            if(cursorPosChar === "\n") {
+                console.log("DEBUG: Alright, I've got it cracked...");
             }
-
 
 
 
@@ -309,10 +289,8 @@ function Toolbar() {
                 if it was newline or not!)
                 - anchor.getNode().offset will give you the position of the cursor within the editor text...
                 */
-                console.log("The value of emptyCursPos is: [", emptyCursPos, "]");
 
-
-                if(selectedText.includes("\n") || (selectedText === "" && (selectedText === anchorNode.getTextContent() || editorTextLastChar === "\n"))) {
+                if(selectedText.includes("\n") || (selectedText === "" && (selectedText === anchorNode.getTextContent() || editorTextLastChar === "\n" || cursorPosChar === "\n"))) {
                     // Scenario 1. If the current line is empty -> {```\n}cursor{\n```} OR multi-line text highlighted -> {```\n}text{\n```}:
                     wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
                     selection.insertText(wrappedText);  // This inserts wrappedText into the space referred to by selection.
