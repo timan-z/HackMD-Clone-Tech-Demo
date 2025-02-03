@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, $createTextNode, $getRoot, COMMAND_PRIORITY_CRITICAL } from "lexical";
+import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, $isTextNode, $createTextNode, $getRoot, COMMAND_PRIORITY_CRITICAL, $isParagraphNode } from "lexical";
 
 /* ^ NOTE-TO-SELF:
 - $getSelection is pretty self explanatory
@@ -266,42 +266,72 @@ function Toolbar() {
             let editorTextFull = anchorNode.getTextContent();
             let editorTextLength = editorTextFull.length;
             let editorTextLastChar = editorTextFull.substr(editorTextLength-1, editorTextLength);
+            let cursorPosition = anchor.offset;
+            let wrappedText = null;
+            let updatedSelection = null;
+
+
+
+
+            console.log("REEF: The value of anchorNode.offset is: [", anchorNode.offset, "]")
+            if($isTextNode(anchorNode)) {
+                console.log("anchorNode is a text node.");
+                console.log("The value of anchorNode.offset is: ", anchor.offset);
+
+            } else {
+                console.log("anchorNode is NOT a text node.");
+                if($isParagraphNode(anchorNode)) {
+                    console.log("anchorNode IS a paragraph node.");
+
+                    anchorNode2 = anchorNode.getFirstChild();
+                    if($isTextNode(anchorNode2)) {
+                        console.log("DID IT WORK???");
+                    } else {
+                        console.log("IT DID NOT WORK!!!");
+                    }
+
+                } else {
+                    console.log("anchorNode is NOT a paragraph node.");
+                }
+            }
+
+
 
 
             // NOTE-TO-SELF: $isRangeSelection() is a type checking function, determines if "selection" exists within the editor (simple).
             if($isRangeSelection(selection)) {
 
+
+                // DEBUG: IMPORTANT COMMENT BELOW!!!
+                /* OKAY... this if-condition branch is missing one final edge-case, the case where 
+                the empty line isn't at the end and isn't just the only line in the text editor... how will
+                I implement this... (probably getting the position of the cursor and finding out what the previous character was,
+                if it was newline or not!)
+                - anchor.getNode().offset will give you the position of the cursor within the editor text...
+                */
+                console.log("The value of emptyCursPos is: [", emptyCursPos, "]");
+
+
                 if(selectedText.includes("\n") || (selectedText === "" && (selectedText === anchorNode.getTextContent() || editorTextLastChar === "\n"))) {
-                    console.log("OKAY THIS CAPTURES WHAT I WANT...");
+                    // Scenario 1. If the current line is empty -> {```\n}cursor{\n```} OR multi-line text highlighted -> {```\n}text{\n```}:
+                    wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
+                    selection.insertText(wrappedText);  // This inserts wrappedText into the space referred to by selection.
+
+
+
+
+
+                    /* NOTE: As will be seen in the contents of the other if-condition branches, I want to move the current cursor 
+                    position of the text editor to just before the first backtick (`) of the second set of backticks. I do this with
+                    function "setTextNodeRange" and a variable that targets a new cursor index position, but it is problematic to use with 
+                    selections of text that are empty (""), so I must "re-get" the selection. (This issue isn't encountered in the other branches). */
+                    updatedSelection = $getSelection();
+                    
+                    let updatedSelectedText = updatedSelection.getTextContent();
+                    console.log("DEBAG: The value of updatedSelection.getTextContent() is: [", updatedSelectedText, "]");
+
+
                 }
-                return;
-
-
-
-                
-                console.log("FELLER: The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
-                console.log("FELLER: The value of anchorNode.getTextContent().length is: [", anchorNode.getTextContent().length, "]");
-                
-                let anchorNodeTextCont = anchorNode.getTextContent(); 
-                let anchorNodeTextLength = anchorNode.getTextContent().length;
-
-                // debug: testing when anchorNode.getTextContent() is "soemthing\n":
-                // so I basically just want to test when anchorNode.getTextContent() == "" OR last char of it is "\n"
-                console.log("FELLER: The last value of anchorNode.getTextContent() is: [", anchorNodeTextCont.substr(anchorNodeTextLength-1, anchorNodeTextLength) , "]");
-
-                let anchorNodeTextFinalChar = anchorNodeTextCont.substr(anchorNodeTextLength-1, anchorNodeTextLength);
-                if(anchorNodeTextFinalChar === "\n") {
-                    // RIGHT now i know what I have to check for!!!
-                    console.log("AAAHHH: Okay.");
-                }  
-
-                /* When selectedText is "", that implies that no text was highlighted (in this case anchorNode and focusNode will be the same
-                since selection is collapsed). Thus, I can ensure the line is empty, and I will be applying the appropriate markdown structuring,
-                by checking if selectedText is "" but moreover doing an equivalence check between it and anchorNode's text content (focusNode would work too). */
-                /*if((selectedText === "" && selectedText === anchorNode.getTextContent()) || selectedText.includes("\n")) {
-                    // I see the issue here... when anchorNode.getTextContent() is "", this doesn't work!
-                    // So I want the length of "anchorNode.getTextContent()" and then I want to dissect characters from it..
-                }*/
 
 
 
