@@ -271,31 +271,98 @@ function Toolbar() {
             let wrappedText = null;
             let updatedSelection = null;
 
-            
-            if(cursorPosChar === "\n") {
-                console.log("DEBUG: Alright, I've got it cracked...");
+            // debug block start:
+            console.log("DEBUG: The value of selectedText is: [", selectedText, "]");
+            console.log("DEBUG: The value of cursorPosChar is: [", cursorPosChar, "]");
+            console.log("DEBUG: The value of anchor.offset is: [", anchor.offset, "]");
+            console.log("DEBUG: The value of editorTextLength is: [", editorTextLength, "]");
+            if(selectedText === "") {
+                console.log("WAH: The value of selectedText is an empty string, as intended...");
             }
+            if(cursorPosChar === "\n") {
+                console.log("WAH: The value of cursorPosChar was indeed a newline...");
+            }
+            // debug block end.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            // MONDAY MORNING -- COME HERE, I NEED TO FIGURE OUT HOW TO CALCULATE ABSOLUTE INDEX POSITION AND ALL MY ISSUES ARE SAVED
+            // I'M MAKING MASSIVE PROGRESS!!!
+
+            // debug block 2 start (calculating true anchor.offset value): 
+            let absolutePosition = 0;
+            const paragraphs = $getRoot().getChildren();
+            console.log("ALLAH-PLEASE: ", paragraphs);
+            
+            for(const paragraph of paragraphs) {
+                if(paragraph.getChildren) {
+                    const textNodes = paragraph.getChildren();
+
+                    for(const textNode of textNodes) {
+                        console.log("loop is entered...");
+                        if($isTextNode(textNode)) {
+                            console.log("if-branch is entered..., the value of textNode is: [", textNode, "]");
+                            console.log("AHHHH: the value of textNode.getTextContent() is: [", textNode.getTextContent(), "]");
+                            console.log("AHHHH: the value of textNode.getTextContent().length is: ", textNode.getTextContent().length, "]");
+                            if(textNode === anchorNode) {
+                                console.log("innermost if-branch is entered... and the value of textNode.getTextContent = [", textNode.getTextContent(), "]");
+                                break;
+                            } else {
+                                absolutePosition += textNode.getTextContent().length;
+                            }
+                        }
+                    }
+                }
+            }
+            console.log("PWEASE: The value of absolutePosition is: ", absolutePosition);
+
+            // debug block 2 end.
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+            // SO BASICALLY ALL OF MY PROBLEMS ARE SOLVED IFF I CAN CALCULATE ABSOLUTE CURSOR POSITON
+            // ^ I BELIEVE THAT BASICALLY FIXES EVEYRTHING I'M STRUGGLING WITH AT THE MOMENT.
 
 
             // NOTE-TO-SELF: $isRangeSelection() is a type checking function, determines if "selection" exists within the editor (simple).
             if($isRangeSelection(selection)) {
 
+                // DEBUG: Try and get rid of the "editorTextLastChar===\n" condition -- it seems redundant and might add undesired behavior.
 
-                // DEBUG: IMPORTANT COMMENT BELOW!!!
-                /* OKAY... this if-condition branch is missing one final edge-case, the case where 
-                the empty line isn't at the end and isn't just the only line in the text editor... how will
-                I implement this... (probably getting the position of the cursor and finding out what the previous character was,
-                if it was newline or not!)
-                - anchor.getNode().offset will give you the position of the cursor within the editor text...
-                */
-
-                if(selectedText.includes("\n") || (selectedText === "" && (selectedText === anchorNode.getTextContent() || editorTextLastChar === "\n" || cursorPosChar === "\n"))) {
-                    // Scenario 1. If the current line is empty -> {```\n}cursor{\n```} OR multi-line text highlighted -> {```\n}text{\n```}:
+                if(selectedText.includes("\n") || (selectedText === "" && (selectedText === anchorNode.getTextContent() || cursorPosChar === "\n" || (editorTextLastChar === "\n" && editorTextLength === cursorPosition)))) {
+                    // Scenario 1. If the current line is empty -> {```\n}cursor{\n```} OR multi-line text highlighted -> {```\n}text{\n```}: 
                     wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
                     selection.insertText(wrappedText);  // This inserts wrappedText into the space referred to by selection.
 
 
+                    // most of it is down, but still some weird edge cases...
 
 
 
@@ -322,6 +389,9 @@ function Toolbar() {
 
 
     
+
+
+
     /* DEBUG: ^ So applyMarkdownFormatCode is basically DONE -- the only minor bug I need to tweak and adjust for is
     when I highlight the WHOLE editor space and click the code button, the cursor position isn't moving where I want it to be
     (but this is an easy fix and I should just need to change the newCursorPos assignment equation for when the selected text
@@ -331,9 +401,6 @@ function Toolbar() {
     // DEBUG: Okay wait no there's still some problems with getting the cursor position where I want it to be regardless of ` characters...
     // DEBUG: ^ fix this Thursday night -- shouldn't be super hard, it's just a mathematical logic thing...
 
-
-
-
     /* Before I stop programming for the day, I want to COMPLETE the applyMarkdownFormatCode function and 
     the applyMarkdownFormatHead function -- if I can do this, it's been a day well spent. I think I can.
     I need to adjust them to be able to work with multiple lines... (NOTE: The "applyMarkdownFormatBIS" function integrates perfectly).
@@ -341,9 +408,6 @@ function Toolbar() {
     - Code Button + Multiple Lines: I'm just doing {```\n}[highlighted space]{\n```} in all scenarios.
     - Header Button + Multiple Lines: I'm just adding # to each individual line encompassed in the highlighted space.
     */
-
-
-
 
 
 
