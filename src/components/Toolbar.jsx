@@ -320,52 +320,58 @@ function Toolbar() {
 
             // debug block 2 start (calculating true anchor.offset value): 
             let absolutePosition = 0;
+            let paragraphOffset = 0;
             const paragraphs = $getRoot().getChildren();
             console.log("ALLAH-PLEASE: ", paragraphs);
-            
+            console.log("DEBAG: Full Document Text: [", JSON.stringify($getRoot().getTextContent()), "]");
+            console.log("DEBAG: Full Document Length: [", $getRoot().getTextContent().length, "]");
+            console.log("DEBAG: Anchor Node Text: [", JSON.stringify(anchorNode.getTextContent()), "]");
+            console.log("DEBAG: Anchor Offset: [", cursorPosition, "]");
+
             for(const paragraph of paragraphs) {
                 if(paragraph.getChildren) {
                     const textNodes = paragraph.getChildren();
+                    console.log("FEEM: The value of paragraph.getChildren().length is: ", paragraph.getChildren().length);
 
                     for(const textNode of textNodes) {
                         if($isTextNode(textNode)) {
-
-                            
-
-
-                            console.log("if-branch is entered..., the value of textNode is: [", textNode, "]");
-                            console.log("AHHHH: the value of textNode.getTextContent() is: [", textNode.getTextContent(), "]");
-                            console.log("AHHHH: the value of textNode.getTextContent().length is: ", textNode.getTextContent().length, "]");
-
-
+                            console.log("DEBAG: Traversing Text Node: ", JSON.stringify(textNode.getTextContent()));
+                            console.log("DEBAG: Text Node Length: ", textNode.getTextContent().length);
 
                             if(textNode === anchorNode) {
-                                console.log("innermost if-branch is entered... and the value of textNode.getTextContent = [", textNode.getTextContent(), "]");
+                                console.log("Reached Anchor Node!");
+                                absolutePosition += cursorPosition;
+                                absolutePosition += paragraphOffset;
+                                console.log("DEBUG: Final Absolute Position OOOOO: ", absolutePosition);
+
                                 break;
                             } else {
+                                // Check if this text node has trailing newlines:
+                                const theTextContent = textNode.getTextContent();
                                 absolutePosition += textNode.getTextContent().length;
+
+                                // check if extra newline is needed for paragraph separation:
+                                if(paragraph.getNextSibling() !== null) {
+                                    paragraphOffset += 1;
+                                    console.log("DEBUG: Adding Paragraph Offset, Total: ", paragraphOffset);
+                                }
                             }
                         }
                     }
                 }
             }
-            console.log("PWEASE: The value of cursorPosition is: ", cursorPosition);
+            /*console.log("PWEASE: The value of cursorPosition is: ", cursorPosition);
             console.log("PWEASE: The PRE-final value of absolutePosition is: ", absolutePosition);
             absolutePosition += cursorPosition; 
             console.log("PWEASE: The FINAL value of absolutePosition is: ", absolutePosition);
             // OKAY LETS SEE WHAT THE PROBLEM IS...
             console.log("Anchor Node: [", anchorNode, "]");
-            
             console.log("Anchor Node Text: [", anchorNode.getTextContent(), "]");
             console.log("Anchor Node Text LENGTH: [", anchorNode.getTextContent().length, "]");
             console.log("Full Document Text: [", $getRoot().getTextContent(), "]");
-            console.log("Full Document Text LENGTH: [", $getRoot().getTextContent().length, "]");
-
-
-
+            console.log("Full Document Text LENGTH: [", $getRoot().getTextContent().length, "]");*/
             // debug block 2 end.
     
-            absolutePosition = absolutePosition - 1; // <-- DO NOT DELETE.
             console.log("DEBUG: Value of absolutePosition is: ", absolutePosition);
             console.log("DEBUG: Value of editorTextLength is: ", editorTextLength);
             if(editorTextLength === absolutePosition) {
