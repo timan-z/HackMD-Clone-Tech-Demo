@@ -333,23 +333,41 @@ function Toolbar() {
                     const textNodes = paragraph.getChildren();
                     console.log("FEEM: The value of paragraph.getChildren().length is: ", paragraph.getChildren().length);
 
+                    for(let i = 0; i < textNodes.length; i++) {
+                        const textNode = textNodes[i];
+
+                        if($isTextNode(textNode)) {
+                            console.log("DEBUG: Traversing Text Node: [", JSON.stringify(textNode.getTextContent()), "]");
+                            console.log("DEBUG: Text Node Length: [", textNode.getTextContent().length, "]");
+
+                            // If anchor node, we stop:
+                            if(textNode === anchorNode) {
+                                console.log("DEBUG: Found cursor at Node, using Offset: ", anchorOffset);
+                                absolutePosition += cursorPosition;
+                                console.log("DEBUG: Final Absolute Position OOO: ", absolutePosition);
+                                break;
+                            } else {
+                                absolutePosition += textNode.getTextContent().length;
+                            }
+                        }
+                    }
+
+
+                    /*
                     for(const textNode of textNodes) {
                         if($isTextNode(textNode)) {
                             console.log("DEBAG: Traversing Text Node: ", JSON.stringify(textNode.getTextContent()));
                             console.log("DEBAG: Text Node Length: ", textNode.getTextContent().length);
-
                             if(textNode === anchorNode) {
                                 console.log("Reached Anchor Node!");
                                 absolutePosition += cursorPosition;
                                 absolutePosition += paragraphOffset;
                                 console.log("DEBUG: Final Absolute Position OOOOO: ", absolutePosition);
-
                                 break;
                             } else {
                                 // Check if this text node has trailing newlines:
                                 const theTextContent = textNode.getTextContent();
                                 absolutePosition += textNode.getTextContent().length;
-
                                 // check if extra newline is needed for paragraph separation:
                                 if(paragraph.getNextSibling() !== null) {
                                     paragraphOffset += 1;
@@ -357,7 +375,7 @@ function Toolbar() {
                                 }
                             }
                         }
-                    }
+                    }*/
                 }
             }
             /*console.log("PWEASE: The value of cursorPosition is: ", cursorPosition);
