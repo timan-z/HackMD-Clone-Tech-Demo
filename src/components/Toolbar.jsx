@@ -263,11 +263,15 @@ function Toolbar() {
         function findCursorPos(paraNodes, anchorNode, anchorOffset) {
 
             console.log("The value of anchorOffset is: ", anchorOffset);
+            console.log("The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
+            console.log("HELP-ME: The value of anchorNode.getKey() is: [", anchorNode.getKey(), "]");
 
 
             let cursorPosition = 0;
             let absolutePosition = 0;
             let textNodeCount = 0;
+            let isCursorOnEmptyL = anchorNode.getTextContent() === "";
+            console.log("The value of isCursorOnEmptyL is: ", isCursorOnEmptyL);
 
             for(const paragraph of paraNodes) {
                 if(paragraph.getChildren()) {
@@ -280,21 +284,45 @@ function Toolbar() {
                         if($isTextNode(textNode)) {
                             console.log("ACP-DEBUG: Traversing Text Node: [", JSON.stringify(textNode.getTextContent()), "]");
                             console.log("ACP-DEBUG: Text Node Length: [", textNode.getTextContent().length, "]");
+                            console.log("ACP-DEBUG: textNode.getKey() value: [", textNode.getKey(), "]");
                             textNodeCount += 1;
 
                             // If anchor node, break:
                             if(textNode === anchorNode) {
+                                // ^ this is never reached! because AnchorNode is the FULL thing...
+
+                                // getKey() might be the answer here oh my god.
+                                // so i might just need to see if getKey is the same as any of the text nodes -- otherwise, i do my og plan...
+
                                 break;
                             }
                             // Otherwise, add the length of the current textNode to cursorPosition:
                             cursorPosition += textNode.getTextContent().length;
+                        } else {
+                            //console.log("FEEEB: This is not a textNode! It is: [", textNode, "]");
                         }
                     }
                 }
             }
 
             // Calculating and returning the final absolute cursor position:
-            absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
+
+
+
+            console.log("DYING: The value of {anchorOffset + cursorPosition} is: ", (anchorOffset + cursorPosition));
+            console.log("dying: The value of cursorPosition is: ", cursorPosition);
+            console.log("DYING: The value of {cursorPosition + (anchorOffset - textNodeCount)} is: ", (cursorPosition + (anchorOffset - textNodeCount)));
+            console.log("dying: The value of textNodeCount is: ", textNodeCount);
+
+            if(!isCursorOnEmptyL && anchorOffset !== 0) {
+                // want to sum it up.
+                absolutePosition = anchorOffset + cursorPosition; // add cursorPosition instead of textNodeCount? and if change if text content == 0, just swap it to 1? (i think this will help???)
+            } else {
+                // otherwise, you're basically at a new line position...
+                absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
+            }
+            
+            
             console.log("ACP-DEBUG: The value of textNodeCount is: ", textNodeCount);
             console.log("ACP-DEBUG: The value of absolutePosition is: ", absolutePosition);
             return absolutePosition;
