@@ -248,12 +248,63 @@ function Toolbar() {
 
 
 
-
-
-
-
-
     const applyMarkdownFormatCode = (editor) => {
+
+
+
+
+
+
+
+
+
+
+        // Function for finding the (absolute) cursor index position within the text editor (anchor.offset doesn't cut it!)
+        function findCursorPos(paraNodes, anchorNode, anchorOffset) {
+
+            console.log("The value of anchorOffset is: ", anchorOffset);
+
+
+            let cursorPosition = 0;
+            let absolutePosition = 0;
+            let textNodeCount = 0;
+
+            for(const paragraph of paraNodes) {
+                if(paragraph.getChildren()) {
+                    const textNodes = paragraph.getChildren();
+                    console.log("ACP-DEBUG: The text editor (value of paragraph.getChildren().length) has this many children: ", paragraph.getChildren().length);
+
+                    for(let i = 0; i < textNodes.length; i++) {
+                        const textNode = textNodes[i];
+
+                        if($isTextNode(textNode)) {
+                            console.log("ACP-DEBUG: Traversing Text Node: [", JSON.stringify(textNode.getTextContent()), "]");
+                            console.log("ACP-DEBUG: Text Node Length: [", textNode.getTextContent().length, "]");
+                            textNodeCount += 1;
+
+                            // If anchor node, break:
+                            if(textNode === anchorNode) {
+                                break;
+                            }
+                            // Otherwise, add the length of the current textNode to cursorPosition:
+                            cursorPosition += textNode.getTextContent().length;
+                        }
+                    }
+                }
+            }
+
+            // Calculating and returning the final absolute cursor position:
+            absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
+            console.log("ACP-DEBUG: The value of textNodeCount is: ", textNodeCount);
+            console.log("ACP-DEBUG: The value of absolutePosition is: ", absolutePosition);
+            return absolutePosition;
+        }
+
+
+
+
+
+
 
         editor.update(() => {
             /* NOTE-TO-SELF:
@@ -265,28 +316,27 @@ function Toolbar() {
             let anchorNode = anchor.getNode();
             let editorTextFull = anchorNode.getTextContent();
             let editorTextLength = editorTextFull.length;
-            let editorTextLastChar = editorTextFull.substr(editorTextLength-1, editorTextLength);
-            let cursorPosition = anchor.offset;
-            let cursorPosChar = editorTextFull.charAt(cursorPosition); 
+            let editorTextLastChar = editorTextFull.substr(editorTextLength-1, editorTextLength);   // DEBUG: <-- overcomplicating things? Maybe just use charAt()
+            let anchorOffset = anchor.offset;
             let wrappedText = null;
             let updatedSelection = null;
 
-            // debug block start:
-            console.log("DEBUG: The value of selectedText is: [", selectedText, "]");
-            console.log("DEBUG: The value of cursorPosChar is: [", cursorPosChar, "]");
-            console.log("DEBUG: The value of anchor.offset is: [", anchor.offset, "]");
-            console.log("DEBUG: The value of editorTextLength is: [", editorTextLength, "]");
-            if(selectedText === "") {
-                console.log("WAH: The value of selectedText is an empty string, as intended...");
-            }
-            if(cursorPosChar === "\n") {
-                console.log("WAH: The value of cursorPosChar was indeed a newline...");
-            }
-            // debug block end.
 
 
 
+            /* NOTE: Calculating the current editor cursor position, at the time that this .update(...) function was invoked, is tricky.
+            Despite what some sources online will say, anchor.offset alone won't cut it if multiple \n characters are present in your 
+            text editor (this has to do with how Lexical partitions its text-editor text into separate nodes, see function "findCursorPos"). */
+            const paraNodes = $getRoot().getChildren(); 
+            let absoluteCursorPos = findCursorPos(paraNodes, anchorNode, anchorOffset); // This var is mainly relevant if cursor selection is "" (empty).
+            let cursorPosChar = editorTextFull.charAt(absoluteCursorPos);
 
+
+            
+            console.log("FINAL-DEBUG: Okay, so the value of absoluteCursorPos is: ", absoluteCursorPos);
+
+
+            return;
 
 
 
@@ -457,7 +507,6 @@ function Toolbar() {
     }
 
 
-    
 
 
 
