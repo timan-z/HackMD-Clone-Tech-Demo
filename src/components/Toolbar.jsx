@@ -6,6 +6,8 @@ import React from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, $isTextNode, $createTextNode, $getRoot, COMMAND_PRIORITY_CRITICAL, $isParagraphNode } from "lexical";
 
+
+
 /* ^ NOTE-TO-SELF:
 - $getSelection is pretty self explanatory
 - $isRangeSelection is a type-checking function verifying the current selection is a range selection. (Empty highlighted space counts). 
@@ -252,6 +254,100 @@ function Toolbar() {
 
 
 
+        // Function for finding the (absolute) cursor index position within the text editor (anchor.offset alone doesn't cut it!)
+        function findCursorPos(paraNodes, anchorNode, anchorOffset) {
+            console.log("The value of anchorOffset is: ", anchorOffset);
+            console.log("The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
+            console.log("HELP-ME: The value of anchorNode.getIndexWithinParent() is: [", anchorNode.getIndexWithinParent(), "]");
+            
+
+            if($isTextNode(anchorNode)) {
+                console.log("Anchor Node IS a text node.");
+            } else {
+                console.log("Anchor Node is NOT a text node.");
+            }
+            
+
+            let cursorPosition = 0;
+            let absolutePosition = 0;
+            let textNodeCount = 0;
+            let lineBreakNodeC = 0;
+            let keyMatch = false;
+
+            let nodeCount = 0;
+
+            for(const paragraph of paraNodes) {
+                if(paragraph.getChildren()) {
+                    const paraChildren = paragraph.getChildren();
+                    console.log("ACP-DEBUG: The text editor (value of paragraph.getChildren().length) has this many children: ", paragraph.getChildren().length);
+
+                    for(let i = 0; i < paraChildren.length; i++) {
+                        const paraChild = paraChildren[i];
+
+                        console.log("The content of paraChild is: ", paraChild);
+                        nodeCount += 1;
+
+
+
+
+
+
+
+                        if($isTextNode(paraChild)) {
+                            console.log("ACP-DEBUG: Traversing Text Node: [", JSON.stringify(paraChild.getTextContent()), "]");
+                            console.log("ACP-DEBUG: Text Node Length: [", paraChild.getTextContent().length, "]");
+                            console.log("ACP-DEBUG: paraChild.getKey() value: [", paraChild.getKey(), "]");
+                            textNodeCount += 1;
+
+                            if(anchorNode.getKey() === paraChild.getKey()) {
+
+                                console.log("~~~Is the key match branch entered??~~~");
+                                console.log("~~~It seems I'm missing the newlines???~~~");
+                                console.log("acp-debug: The value of cursorPosition is: ", cursorPosition);
+                                console.log("acp-debug: The value of anchorOffset is: ", anchorOffset);
+                                console.log("acp-debug: The value of nodeCount is: ", nodeCount);
+                                console.log("acp-debug: The value of textNodeCount is: ", textNodeCount);
+                                console.log("acp-debug: The value of lineBreakNodeC is: ", lineBreakNodeC);
+
+                                cursorPosition += (anchorOffset + lineBreakNodeC);
+                                keyMatch = true;
+                                break;
+                            }
+                            cursorPosition += paraChild.getTextContent().length;
+                        } else {
+                            lineBreakNodeC += 1;
+                        }
+
+                        // necessary line below here.
+                        if(!$isTextNode(anchorNode)) {
+                            if(nodeCount === anchorOffset) {
+                                break;
+                            }
+                        }
+
+
+
+                    }
+                }
+            }
+
+            // Calculating and returning the final absolute cursor position:
+            if(keyMatch === true) {
+
+                console.log("ACP-DEBUG: The \"if(keyMatch===true)\" branch was entered...");
+                
+                absolutePosition = cursorPosition;
+            } else {
+
+                console.log("ACP-DEBUG: The \"else\" branch was entered...");
+                console.log("acp-debug: The value of cursorPosition is: ", cursorPosition);
+                console.log("acp-debug: The value of anchorOffset is: ", anchorOffset);
+                console.log("acp-debug: The value of textNodeCount is: ", textNodeCount);
+
+                absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
+            }
+            return absolutePosition;
+        }
 
 
 
@@ -260,18 +356,17 @@ function Toolbar() {
 
 
         // Function for finding the (absolute) cursor index position within the text editor (anchor.offset doesn't cut it!)
-        function findCursorPos(paraNodes, anchorNode, anchorOffset) {
+        function findCursorPosOLD(paraNodes, anchorNode, anchorOffset) {
 
             console.log("The value of anchorOffset is: ", anchorOffset);
             console.log("The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
             console.log("HELP-ME: The value of anchorNode.getKey() is: [", anchorNode.getKey(), "]");
 
-
             let cursorPosition = 0;
             let absolutePosition = 0;
             let textNodeCount = 0;
-            let isCursorOnEmptyL = anchorNode.getTextContent() === "";
-            console.log("The value of isCursorOnEmptyL is: ", isCursorOnEmptyL);
+            
+            
 
             for(const paragraph of paraNodes) {
                 if(paragraph.getChildren()) {
@@ -287,19 +382,18 @@ function Toolbar() {
                             console.log("ACP-DEBUG: textNode.getKey() value: [", textNode.getKey(), "]");
                             textNodeCount += 1;
 
-                            // If anchor node, break:
-                            if(textNode === anchorNode) {
-                                // ^ this is never reached! because AnchorNode is the FULL thing...
-
-                                // getKey() might be the answer here oh my god.
-                                // so i might just need to see if getKey is the same as any of the text nodes -- otherwise, i do my og plan...
-
-                                break;
+                            if(anchorNode.getKey() === textNode.getKey()) {
+                                console.log("We have found a match.");
                             }
-                            // Otherwise, add the length of the current textNode to cursorPosition:
+
+
+
+
+
                             cursorPosition += textNode.getTextContent().length;
                         } else {
-                            //console.log("FEEEB: This is not a textNode! It is: [", textNode, "]");
+                            // these are linebreak nodes...
+                            console.log("AHHHHHHHH: This is not a textNode! It is: [", textNode, "]");
                         }
                     }
                 }
@@ -314,13 +408,15 @@ function Toolbar() {
             console.log("DYING: The value of {cursorPosition + (anchorOffset - textNodeCount)} is: ", (cursorPosition + (anchorOffset - textNodeCount)));
             console.log("dying: The value of textNodeCount is: ", textNodeCount);
 
-            if(!isCursorOnEmptyL && anchorOffset !== 0) {
+
+            absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
+            //if(!isCursorOnEmptyL && anchorOffset !== 0) {
                 // want to sum it up.
-                absolutePosition = anchorOffset + cursorPosition; // add cursorPosition instead of textNodeCount? and if change if text content == 0, just swap it to 1? (i think this will help???)
-            } else {
+                //absolutePosition = anchorOffset + cursorPosition; // add cursorPosition instead of textNodeCount? and if change if text content == 0, just swap it to 1? (i think this will help???)
+            //} else {
                 // otherwise, you're basically at a new line position...
-                absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
-            }
+                //absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
+            //}
             
             
             console.log("ACP-DEBUG: The value of textNodeCount is: ", textNodeCount);
@@ -348,7 +444,6 @@ function Toolbar() {
             let anchorOffset = anchor.offset;
             let wrappedText = null;
             let updatedSelection = null;
-
 
 
 
