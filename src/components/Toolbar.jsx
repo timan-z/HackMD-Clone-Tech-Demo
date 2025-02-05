@@ -270,18 +270,18 @@ function Toolbar() {
 
 
 
-        // Function for finding the (absolute) cursor index position within the text editor (anchor.offset alone doesn't cut it!)
+        // Function for finding the (absolute) cursor index position within the text editor:
         function findCursorPos(paraNodes, anchorNode, anchorOffset) {
-            console.log("~~~Code Button Clicked console.log statements BEGIN (mainly of relevance if no text is highlighted)~~~");
+            console.log("~~~Code Button Clicked (CBC) console.log statements BEGIN (mainly of relevance if no text is highlighted)~~~");
 
             /* NOTE: anchorOffset is key to determining the absolute cursor position (ACP) in the text editor (its index position in the overall text display),
             but its use will depend on if anchorNode is a TextNode or not. If it does, anchorOffset gives the position of the cursor within the current
             text-editor line (a non-empty text line). Otherwise, the cursor position is on an empty line and anchorOffset's value is less immediately useful,
             but can still be used to determine ACP. */
             if($isTextNode(anchorNode)) {
-                console.log("Code Button Clicked: Anchor Node is a Text Node. The cursor is within a text line.");
+                console.log("CBC: Anchor Node is a Text Node. The cursor is within a text line.");
             } else {
-                console.log("Code Button Clicked: Anchor Node is not a Text Node. The cursor is within an empty line.");
+                console.log("CBC: Anchor Node is not a Text Node. The cursor is within an empty line.");
             }
 
             /* Lexical does not store its text-editor content as a single string, rather it partitions its content into various paragraph nodes 
@@ -339,7 +339,7 @@ function Toolbar() {
                 }
             }
 
-            console.log("Code Button Clicked: The cursor position is currently on line: ", (lineBreakNodeC + 1));
+            console.log("CBC: The cursor position is currently on line: ", (lineBreakNodeC + 1));
             
             // Calculating and returning the final absolute cursor position:
             if(keyMatch === true) {                
@@ -348,8 +348,8 @@ function Toolbar() {
                 absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
             }
 
-            console.log("Code Button Clicked: The absolute cursor position in the text editor is: ", absolutePosition);
-            console.log("~~~Code Button Clicked console.log statements END~~~");
+            console.log("CBC: The absolute cursor position in the text editor is: ", absolutePosition);
+            console.log("~~~Code Button Clicked (CBC) console.log statements END~~~");
             return absolutePosition;
         }
 
@@ -383,9 +383,9 @@ function Toolbar() {
             const selectedText = selection.getTextContent();
             let {anchor, focus} = selection;
             let anchorNode = anchor.getNode();
-            let editorTextFull = anchorNode.getTextContent();
+            let editorTextFull = $getRoot().getTextContent();
             let editorTextLength = editorTextFull.length;
-            let editorTextLastChar = editorTextFull.substr(editorTextLength-1, editorTextLength);   // DEBUG: <-- overcomplicating things? Maybe just use charAt()
+            let editorTextLastChar = editorTextFull.charAt(Math.max(editorTextLength-1, 0));
             let anchorOffset = anchor.offset;
             let wrappedText = null;
             let updatedSelection = null;
@@ -396,145 +396,33 @@ function Toolbar() {
             into seperate nodes, see more in function "findCursorPos"). */
             const paraNodes = $getRoot().getChildren(); 
             let absoluteCursorPos = findCursorPos(paraNodes, anchorNode, anchorOffset); // This var is mainly relevant if cursor selection is "" (empty).
-            let cursorPosChar = editorTextFull.charAt(absoluteCursorPos);
+            let cursorPosChar = editorTextFull.charAt(Math.max(absoluteCursorPos-1, 0)); 
 
 
-            
-            console.log("FINAL-DEBUG: Okay, so the value of absoluteCursorPos is: ", absoluteCursorPos);
+
+            console.log("DEBUG: The value of editorTextFull is: [", editorTextFull, "]");
+            console.log("DEBUG: The value of editorTextLength is: [", editorTextLength, "]");
+            console.log("DEBUG: The value of editorTextLastChar is: [", editorTextLastChar, "]");
+            console.log("DEBUG: The value of cursorPosChar is: [", cursorPosChar, "]");
+            console.log("DEBUG: The value of absoluteCursorPos is: [", absoluteCursorPos, "]");
+
+            // $isRangeSelection(...) is a type-checking function, ensuring "selection" (cursor area) exists within the editor:
+            if($isRangeSelection(selection)) {
+                
+
+                // if(selectedText.includes("\n") || (selectedText === "" && (selectedText === anchorNode.getTextContent() || cursorPosChar === "\n" || (editorTextLastChar === "\n" && editorTextLength === absoluteCursorPos)))) {
+                if(selectedText.includes("\n") || (selectedText === "" && (selectedText === editorTextFull || cursorPosChar === "\n"))) {
+                    // Scenario 1. If the current line is empty -> {```\n}cursor{\n```} OR multi-line text highlighted -> {```\n}text{\n```}: 
+
+                    console.log("ZOO-WEE-MAMA: This slipped through!!!");
+
+                }
+
+            }
 
 
             return;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            // MONDAY MORNING -- COME HERE, I NEED TO FIGURE OUT HOW TO CALCULATE ABSOLUTE INDEX POSITION AND ALL MY ISSUES ARE SAVED
-            // I'M MAKING MASSIVE PROGRESS!!!
-
-            // debug block 2 start (calculating true anchor.offset value): 
-            let absolutePosition = 0;
-            let paragraphOffset = 0;
-            const paragraphs = $getRoot().getChildren();
-            console.log("ALLAH-PLEASE: ", paragraphs);
-            console.log("DEBAG: Full Document Text: [", JSON.stringify($getRoot().getTextContent()), "]");
-            console.log("DEBAG: Full Document Length: [", $getRoot().getTextContent().length, "]");
-            console.log("DEBAG: Anchor Node Text: [", JSON.stringify(anchorNode.getTextContent()), "]");
-            console.log("DEBAG: Anchor Offset: [", cursorPosition, "]");
-
-            for(const paragraph of paragraphs) {
-                if(paragraph.getChildren) {
-                    const textNodes = paragraph.getChildren();
-                    console.log("FEEM: The value of paragraph.getChildren().length is: ", paragraph.getChildren().length);
-
-                    for(let i = 0; i < textNodes.length; i++) {
-                        const textNode = textNodes[i];
-
-                        if($isTextNode(textNode)) {
-                            console.log("DEBUG: Traversing Text Node: [", JSON.stringify(textNode.getTextContent()), "]");
-                            console.log("DEBUG: Text Node Length: [", textNode.getTextContent().length, "]");
-
-                            // If anchor node, we stop:
-                            if(textNode === anchorNode) {
-                                console.log("DEBUG: Found cursor at Node, using Offset: ", anchorOffset);
-                                absolutePosition += cursorPosition;
-                                console.log("DEBUG: Final Absolute Position OOO: ", absolutePosition);
-                                break;
-                            } else {
-                                absolutePosition += textNode.getTextContent().length;
-                            }
-                        }
-                    }
-
-
-                    /*
-                    for(const textNode of textNodes) {
-                        if($isTextNode(textNode)) {
-                            console.log("DEBAG: Traversing Text Node: ", JSON.stringify(textNode.getTextContent()));
-                            console.log("DEBAG: Text Node Length: ", textNode.getTextContent().length);
-                            if(textNode === anchorNode) {
-                                console.log("Reached Anchor Node!");
-                                absolutePosition += cursorPosition;
-                                absolutePosition += paragraphOffset;
-                                console.log("DEBUG: Final Absolute Position OOOOO: ", absolutePosition);
-                                break;
-                            } else {
-                                // Check if this text node has trailing newlines:
-                                const theTextContent = textNode.getTextContent();
-                                absolutePosition += textNode.getTextContent().length;
-                                // check if extra newline is needed for paragraph separation:
-                                if(paragraph.getNextSibling() !== null) {
-                                    paragraphOffset += 1;
-                                    console.log("DEBUG: Adding Paragraph Offset, Total: ", paragraphOffset);
-                                }
-                            }
-                        }
-                    }*/
-                }
-            }
-            /*console.log("PWEASE: The value of cursorPosition is: ", cursorPosition);
-            console.log("PWEASE: The PRE-final value of absolutePosition is: ", absolutePosition);
-            absolutePosition += cursorPosition; 
-            console.log("PWEASE: The FINAL value of absolutePosition is: ", absolutePosition);
-            // OKAY LETS SEE WHAT THE PROBLEM IS...
-            console.log("Anchor Node: [", anchorNode, "]");
-            console.log("Anchor Node Text: [", anchorNode.getTextContent(), "]");
-            console.log("Anchor Node Text LENGTH: [", anchorNode.getTextContent().length, "]");
-            console.log("Full Document Text: [", $getRoot().getTextContent(), "]");
-            console.log("Full Document Text LENGTH: [", $getRoot().getTextContent().length, "]");*/
-            // debug block 2 end.
-    
-            console.log("DEBUG: Value of absolutePosition is: ", absolutePosition);
-            console.log("DEBUG: Value of editorTextLength is: ", editorTextLength);
-            if(editorTextLength === absolutePosition) {
-                console.log("DEBUG: editorTextLength MATCHES absolutePosition!!!");
-            }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            // SO BASICALLY ALL OF MY PROBLEMS ARE SOLVED IFF I CAN CALCULATE ABSOLUTE CURSOR POSITON
-            // ^ I BELIEVE THAT BASICALLY FIXES EVEYRTHING I'M STRUGGLING WITH AT THE MOMENT.
 
 
             // NOTE-TO-SELF: $isRangeSelection() is a type checking function, determines if "selection" exists within the editor (simple).
