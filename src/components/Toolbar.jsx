@@ -276,57 +276,54 @@ function Toolbar() {
 
             let nodeCount = 0;
 
-            for(const paragraph of paraNodes) {
-                if(paragraph.getChildren()) {
-                    const paraChildren = paragraph.getChildren();
-                    console.log("ACP-DEBUG: The text editor (value of paragraph.getChildren().length) has this many children: ", paragraph.getChildren().length);
+            //if($isTextNode(anchorNode) && anchorOffset !== 0) {
 
-                    for(let i = 0; i < paraChildren.length; i++) {
-                        const paraChild = paraChildren[i];
+            // when anchor node is a non-text node and value === 0, that's bad and should be avoided!
+            if(!(!$isTextNode(anchorNode) && anchorOffset === 0)) {
 
-                        console.log("The content of paraChild is: ", paraChild);
-                        nodeCount += 1;
+                for(const paragraph of paraNodes) {
+                    if(paragraph.getChildren()) {
+                        const paraChildren = paragraph.getChildren();
+                        console.log("ACP-DEBUG: The text editor (value of paragraph.getChildren().length) has this many children: ", paragraph.getChildren().length);
 
+                        for(let i = 0; i < paraChildren.length; i++) {
+                            const paraChild = paraChildren[i];
 
+                            console.log("The content of paraChild is: ", paraChild);
+                            nodeCount += 1;
 
+                            if($isTextNode(paraChild)) {
+                                console.log("ACP-DEBUG: Traversing Text Node: [", JSON.stringify(paraChild.getTextContent()), "]");
+                                console.log("ACP-DEBUG: Text Node Length: [", paraChild.getTextContent().length, "]");
+                                console.log("ACP-DEBUG: paraChild.getKey() value: [", paraChild.getKey(), "]");
+                                textNodeCount += 1;
 
+                                if(anchorNode.getKey() === paraChild.getKey()) {
 
+                                    console.log("~~~Is the key match branch entered??~~~");
+                                    console.log("~~~It seems I'm missing the newlines???~~~");
+                                    console.log("acp-debug: The value of cursorPosition is: ", cursorPosition);
+                                    console.log("acp-debug: The value of anchorOffset is: ", anchorOffset);
+                                    console.log("acp-debug: The value of nodeCount is: ", nodeCount);
+                                    console.log("acp-debug: The value of textNodeCount is: ", textNodeCount);
+                                    console.log("acp-debug: The value of lineBreakNodeC is: ", lineBreakNodeC);
 
-
-                        if($isTextNode(paraChild)) {
-                            console.log("ACP-DEBUG: Traversing Text Node: [", JSON.stringify(paraChild.getTextContent()), "]");
-                            console.log("ACP-DEBUG: Text Node Length: [", paraChild.getTextContent().length, "]");
-                            console.log("ACP-DEBUG: paraChild.getKey() value: [", paraChild.getKey(), "]");
-                            textNodeCount += 1;
-
-                            if(anchorNode.getKey() === paraChild.getKey()) {
-
-                                console.log("~~~Is the key match branch entered??~~~");
-                                console.log("~~~It seems I'm missing the newlines???~~~");
-                                console.log("acp-debug: The value of cursorPosition is: ", cursorPosition);
-                                console.log("acp-debug: The value of anchorOffset is: ", anchorOffset);
-                                console.log("acp-debug: The value of nodeCount is: ", nodeCount);
-                                console.log("acp-debug: The value of textNodeCount is: ", textNodeCount);
-                                console.log("acp-debug: The value of lineBreakNodeC is: ", lineBreakNodeC);
-
-                                cursorPosition += (anchorOffset + lineBreakNodeC);
-                                keyMatch = true;
-                                break;
+                                    cursorPosition += (anchorOffset + lineBreakNodeC);
+                                    keyMatch = true;
+                                    break;
+                                }
+                                cursorPosition += paraChild.getTextContent().length;
+                            } else {
+                                lineBreakNodeC += 1;
                             }
-                            cursorPosition += paraChild.getTextContent().length;
-                        } else {
-                            lineBreakNodeC += 1;
-                        }
 
-                        // necessary line below here.
-                        if(!$isTextNode(anchorNode)) {
-                            if(nodeCount === anchorOffset) {
-                                break;
+                            // necessary line below here.
+                            if(!$isTextNode(anchorNode)) {
+                                if(nodeCount === anchorOffset) {
+                                    break;
+                                }
                             }
                         }
-
-
-
                     }
                 }
             }
