@@ -254,73 +254,84 @@ function Toolbar() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // Function for finding the (absolute) cursor index position within the text editor (anchor.offset alone doesn't cut it!)
         function findCursorPos(paraNodes, anchorNode, anchorOffset) {
-            console.log("The value of anchorOffset is: ", anchorOffset);
-            console.log("The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
-            console.log("HELP-ME: The value of anchorNode.getIndexWithinParent() is: [", anchorNode.getIndexWithinParent(), "]");
-            
+            console.log("~~~Code Button Clicked console.log statements BEGIN (mainly of relevance if no text is highlighted)~~~");
 
+            /* NOTE: anchorOffset is key to determining the absolute cursor position (ACP) in the text editor (its index position in the overall text display),
+            but its use will depend on if anchorNode is a TextNode or not. If it does, anchorOffset gives the position of the cursor within the current
+            text-editor line (a non-empty text line). Otherwise, the cursor position is on an empty line and anchorOffset's value is less immediately useful,
+            but can still be used to determine ACP. */
             if($isTextNode(anchorNode)) {
-                console.log("Anchor Node IS a text node.");
+                console.log("Code Button Clicked: Anchor Node is a Text Node. The cursor is within a text line.");
             } else {
-                console.log("Anchor Node is NOT a text node.");
+                console.log("Code Button Clicked: Anchor Node is not a Text Node. The cursor is within an empty line.");
             }
-            
 
+            /* Lexical does not store its text-editor content as a single string, rather it partitions its content into various paragraph nodes 
+            (see param "paraNodes"), which can be iterated through and inspected (for its child nodes, which are mostly TextNodes and LineBreakNodes). 
+            It also does not provide explicit functions for returning specific line contents so some logic is required to extract the ACP with what is known. */
+
+            // Variables for ACP calculation:
             let cursorPosition = 0;
             let absolutePosition = 0;
+            let nodeCount = 0;
             let textNodeCount = 0;
             let lineBreakNodeC = 0;
             let keyMatch = false;
 
-            let nodeCount = 0;
-
-            //if($isTextNode(anchorNode) && anchorOffset !== 0) {
-
-            // when anchor node is a non-text node and value === 0, that's bad and should be avoided!
+            // This if-condition is for when the cursor position is on an empty line that comprises the whole text editor (ACP is 0, no further calculations needed).
             if(!(!$isTextNode(anchorNode) && anchorOffset === 0)) {
 
+                // NOTE: Lexical appears to always (?) store its text-editor content in *one* specific paragraph node.
                 for(const paragraph of paraNodes) {
                     if(paragraph.getChildren()) {
                         const paraChildren = paragraph.getChildren();
-                        console.log("ACP-DEBUG: The text editor (value of paragraph.getChildren().length) has this many children: ", paragraph.getChildren().length);
 
+                        /* Throughout the paragraph node iteration, as its children are inspected, a count is kept of nodes traversed.
+                        This is important for ACP calculation and determining when traversal should stop based on the values passed as arguments
+                        (this is how we determine at what point we "meet" the line in which the cursor position was positioned). */
                         for(let i = 0; i < paraChildren.length; i++) {
+                            nodeCount += 1;
                             const paraChild = paraChildren[i];
 
-                            console.log("The content of paraChild is: ", paraChild);
-                            nodeCount += 1;
-
                             if($isTextNode(paraChild)) {
-                                console.log("ACP-DEBUG: Traversing Text Node: [", JSON.stringify(paraChild.getTextContent()), "]");
-                                console.log("ACP-DEBUG: Text Node Length: [", paraChild.getTextContent().length, "]");
-                                console.log("ACP-DEBUG: paraChild.getKey() value: [", paraChild.getKey(), "]");
                                 textNodeCount += 1;
 
+                                /* When anchorNode is a TextElement, then anchorNode.getKey() will have the same key value as the TextNode which 
+                                refers to the text line in which the cursor position was positioned. */
                                 if(anchorNode.getKey() === paraChild.getKey()) {
-
-                                    console.log("~~~Is the key match branch entered??~~~");
-                                    console.log("~~~It seems I'm missing the newlines???~~~");
-                                    console.log("acp-debug: The value of cursorPosition is: ", cursorPosition);
-                                    console.log("acp-debug: The value of anchorOffset is: ", anchorOffset);
-                                    console.log("acp-debug: The value of nodeCount is: ", nodeCount);
-                                    console.log("acp-debug: The value of textNodeCount is: ", textNodeCount);
-                                    console.log("acp-debug: The value of lineBreakNodeC is: ", lineBreakNodeC);
-
+                                    // anchorOffset will be line index and lineBreakNodeC will be all the prior \n characters traversed. (These aren't stored in TextNodes).
                                     cursorPosition += (anchorOffset + lineBreakNodeC);
                                     keyMatch = true;
-                                    break;
+                                    break;  // stop traversal.
                                 }
                                 cursorPosition += paraChild.getTextContent().length;
                             } else {
                                 lineBreakNodeC += 1;
                             }
 
-                            // necessary line below here.
+                            /* When anchorNode is not a text node (cursor on empty line), the value of anchorOffset will refer not to
+                            line index, but the newline depth of the cursor (this will correspond with nodeCount): */
                             if(!$isTextNode(anchorNode)) {
                                 if(nodeCount === anchorOffset) {
-                                    break;
+                                    break;   // stop traversal.
                                 }
                             }
                         }
@@ -328,21 +339,17 @@ function Toolbar() {
                 }
             }
 
+            console.log("Code Button Clicked: The cursor position is currently on line: ", (lineBreakNodeC + 1));
+            
             // Calculating and returning the final absolute cursor position:
-            if(keyMatch === true) {
-
-                console.log("ACP-DEBUG: The \"if(keyMatch===true)\" branch was entered...");
-                
+            if(keyMatch === true) {                
                 absolutePosition = cursorPosition;
             } else {
-
-                console.log("ACP-DEBUG: The \"else\" branch was entered...");
-                console.log("acp-debug: The value of cursorPosition is: ", cursorPosition);
-                console.log("acp-debug: The value of anchorOffset is: ", anchorOffset);
-                console.log("acp-debug: The value of textNodeCount is: ", textNodeCount);
-
                 absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
             }
+
+            console.log("Code Button Clicked: The absolute cursor position in the text editor is: ", absolutePosition);
+            console.log("~~~Code Button Clicked console.log statements END~~~");
             return absolutePosition;
         }
 
@@ -352,74 +359,15 @@ function Toolbar() {
 
 
 
-        // Function for finding the (absolute) cursor index position within the text editor (anchor.offset doesn't cut it!)
-        function findCursorPosOLD(paraNodes, anchorNode, anchorOffset) {
-
-            console.log("The value of anchorOffset is: ", anchorOffset);
-            console.log("The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
-            console.log("HELP-ME: The value of anchorNode.getKey() is: [", anchorNode.getKey(), "]");
-
-            let cursorPosition = 0;
-            let absolutePosition = 0;
-            let textNodeCount = 0;
-            
-            
-
-            for(const paragraph of paraNodes) {
-                if(paragraph.getChildren()) {
-                    const textNodes = paragraph.getChildren();
-                    console.log("ACP-DEBUG: The text editor (value of paragraph.getChildren().length) has this many children: ", paragraph.getChildren().length);
-
-                    for(let i = 0; i < textNodes.length; i++) {
-                        const textNode = textNodes[i];
-
-                        if($isTextNode(textNode)) {
-                            console.log("ACP-DEBUG: Traversing Text Node: [", JSON.stringify(textNode.getTextContent()), "]");
-                            console.log("ACP-DEBUG: Text Node Length: [", textNode.getTextContent().length, "]");
-                            console.log("ACP-DEBUG: textNode.getKey() value: [", textNode.getKey(), "]");
-                            textNodeCount += 1;
-
-                            if(anchorNode.getKey() === textNode.getKey()) {
-                                console.log("We have found a match.");
-                            }
 
 
 
 
 
-                            cursorPosition += textNode.getTextContent().length;
-                        } else {
-                            // these are linebreak nodes...
-                            console.log("AHHHHHHHH: This is not a textNode! It is: [", textNode, "]");
-                        }
-                    }
-                }
-            }
-
-            // Calculating and returning the final absolute cursor position:
 
 
 
-            console.log("DYING: The value of {anchorOffset + cursorPosition} is: ", (anchorOffset + cursorPosition));
-            console.log("dying: The value of cursorPosition is: ", cursorPosition);
-            console.log("DYING: The value of {cursorPosition + (anchorOffset - textNodeCount)} is: ", (cursorPosition + (anchorOffset - textNodeCount)));
-            console.log("dying: The value of textNodeCount is: ", textNodeCount);
 
-
-            absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
-            //if(!isCursorOnEmptyL && anchorOffset !== 0) {
-                // want to sum it up.
-                //absolutePosition = anchorOffset + cursorPosition; // add cursorPosition instead of textNodeCount? and if change if text content == 0, just swap it to 1? (i think this will help???)
-            //} else {
-                // otherwise, you're basically at a new line position...
-                //absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
-            //}
-            
-            
-            console.log("ACP-DEBUG: The value of textNodeCount is: ", textNodeCount);
-            console.log("ACP-DEBUG: The value of absolutePosition is: ", absolutePosition);
-            return absolutePosition;
-        }
 
 
 
@@ -442,11 +390,10 @@ function Toolbar() {
             let wrappedText = null;
             let updatedSelection = null;
 
-
-
             /* NOTE: Calculating the current editor cursor position, at the time that this .update(...) function was invoked, is tricky.
-            Despite what some sources online will say, anchor.offset alone won't cut it if multiple \n characters are present in your 
-            text editor (this has to do with how Lexical partitions its text-editor text into separate nodes, see function "findCursorPos"). */
+            Despite what some sources online will say, anchor.offset *alone* won't cut it if multiple \n characters are present in your 
+            text editor or if the cursor position is on an empty line. (This has to do with how Lexical partitions its text-editor text
+            into seperate nodes, see more in function "findCursorPos"). */
             const paraNodes = $getRoot().getChildren(); 
             let absoluteCursorPos = findCursorPos(paraNodes, anchorNode, anchorOffset); // This var is mainly relevant if cursor selection is "" (empty).
             let cursorPosChar = editorTextFull.charAt(absoluteCursorPos);
