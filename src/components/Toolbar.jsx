@@ -207,6 +207,7 @@ function Toolbar() {
 
 
 
+                        
                     } else {
                         // Scenario 1b (multi-line highlighted):
                         newCursorPos = anchor.offset - (anchor.offset - wrappedText.length);    
@@ -250,25 +251,18 @@ function Toolbar() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
     const applyMarkdownFormatCode = (editor) => {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         // Function for finding the (absolute) cursor index position within the text editor:
         function findCursorPos(paraNodes, anchorNode, anchorOffset) {
@@ -390,6 +384,8 @@ function Toolbar() {
             let wrappedText = null;
             let updatedSelection = null;
 
+            console.log("debug: The value of selectedText.length is: ", selectedText.length);
+
             /* NOTE: Calculating the current editor cursor position, at the time that this .update(...) function was invoked, is tricky.
             Despite what some sources online will say, anchor.offset *alone* won't cut it if multiple \n characters are present in your 
             text editor or if the cursor position is on an empty line. (This has to do with how Lexical partitions its text-editor text
@@ -397,8 +393,8 @@ function Toolbar() {
             const paraNodes = $getRoot().getChildren(); 
             let absoluteCursorPos = findCursorPos(paraNodes, anchorNode, anchorOffset); // This var is mainly relevant if cursor selection is "" (empty).
             let cursorPosChar = editorTextFull.charAt(Math.max(absoluteCursorPos-1, 0)); 
-
-
+            let newCursorPos = null;
+            let newSelection = null;
 
             console.log("DEBUG: The value of editorTextFull is: [", editorTextFull, "]");
             console.log("DEBUG: The value of editorTextLength is: [", editorTextLength, "]");
@@ -408,59 +404,107 @@ function Toolbar() {
 
             // $isRangeSelection(...) is a type-checking function, ensuring "selection" (cursor area) exists within the editor:
             if($isRangeSelection(selection)) {
-                
 
-                // if(selectedText.includes("\n") || (selectedText === "" && (selectedText === anchorNode.getTextContent() || cursorPosChar === "\n" || (editorTextLastChar === "\n" && editorTextLength === absoluteCursorPos)))) {
-                if(selectedText.includes("\n") || (selectedText === "" && (selectedText === editorTextFull || cursorPosChar === "\n"))) {
-                    // Scenario 1. If the current line is empty -> {```\n}cursor{\n```} OR multi-line text highlighted -> {```\n}text{\n```}: 
-
-                    console.log("ZOO-WEE-MAMA: This slipped through!!!");
-
-                }
-
-            }
-
-
-            return;
-
-
-
-            // NOTE-TO-SELF: $isRangeSelection() is a type checking function, determines if "selection" exists within the editor (simple).
-            if($isRangeSelection(selection)) {
-
-                // DEBUG: Try and get rid of the "editorTextLastChar===\n" condition -- it seems redundant and might add undesired behavior.
-
-                if(selectedText.includes("\n") || (selectedText === "" && (selectedText === anchorNode.getTextContent() || cursorPosChar === "\n" || (editorTextLastChar === "\n" && editorTextLength === absolutePosition)))) {
+                if(selectedText.includes("\n") || (selectedText === "" && (selectedText === editorTextFull || cursorPosChar === "\n" || absoluteCursorPos === 0))) {
                     // Scenario 1. If the current line is empty -> {```\n}cursor{\n```} OR multi-line text highlighted -> {```\n}text{\n```}: 
                     wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
-                    selection.insertText(wrappedText);  // This inserts wrappedText into the space referred to by selection.
-
-
-                    // most of it is down, but still some weird edge cases...
+                    selection.insertText(wrappedText);
 
 
 
-                    /* NOTE: As will be seen in the contents of the other if-condition branches, I want to move the current cursor 
-                    position of the text editor to just before the first backtick (`) of the second set of backticks. I do this with
-                    function "setTextNodeRange" and a variable that targets a new cursor index position, but it is problematic to use with 
-                    selections of text that are empty (""), so I must "re-get" the selection. (This issue isn't encountered in the other branches). */
-                    updatedSelection = $getSelection();
-                    
-                    let updatedSelectedText = updatedSelection.getTextContent();
-                    console.log("DEBAG: The value of updatedSelection.getTextContent() is: [", updatedSelectedText, "]");
+                    console.log("DEBUG: The value of selectedText.length is: ", selectedText.text);
 
+                    // Now I need a new method of figuring out how to re-position the cursor...
+                    // But let's approach this from small case up...
+                    const cursorOffset = 4 + selectedText.length;
+
+                    console.log("DEBUG: The value of cursorOffset is: ", cursorOffset);
+
+                    const newSelection = $createRangeSelection();
+                    newSelection.anchor.set(selection.focus.key, cursorOffset, "text");
+                    newSelection.focus.set(selection.focus.key, cursorOffset, "text");
+                    $setSelection(newSelection);
 
                 }
-
-
-
-
             }
-
         })
 
     }
 
+
+
+
+
+    /*
+    if(selectedText.includes("\n") || (selectedText === "" && (selectedText === editorTextFull || cursorPosChar === "\n" || absoluteCursorPos === 0))) {
+        // Scenario 1. If the current line is empty -> {```\n}cursor{\n```} OR multi-line text highlighted -> {```\n}text{\n```}: 
+        wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
+        selection.insertText(wrappedText);
+        
+
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // IMPORTANT-DEBUG: EVERYTHING ABOVE IN THIS FUNCTION IS *GOOD* (EVERYTHING BELOW STILL NEEDS SOME WORK):
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+
+
+         NOTE: As will be seen in the contents of the other if-condition branches, I want to move the current cursor 
+        position of the text editor to just before the first backtick (`) of the second set of backticks. I do this with
+        function "setTextNodeRange" and a variable that targets a new cursor index position, but it is problematic to use with 
+        selections of text that are empty (""), so I must "re-get" the selection. (This issue isn't encountered in the other branches). 
+        updatedSelection = $getSelection();
+        let updatedSelectedText = updatedSelection.getTextContent();
+
+        if(selectedText === "") {
+            // Scenario 1a (current line is empty):
+            //newCursorPos = absoluteCursorPos + 4;   // DEBUG: okay this is causing some problems too but with how i'm setting the new cursor position... (this sometimes exceeds anchorNode).
+
+            console.log("failed to execute because of the line below...");
+            selection.focus.offset += 4;
+            console.log("failed to execute because of the line above...");
+
+            // can I do setSelection with rootNOde? probably not...
+
+
+
+
+
+
+             NOTE: The two subsequent lines of code are critical here...
+            I am relying on function setTextNodeRange(...) to move the cursor position after inserText(...) but this is
+            the branch for where the "</>" code button is clicked on an empty line. The issue is that setTextNodeRange(...)
+            won't work properly unless there is existing non-"" empty string text to be dealt with, and that's why I need to
+            re-get the selection via $getSelection() to update it with the text that was inserted earlier. 
+            //anchorNode = updatedSelection.anchor.getNode();
+
+        } else {
+            // DEBUG: This should genuinely be a lot more tricky than the previous branch clearly...
+
+            // Scenario 1b (multi-line highlighted):
+            //newCursorPos = anchor.offset - (anchor.offset - wrappedText.length); // DEBUG: There's something wrong with my calculations and it probably has to do with this line here...
+            // DEBUG: ^ Would probably be quite easy to just use absoluteCursorPos here?
+
+            // debug: get rid of these debug statements afterwards...
+            //console.log("debug: The value of anchor.offset is: [", anchor.offset, "]");
+            //console.log("debug: The value of wrappedText.length is: [", wrappedText.length, "]");
+        }
+    } else {
+        // This "else" branch will catch all scenarios where the line is NOT empty.
+
+
+        //console.log("DEBUG: COME BACK HERE AFTER AFTER DEBUGGING THE OTHER BIG BRANCH!!!");
+
+
+
+    }
+    // Applying new cursor position using value of newCursorPos (steps are the same for all branch outcomes):
+    newSelection = $createRangeSelection();
+    newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+    $setSelection(newSelection);*/
 
 
 
