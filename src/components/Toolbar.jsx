@@ -401,6 +401,8 @@ function Toolbar() {
             console.log("DEBUG: The value of editorTextLastChar is: [", editorTextLastChar, "]");
             console.log("DEBUG: The value of cursorPosChar is: [", cursorPosChar, "]");
             console.log("DEBUG: The value of absoluteCursorPos is: [", absoluteCursorPos, "]");
+            console.log("debug: The value of anchorNode.getKey() is: [", anchorNode.getKey(), "]");
+            console.log("debug: The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
 
             // $isRangeSelection(...) is a type-checking function, ensuring "selection" (cursor area) exists within the editor:
             if($isRangeSelection(selection)) {
@@ -410,20 +412,60 @@ function Toolbar() {
                     wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
                     selection.insertText(wrappedText);
 
+                    // DEBUG: Focus on the thing below!!!
+
+                    /* DEBUG: Okay so, the two methods below mostly work (need to do the "re-get" selection for [1]) for different
+                    scenarios. I want to decide which one is better to work with, and which one's edge cases are easier to figure out.
+                    Figure that out and then work on how to figure out their edge cases, and I should be good...  */
+                    // [1] - DEBUG: This one below isn't working but I think it's because I need to do the "re-get" thing for ```\n\n```...
+                    newCursorPos = absoluteCursorPos + 4;
+                    newSelection = $createRangeSelection();
+                    newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+                    $setSelection(newSelection);
+
+                    // [2] - DEBUG: This one below works at the moment... but there's some edge cases...
+                    const wrappedTextLength = 8 + selectedText.length;
+                    const reposCursor = wrappedTextLength - 4;
+                    newSelection = $createRangeSelection();
+                    newSelection.anchor.set(selection.focus.key, reposCursor, "text");
+                    newSelection.focus.set(selection.focus.key, reposCursor, "text");
+                    $setSelection(newSelection);
+                    
+                    // DEBUG: Focus on the thing above!!!
+                    // DEBUG: IGNORE THE BELOW!!!
 
 
-                    console.log("DEBUG: The value of selectedText.length is: ", selectedText.text);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    //selection.setTextNodeRange(anchorNode, reposCursor, anchorNode, reposCursor);
+                    /*const reposCursor = wrappedTextLength - 4;
+                    // Creating a new selection at the desired position:
+                    newSelection = $createRangeSelection();
+                    newSelection.anchor.set();*/
+                    // Okay we starting from ground-up what's the best way to reposition the cursor in Lexical text editor...
+                    // maybe what i can do is... just return the node key and set then reposition AFTER this func ends, with absoluteCursorPos, when the editor updates?
+                    // ^ how can i make that work (only problem with the absoluteValue thing for positiong is sometimes there's an exceeding value thing...)
+                    //console.log("DEBUG: The value of selectedText.length is: ", selectedText.text);
                     // Now I need a new method of figuring out how to re-position the cursor...
                     // But let's approach this from small case up...
-                    const cursorOffset = 4 + selectedText.length;
-
+                    /*const cursorOffset = 4 + selectedText.length;
                     console.log("DEBUG: The value of cursorOffset is: ", cursorOffset);
-
                     const newSelection = $createRangeSelection();
                     newSelection.anchor.set(selection.focus.key, cursorOffset, "text");
                     newSelection.focus.set(selection.focus.key, cursorOffset, "text");
-                    $setSelection(newSelection);
+                    $setSelection(newSelection);*/
 
                 }
             }
