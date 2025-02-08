@@ -412,13 +412,19 @@ function Toolbar() {
                     wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
                     selection.insertText(wrappedText);
 
+
+                    
+
+
+
+
                     // DEBUG: Focus on the thing below!!!
 
                     /* DEBUG: Okay so, the two methods below mostly work (need to do the "re-get" selection for [1]) for different
                     scenarios. I want to decide which one is better to work with, and which one's edge cases are easier to figure out.
                     Figure that out and then work on how to figure out their edge cases, and I should be good...  */
                     // [1] - DEBUG: This one below isn't working but I think it's because I need to do the "re-get" thing for ```\n\n```...
-                    newCursorPos = absoluteCursorPos + 4;
+                    /*newCursorPos = absoluteCursorPos + 4;
                     newSelection = $createRangeSelection();
                     newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
                     $setSelection(newSelection);
@@ -429,7 +435,7 @@ function Toolbar() {
                     newSelection = $createRangeSelection();
                     newSelection.anchor.set(selection.focus.key, reposCursor, "text");
                     newSelection.focus.set(selection.focus.key, reposCursor, "text");
-                    $setSelection(newSelection);
+                    $setSelection(newSelection);*/
                     
                     // DEBUG: Focus on the thing above!!!
                     // DEBUG: IGNORE THE BELOW!!!
