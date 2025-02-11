@@ -383,8 +383,7 @@ function Toolbar() {
             let anchorOffset = anchor.offset;
             let wrappedText = null;
             let updatedSelection = null;
-
-            console.log("debug: The value of selectedText.length is: ", selectedText.length);
+            let updatedSelectedText = null;
 
             /* NOTE: Calculating the current editor cursor position, at the time that this .update(...) function was invoked, is tricky.
             Despite what some sources online will say, anchor.offset *alone* won't cut it if multiple \n characters are present in your 
@@ -396,14 +395,11 @@ function Toolbar() {
             let newCursorPos = null;
             let newSelection = null;
 
-            console.log("DEBUG: The value of editorTextFull is: [", editorTextFull, "]");
-            console.log("DEBUG: The value of editorTextLength is: [", editorTextLength, "]");
-            console.log("DEBUG: The value of editorTextLastChar is: [", editorTextLastChar, "]");
-            console.log("DEBUG: The value of cursorPosChar is: [", cursorPosChar, "]");
-            console.log("DEBUG: The value of absoluteCursorPos is: [", absoluteCursorPos, "]");
-            console.log("debug: The value of anchorNode.getKey() is: [", anchorNode.getKey(), "]");
-            console.log("debug: The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
-            console.log("~~~DEBUG COMMENT BREAK~~~");
+
+            console.log("DEBUG: -- Use these two console.log statements below to figure out the issue...");
+            console.log("DEBUG: The value of absoluteCursorPosition is: ", absoluteCursorPos);
+            console.log("DEBUG: The value of editorTextFull is: ", editorTextFull);
+
 
             // $isRangeSelection(...) is a type-checking function, ensuring "selection" (cursor area) exists within the editor:
             if($isRangeSelection(selection)) {
@@ -415,37 +411,81 @@ function Toolbar() {
 
                     if(selectedText === "") {
                         /* NOTE: These subsequent two lines, while they may appear redundant, are necessary for the empty string scenario.
-                        Otherwise, I will face the "Lexical Error: TypeError: anchorNode.selectionTransform is not a function" error. */
+                        Otherwise, I will face the "Lexical Error: TypeError: anchorNode.selectionTransform is not a function" error. Despite
+                        what I've read on the internet about not being able to "refresh" the editor content until the update function finishes,
+                        the three steps below (mostly the first two) will infact "re-get" the selection content post-insertText(). */
                         updatedSelection = $getSelection();
                         anchorNode = updatedSelection.anchor.getNode();
-                        newCursorPos = String(anchorNode.getTextContent()).length - 4;
+                        updatedSelectedText = String(anchorNode.getTextContent());
+                        let newEditorTextFull = $getRoot().getTextContent();
+
+                        if(updatedSelectedText === "```\n\n```") {
+                            newCursorPos = updatedSelectedText.length - 4;
+                        } else {
+
+                            if(updatedSelectedText === newEditorTextFull) {
+                                newCursorPos = absoluteCursorPos + 4;
+                                // ^ this isn't reliable because it will eventually break off...
+                            } else {
+                                newCursorPos = 0;
+                            }
+
+
+
+                            
+                            /* A long verbose solution that *should work* would be to find out the updatedSelectedText
+                            position within newEditorTextFull... (because it will always be a subset even if they match),
+                            verify what I found was the correct position (potential duplicates) -- using absoluteCursorPos -- 
+                            and then calculate the proper position from there... */
+
+
+
+
+                            /*newCursorPos = absoluteCursorPos + 4;
+                            DEBUG: ^ This is mostly sound but there's still one primary edge case I need to deal with when the cursor position
+                            is on the final line of the text editor (non-empty) and I get the "IndexSizeError: offset is larger than node's length"
+                            error... Hard one to keep an eye out for because I can't really tell when the node will break off into multiple parts... 
+
+                            // DEBUG: ^ For avoiding the error mentioned in the comment above...
+                            const cursorPosArea = "`\n\n`";
+                            if(newCursorPos > updatedSelectedText.length) {
+
+                                console.log("INSIDE-DEBUG: If you see this post-error, the newCursorPos > updatedSelectedText.length fix may not be foolproof. Alas.");
+                                // DEBUG: ^ Remove the comment above after exhaustive debugging and confirming that all edge cases are fixed...
+
+                                let lastIndex = updatedSelectedText.lastIndexOf(cursorPosArea);
+                                if(lastIndex === -1) {
+                                    console.log("ERROR: This if-condition should NEVER be entered. (lastIndex issue).");
+                                }
+                                let subThis = updatedSelectedText.length - (lastIndex + 2);
+                                newCursorPos = updatedSelectedText.length - subThis;
+                            }*/
+
+
+
+
+
+
+
+                        }
+
+
 
 
                         
 
-                        /* Problems with this method:
-                        GOOD : 
-                        - Works perfectly when on a new empty line. (Like the latest line, and it must be empty).
-                        BAD:
-                        - Does not work when invoking on a previous empty line (anchorNode.getTextContent() seemingly grabs EVERYTHING?)
-                        - Does not work when invoked at the start of a non-empty line.
-                        */
 
-
-
-
-                        console.log("DEBUG: The value of String(anchorNode.getTextContent()).length is: [", String(anchorNode.getTextContent()), "]");
+                        /*console.log("DEBUG: The value of String(anchorNode.getTextContent()).length is: [", String(anchorNode.getTextContent()), "]");
                         console.log("DEBUG: The value of newCursorPos is: [", newCursorPos, "]");
-
+                        console.log("debug: The value of absoluteCursorPos is: [", absoluteCursorPos, "]");
+                        console.log("debug: The value of updatedSelectedText is: [", updatedSelectedText, "]");*/
 
                         // DEBUG: Next three lines are pretty universal for all situations but we still focusing just on ==="" empty string rn...
                         newSelection = $createRangeSelection();
                         newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
                         $setSelection(newSelection);
-
-                        
-
-
+                        // DEBUG: ^ Keeping it here for now, should probably be repositioned later.
+                
 
                     }
 
