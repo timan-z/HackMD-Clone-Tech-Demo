@@ -312,7 +312,174 @@ function Toolbar() {
                 $setSelection(newSelection);
             }
         })
-    }
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Sep Function for applying "Quote" (just adds "> " to the start of the current line)...
+    const applyMarkdownFormatQuote = (editor) => {
+
+        editor.update(() => {
+            const selection = $getSelection();
+            const selectedText = selection.getTextContent();
+            const paraNodes = $getRoot().getChildren();
+            let {anchor} = selection;
+            let anchorNode = anchor.getNode();
+            let anchorNodeKey = anchorNode.getKey();
+            let lineText = null;
+            let updatedLineT = null;
+            let wrappedText = null;
+
+            console.log("DEBUG: The value (pre-insertText) value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
+            console.log("DEBUG: The value of anchorNodeKey is: [", anchorNodeKey, "]");
+            console.log("DEBUG: The value of selectedText is: [", selectedText, "]");
+            console.log("DEBUG: The value of anchorNodeKey is: [", anchorNodeKey, "]");
+
+            // NOTE: Must use "==" here for the equivalence when using anchorNodeKey.
+            if(anchorNodeKey == 2 && selectedText === "") {
+                // Scenario 1. When the Quote button is invoked for a single empty line (getKey value will always be 2):
+                wrappedText = `${"> "}${selectedText}`;
+                selection.insertText(wrappedText);
+            } else if (!selectedText.includes("\n")) {
+                // Scenario 2. When the Quote button is invoked for a single line but it's not empty.
+
+                console.log("DEBUG: Scenario 2 entered...");
+                // DEBUG: so i'm replacing a line with the content I add... (I can borrow what I did with the # function for sure).
+
+                // Finding the text content of the current line:
+                for(const paragraph of paraNodes) {
+                    if(paragraph.getChildren()) {
+                        const paraChildren = paragraph.getChildren();
+
+                        for(let i = 0; i < paraChildren.length; i++) {
+                            const paraChild = paraChildren[i];
+                                
+                            if($isTextNode(paraChild)) {
+                                if(anchorNodeKey === paraChild.getKey()) {
+                                    console.log("DEBUG: LET'S SEE WHAT WE FOUND!!!");
+                                    console.log("debug: The value of paraChild.getTextContent() is: [", paraChild.getTextContent(), "]");
+
+                                    lineText = paraChild.getTextContent(); 
+
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /* To insert "> " before the current line text, I am going to need the value of anchor.offset but I'm also going to
+                have to apply the deleteLine() function, which will alter anchor.offset, so I must preserve its value somehow (or at least,
+                preserve the fact that it potentially had a value that is significant to how the logic progresses): */                
+                let anchorOffsetFreeze = null;
+                if(anchor.offset === 0) {
+                    anchorOffsetFreeze = 0;
+                }
+            
+                updatedLineT = "> " + lineText;
+                selection.deleteLine();
+
+                // When anchor.offset pre-deleteLine() is 0, I don't want to have those two following lines (but otherwise I do).
+                if(anchorOffsetFreeze !== 0) {
+                    selection.deleteLine(false);
+                    selection.deleteLine(true);
+                }
+                selection.insertText(updatedLineT);
+
+
+
+
+
+                /* edge cases encountered so far:
+                - one line but it's a non-empty line and the cursor is at the start of the line instead of anywhere else!
+                ^ this is also a bug in the Header function so, when I solve it here, I must solve it there too!
+                
+                - very easy fix: just remove deleteLine(false) and deleteLine(true) when absolute cursor position is at the start of a line.
+                ^ this will also be tricky because it counts each new line and not just at the start...
+
+                ^ remember to fix this for the header function as well...
+                ^ ah anchor.offset should be an easy fix here! (because these are single-line so offset *will* give the value im looking for).
+                
+
+
+                
+
+
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+                ADD THIS TO FUTURE-DEBUGGING.TXT:
+                - I did find another bug but it's a weird one that might have little to do with what I can fix here?
+                So if I take the cursor and place it in the middle of text line like:
+                - "some|thing" but then take it off by clicking offscreen, it'll go "something", but then
+                if I click the Quote button, I'll get "some> somethingthing" <-- might be a bug I can let slide for now?
+                
+                ^ like, i may be able to fix this if i just make it so, when you click offscreen, you cursor information all becomes null?
+
+                */
+
+
+
+
+            } else {
+                // Scenario 3. When the Quote button is invoked for a multi-line selection...
+                // NOTE: This branch might get quite verbose...
+                // NOTE: ^ yes it will probably be more complex than initially thought BUT nowhere near as hard as the code button...
+
+                console.log("Scenario 3 entered...");
+            }
+        
+
+
+
+
+
+
+            /* Now, the complicated part is, when it's not on an empty line,
+            I need to retrieve the line content (which I can do and I have already done...)
+            ^ just need to tie this all together...
+
+            ^ I can do this by retrieving getKey() value, iterating through the nodes and then finding
+            the text node that I need. Extracting its contents and then inserting the "> " substring infront of it.
+            (don't need to worry about newlines because theyll  be stored differently). 
+            
+            ^ Need to take care of this situation and multi-lines highlighted, which should be pretty easy. */
+
+
+
+
+            console.log("DEBUG: The value of selectedText is: [", selectedText, "]");
+            console.log("DEBUG: The (post-insertText) value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
+            console.log("DEBUG: The value of anchorNode.getKey() is: [", anchorNode.getKey(), "]");
+
+            // should be as easy as selection.insertText "> " 
+            // nevermind there's a bit of thought involved here. i need to be able to place it infront of the whole line content.
+            // ^ now i *can* do this with functionality ive built before -- it might just look a little verbose...
+            // okay it's a little more complicated than i thought...
+
+
+        })
+    };
+
+
 
 
 
@@ -359,6 +526,10 @@ function Toolbar() {
             applyMarkdownFormatCode(editor)
         }}>&#60;/&#62;</button>
 
+        {/* Creating the button that responds to "quote" */}
+        <button onClick={()=>{
+            applyMarkdownFormatQuote(editor)
+        }}>" "</button>
 
 
 
@@ -369,15 +540,18 @@ function Toolbar() {
 
 
 
+        {/*
 
 
-        {/* Some things I'm going to need to tweak for the other buttons I have to implement...
-        - So for the Code [</>] button, I am going to need a new function because {```\n}text{\n```} is only supposed to
-        be a thing for when the current line is an empty line. Otherwise, I'm looking to do {`}text{`}... 
-        
         - For the Quote [""] button, I'm just adding a ">" symbol at the start of the line regardless of if current line is empty or not. (Easy).
         (Granted, when I press enter and go to new line, that line will start off with a ">" unless I press enter/newline again which will clear
         the > on the current line, and so on).
+        
+        ^ now the part about pressing enter to go to a new line will probably need to be made outside of the const function...
+        (like programmed elsewhere maybe in Editor.jsx)
+
+
+
         
         - For the Generic List [idk] button, I'm doing the same as the Quote button but with the * symbol (same enter/newline situation).
 
