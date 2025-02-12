@@ -20,15 +20,3 @@ ADD THIS TO FUTURE-DEBUGGING.TXT:
                 if I click the Quote button, I'll get "some> somethingthing" <-- might be a bug I can let slide for now?
                 
                 ^ like, i may be able to fix this if i just make it so, when you click offscreen, you cursor information all becomes null?
-
-
-
-
-
-only edge case i need to work on now is making sure if I reclick the button when "> " is already present, it'll get rid of it...
-
-
-
-
-One creative choice I want to make to differentiate my project from HackMD is that when "> " precedes a line, that's Quote in effect. But when it's just ">" alone and then some other non-whitespace character follows it -- this won't be Quote in effect.
-^ so quote will be interpeted as "> " in my editor.
