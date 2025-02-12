@@ -364,12 +364,6 @@ function Toolbar() {
             } else if (!selectedText.includes("\n")) {
                 // Scenario 2. When the Quote button is invoked for a single line but it's not empty.
 
-
-
-                // debug: In this branch I also need to be able to undo the "> " thing... when pressed double...
-
-                
-
                 // Finding the text content of the current line:
                 for(const paragraph of paraNodes) {
                     if(paragraph.getChildren()) {
@@ -391,23 +385,35 @@ function Toolbar() {
                         }
                     }
                 }
-                
-                /* To insert "> " before the current line text, I am going to need the value of anchor.offset but I'm also going to
+
+                /* To insert "> " before the current line text (or the Alt), I am going to need the value of anchor.offset but I'm also going to
                 have to apply the deleteLine() function, which will alter anchor.offset, so I must preserve its value somehow (or at least,
-                preserve the fact that it potentially had a value that is significant to how the logic progresses): */                
+                preserve the fact that it potentially had a value that is significant to how the logic progresses): */  
+                // NOTE: selectedText === lineText needed for a bizarre bug that occurs where offset is different when you slide the cursor right-to-left to highlight full line text rather than double-clicking.              
                 let anchorOffsetFreeze = null;
-                if(anchor.offset === 0) {
+                if(anchor.offset === 0 || selectedText === lineText) {
                     anchorOffsetFreeze = 0;
                 }
-            
-                updatedLineT = "> " + lineText;
-                selection.deleteLine();
 
+                // If "> " is already at the start of the line, then it's just undone (NOTE: This is how it's done in HackMD).
+                // NOTE: ^ It'll be undone in this situation but not if multiple lines are highlighted... (so I'll follow that too).
+                if (lineText.length >=2 && lineText[0] === ">" && lineText[1] === " ") {
+                    if(lineText.length === 2) {
+                        updatedLineT = "";
+                    } else {
+                        updatedLineT = lineText.substring(2, lineText.length);
+                    }
+                } else {
+                    updatedLineT = "> " + lineText;
+                }
+
+                selection.deleteLine();
                 // When anchor.offset pre-deleteLine() is 0, I don't want to have those two following lines (but otherwise I do).
                 if(anchorOffsetFreeze !== 0) {
                     selection.deleteLine(false);
                     selection.deleteLine(true);
                 }
+
                 selection.insertText(updatedLineT);
 
             } else {
