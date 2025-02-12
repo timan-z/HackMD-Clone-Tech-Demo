@@ -352,11 +352,6 @@ function Toolbar() {
             let updatedLineT = null;
             let wrappedText = null;
 
-            console.log("DEBUG: The value (pre-insertText) value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
-            console.log("DEBUG: The value of anchorNodeKey is: [", anchorNodeKey, "]");
-            console.log("DEBUG: The value of selectedText is: [", selectedText, "]");
-            console.log("DEBUG: The value of anchorNodeKey is: [", anchorNodeKey, "]");
-
             if(!$isRangeSelection(selection)) {
                 return;
             }
@@ -368,6 +363,12 @@ function Toolbar() {
                 selection.insertText(wrappedText);
             } else if (!selectedText.includes("\n")) {
                 // Scenario 2. When the Quote button is invoked for a single line but it's not empty.
+
+
+
+                // debug: In this branch I also need to be able to undo the "> " thing... when pressed double...
+
+                
 
                 // Finding the text content of the current line:
                 for(const paragraph of paraNodes) {
@@ -411,24 +412,8 @@ function Toolbar() {
 
             } else {
                 // Scenario 3. When the Quote button is invoked for a multi-line selection...
-                console.log("DEBUG:~~~~~~~~~~~~~~~~~~~~~~~~~");
-                console.log("DEBUG: Scenario 3 entered...");
-                console.log("DEBUG:~~~~~~~~~~~~~~~~~~~~~~~~~");
-                
-                console.log("debug: The value of selectedText is: ", selectedText);
-                console.log("debug: The value of anchorNodeKey is: ", anchorNodeKey);
-
-
-
-
-                /* this could potentially be quite easy.
-                What I might be able to do is to extract the selected text and insert "> " right after each
-                newline appearance. That's it. Manipulate the string, deleteLine(...) and insertText(...), and
-                then that should be good?
-        
-                ^ The only edge-case I'll need to figure out how to handle, though will be if it doesn't capture the
-                starting and ending line newlines... (which it shouldn't -- so I'll need to work around that). */
-
+               
+                // selection.getNodes() retrieves all the nodes affected by the highlighted text (and from there I can alter their content):
                 const selectionNodes = selection.getNodes();
                 selectionNodes.forEach((sNode) => {
                     if($isTextNode(sNode)) {
@@ -437,17 +422,11 @@ function Toolbar() {
                     }
                 });
 
-
-
-
-                /*console.log("The affected nodes (pre-insert) are: selection.getnodes(): [", selection.getNodes(), "]");
-                wrappedText = "some stuff";
-                selection.insertText(wrappedText);
-                console.log("The affected nodes (post-insert) are: selection.getNodes(): [", selection.getNodes(), "]");*/
-
-
-
-
+                // NOTE: Put the comment below in the README.md documentation later.
+                /* NOTE: So there's the issue of handling behavior when lines already start with "> " and then you highlight that line
+                and click the Quote button... should I then undo the "> " starting the string? Well, the way HackMD handles it is that
+                -- for mult-line highlighted text -- you stack the "> "s prepended to the string, and so I will handle it that way as well.
+                (For single-line Quote invocations though, it seems HackMD will undo the "> " quotes). */
             }
         })
     };
