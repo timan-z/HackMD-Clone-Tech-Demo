@@ -395,8 +395,6 @@ function Toolbar() {
             let newCursorPos = null;
             let newSelection = null;
 
-
-
             // $isRangeSelection(...) is a type-checking function, ensuring "selection" (cursor area) exists within the editor:
             if($isRangeSelection(selection)) {
 
@@ -405,16 +403,17 @@ function Toolbar() {
                     wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
                     selection.insertText(wrappedText);
 
+                    updatedSelection = $getSelection();
+                    anchorNode = updatedSelection.anchor.getNode();
+                    updatedSelectedText = String(anchorNode.getTextContent());
+                    let newEditorTextFull = $getRoot().getTextContent();
+
                     if(selectedText === "") {
                         /* NOTE: These subsequent two lines, while they may appear redundant, are necessary for the empty string scenario.
                         Otherwise, I will face the "Lexical Error: TypeError: anchorNode.selectionTransform is not a function" error. Despite
                         what I've read on the internet about not being able to "refresh" the editor content until the update function finishes,
                         the three steps below (mostly the first two) will infact "re-get" the selection content post-insertText(). */
-                        updatedSelection = $getSelection();
-                        anchorNode = updatedSelection.anchor.getNode();
-                        updatedSelectedText = String(anchorNode.getTextContent());
-                        let newEditorTextFull = $getRoot().getTextContent();
-
+                        
                         if(updatedSelectedText === "```\n\n```") {
                             newCursorPos = updatedSelectedText.length - 4;
                         } else {
@@ -433,6 +432,7 @@ function Toolbar() {
                                 if(startIndex <= absoluteCursorPos && absoluteCursorPos <= endIndex) {
                                     startIndexFinal = startIndex;
                                     endIndexFinal = endIndex;
+                                    break;
                                 }                                
                                 // Finding the next occurence (if there is any):
                                 startIndex = newEditorTextFull.indexOf(updatedSelectedText, startIndex + 1);
@@ -440,13 +440,61 @@ function Toolbar() {
 
                             newCursorPos = (absoluteCursorPos + 4) - startIndexFinal;
                         }
-
-
+                    } else {
+                        // Scenario 1b (multi-line highlighted):
 
 
                         
 
+                        console.log("Debug: selectedText: [", selectedText, "]");
+                        console.log("Debug: editorTextFull: [", newEditorTextFull, "]");
+                        console.log("Debug: The value of absoluteCursorPosition is: [", absoluteCursorPos, "]"); // would be adjusted +4 after text insertion.
+                        let absCursorPosAdjust = absoluteCursorPos + 4;
+                        console.log("Debug: The value of absCursorPosAdjust is: [", absCursorPosAdjust, "]");
+
+                        let startIndex = newEditorTextFull.indexOf(selectedText);
+                        console.log("The value of startIndex is: ", startIndex);
+                        let endIndex, startIndexFinal, endIndexFinal = null;
+
+                        while(startIndex !== -1) {
+                            endIndex = startIndex + selectedText.length;
+                            if((startIndex <= absCursorPosAdjust) && (absCursorPosAdjust <= endIndex)) {
+                                startIndexFinal = startIndex;
+                                endIndexFinal = endIndex;
+                                break;
+                            }
+                            // Finding the next occurrence (if any):
+                            startIndex = newEditorTextFull.indexOf(selectedText, startIndex + 1);
+                        }
+
+                        console.log("YEE: The value of startIndexFinal is: ", startIndexFinal);
+                        console.log("YEE: The value of endIndexFinal is: ", endIndexFinal);
+
+                        console.log("yee: The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
+                        console.log("yee: The value of anchorNode.offset is: [", anchorNode.offset, "]");
+
+                        console.log("YEE: The value of absCursorPosAdjust is: [", absCursorPosAdjust, "]");
+
+
+                        newCursorPos = absCursorPosAdjust - startIndexFinal + 5;
+
+                        console.log("YEE: The value of newCursorPos is: ", newCursorPos);
+
+
+
+                        /* OKAY I THINK I HAVE THE LOGIC FIGURED OUT!!!
+                        So newCursorPos will be at the end of the text that I selected.
+                        What I can then do is find out the start index of updatedSelectedText and substract it from newCursorPos
+                        and then use that as the value I'll be using from the offset... (So I'm basically doubling the process here).
+                        ^ It makes sense in my head.
+                        */
+
+
                     }
+
+
+
+
 
 
 
