@@ -357,6 +357,10 @@ function Toolbar() {
             console.log("DEBUG: The value of selectedText is: [", selectedText, "]");
             console.log("DEBUG: The value of anchorNodeKey is: [", anchorNodeKey, "]");
 
+            if(!$isRangeSelection(selection)) {
+                return;
+            }
+
             // NOTE: Must use "==" here for the equivalence when using anchorNodeKey.
             if(anchorNodeKey == 2 && selectedText === "") {
                 // Scenario 1. When the Quote button is invoked for a single empty line (getKey value will always be 2):
@@ -407,63 +411,46 @@ function Toolbar() {
 
             } else {
                 // Scenario 3. When the Quote button is invoked for a multi-line selection...
-
-
-
+                console.log("DEBUG:~~~~~~~~~~~~~~~~~~~~~~~~~");
+                console.log("DEBUG: Scenario 3 entered...");
+                console.log("DEBUG:~~~~~~~~~~~~~~~~~~~~~~~~~");
                 
-                // NOTE: This branch might get quite verbose...
-                // NOTE: ^ yes it will probably be more complex than initially thought BUT nowhere near as hard as the code button...
+                console.log("debug: The value of selectedText is: ", selectedText);
+                console.log("debug: The value of anchorNodeKey is: ", anchorNodeKey);
 
-                /* NOTE: ^ It looks like I have *not* implemented multi-line highlighting for the Head function so I suppose part of my job
-                today will be to implement that there as well..., which is okay. */
-                // Okay I probably need to rehaul the Head function in its entirety it looks like...
-                /* So tonight, finish:
-                - Quote
-                - Generic List
-                - Numbered List
-                - Check List
-                - Fix Head
 
-                ^ do-able but grindy.
 
-                */
 
-                console.log("Scenario 3 entered...");
-            }
+                /* this could potentially be quite easy.
+                What I might be able to do is to extract the selected text and insert "> " right after each
+                newline appearance. That's it. Manipulate the string, deleteLine(...) and insertText(...), and
+                then that should be good?
         
+                ^ The only edge-case I'll need to figure out how to handle, though will be if it doesn't capture the
+                starting and ending line newlines... (which it shouldn't -- so I'll need to work around that). */
+
+                const selectionNodes = selection.getNodes();
+                selectionNodes.forEach((sNode) => {
+                    if($isTextNode(sNode)) {
+                        updatedLineT = "> " + sNode.getTextContent();
+                        sNode.setTextContent(updatedLineT);
+                    }
+                });
 
 
 
 
-
-
-            /* Now, the complicated part is, when it's not on an empty line,
-            I need to retrieve the line content (which I can do and I have already done...)
-            ^ just need to tie this all together...
-
-            ^ I can do this by retrieving getKey() value, iterating through the nodes and then finding
-            the text node that I need. Extracting its contents and then inserting the "> " substring infront of it.
-            (don't need to worry about newlines because theyll  be stored differently). 
-            
-            ^ Need to take care of this situation and multi-lines highlighted, which should be pretty easy. */
+                /*console.log("The affected nodes (pre-insert) are: selection.getnodes(): [", selection.getNodes(), "]");
+                wrappedText = "some stuff";
+                selection.insertText(wrappedText);
+                console.log("The affected nodes (post-insert) are: selection.getNodes(): [", selection.getNodes(), "]");*/
 
 
 
 
-            console.log("DEBUG: The value of selectedText is: [", selectedText, "]");
-            console.log("DEBUG: The (post-insertText) value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
-            console.log("DEBUG: The value of anchorNode.getKey() is: [", anchorNode.getKey(), "]");
-
-            // should be as easy as selection.insertText "> " 
-            // nevermind there's a bit of thought involved here. i need to be able to place it infront of the whole line content.
-            // ^ now i *can* do this with functionality ive built before -- it might just look a little verbose...
-            // okay it's a little more complicated than i thought...
-
-
+            }
         })
     };
-
-
 
 
 
