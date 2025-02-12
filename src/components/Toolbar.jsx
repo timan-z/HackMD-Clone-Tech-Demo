@@ -107,6 +107,8 @@ function Toolbar() {
                         }
                     }
                 } else {
+                    console.log("HEAD-DEBUG: The value of anchor.offset is [", anchor.offset, "]");
+
                     // Updated the targeted line with the appropriate heading format:
                     selection.deleteLine(false);
                     selection.deleteLine(true);
@@ -363,9 +365,6 @@ function Toolbar() {
             } else if (!selectedText.includes("\n")) {
                 // Scenario 2. When the Quote button is invoked for a single line but it's not empty.
 
-                console.log("DEBUG: Scenario 2 entered...");
-                // DEBUG: so i'm replacing a line with the content I add... (I can borrow what I did with the # function for sure).
-
                 // Finding the text content of the current line:
                 for(const paragraph of paraNodes) {
                     if(paragraph.getChildren()) {
@@ -406,43 +405,28 @@ function Toolbar() {
                 }
                 selection.insertText(updatedLineT);
 
-
-
-
-
-                /* edge cases encountered so far:
-                - one line but it's a non-empty line and the cursor is at the start of the line instead of anywhere else!
-                ^ this is also a bug in the Header function so, when I solve it here, I must solve it there too!
-                
-                - very easy fix: just remove deleteLine(false) and deleteLine(true) when absolute cursor position is at the start of a line.
-                ^ this will also be tricky because it counts each new line and not just at the start...
-
-                ^ remember to fix this for the header function as well...
-                ^ ah anchor.offset should be an easy fix here! (because these are single-line so offset *will* give the value im looking for).
-                
-
-
-                
-
-
-                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
-                ADD THIS TO FUTURE-DEBUGGING.TXT:
-                - I did find another bug but it's a weird one that might have little to do with what I can fix here?
-                So if I take the cursor and place it in the middle of text line like:
-                - "some|thing" but then take it off by clicking offscreen, it'll go "something", but then
-                if I click the Quote button, I'll get "some> somethingthing" <-- might be a bug I can let slide for now?
-                
-                ^ like, i may be able to fix this if i just make it so, when you click offscreen, you cursor information all becomes null?
-
-                */
-
-
-
-
             } else {
                 // Scenario 3. When the Quote button is invoked for a multi-line selection...
+
+
+
+                
                 // NOTE: This branch might get quite verbose...
                 // NOTE: ^ yes it will probably be more complex than initially thought BUT nowhere near as hard as the code button...
+
+                /* NOTE: ^ It looks like I have *not* implemented multi-line highlighting for the Head function so I suppose part of my job
+                today will be to implement that there as well..., which is okay. */
+                // Okay I probably need to rehaul the Head function in its entirety it looks like...
+                /* So tonight, finish:
+                - Quote
+                - Generic List
+                - Numbered List
+                - Check List
+                - Fix Head
+
+                ^ do-able but grindy.
+
+                */
 
                 console.log("Scenario 3 entered...");
             }

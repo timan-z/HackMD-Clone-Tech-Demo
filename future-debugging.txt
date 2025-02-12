@@ -9,3 +9,14 @@ FUTURE REMINDER:
 - This code may not be the most efficient.
 - I am very much learning about/figuring out Lexical and its intricacies, how it works and stores things, as I go
 
+
+
+(ANOTHER BUG I PICKED UP ON RELATED TO THE CODE BUTTON'S FUNCTIONALITY AND PROBABLY THE OTHERS AS WELL):
+
+ADD THIS TO FUTURE-DEBUGGING.TXT:
+                - I did find another bug but it's a weird one that might have little to do with what I can fix here?
+                So if I take the cursor and place it in the middle of text line like:
+                - "some|thing" but then take it off by clicking offscreen, it'll go "something", but then
+                if I click the Quote button, I'll get "some> somethingthing" <-- might be a bug I can let slide for now?
+                
+                ^ like, i may be able to fix this if i just make it so, when you click offscreen, you cursor information all becomes null?
