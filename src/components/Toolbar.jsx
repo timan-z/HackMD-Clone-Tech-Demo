@@ -347,12 +347,10 @@ function Toolbar() {
             return absolutePosition;
         }
 
-
-
         // Function for finding substring (start and end) indices in a string given an "anchor" value:
         function subStrIndices(anchorVal, stringVal, subStrVal) {
             let startIndex = stringVal.indexOf(subStrVal);
-            let endIndex, startIndexFinal, endIndexFinal = null;
+            let endIndex = null;
 
             while(startIndex !== -1) {
                 endIndex = startIndex + subStrVal.length;
@@ -364,6 +362,12 @@ function Toolbar() {
             }
             return null;
         }
+
+
+
+
+
+
 
         editor.update(() => {
             /* NOTE-TO-SELF:
@@ -403,6 +407,7 @@ function Toolbar() {
                     anchorNode = updatedSelection.anchor.getNode();
                     updatedSelectedText = String(anchorNode.getTextContent());
                     let newEditorTextFull = $getRoot().getTextContent();
+                    let sStrIndices = null;
 
                     if(selectedText === "") {
                         /* NOTE: These subsequent two lines, while they may appear redundant, are necessary for the empty string scenario.
@@ -418,100 +423,50 @@ function Toolbar() {
                             (the full text content is partitioned) and I need to reposition the cursor within the specific node that is being
                             dealt with. I can do this by finding the start and end indices of said node's string within the complete editor text,
                             figuring out if it's correct via absoluteCursorPosition, and then repositioning the cursor based on those values alone. */
+                            // EDIT: ^ I re-use this a few times, so created an external function for it... [subStringIndices(...)]
 
-                            let startIndex = newEditorTextFull.indexOf(updatedSelectedText);
-                            let endIndex, startIndexFinal, endIndexFinal = null;
-
-                            while(startIndex !== -1) {
-                                endIndex = startIndex + updatedSelectedText.length;
-                                //nodeOccurrences.push({startIndex, endIndex});
-                                if(startIndex <= absoluteCursorPos && absoluteCursorPos <= endIndex) {
-                                    startIndexFinal = startIndex;
-                                    endIndexFinal = endIndex;
-                                    break;
-                                }                                
-                                // Finding the next occurence (if there is any):
-                                startIndex = newEditorTextFull.indexOf(updatedSelectedText, startIndex + 1);
-                            }
-
-                            newCursorPos = (absoluteCursorPos + 4) - startIndexFinal;
+                            sStrIndices = subStrIndices(absoluteCursorPos, newEditorTextFull, updatedSelectedText);
+                            newCursorPos = (absoluteCursorPos + 4) - sStrIndices.startIndexFinal;
                         }
                     } else {
                         // Scenario 1b (multi-line highlighted):
-
-
-                        console.log("Debug: selectedText: [", selectedText, "]");
-                        console.log("Debug: editorTextFull: [", newEditorTextFull, "]");
-                        console.log("Debug: The value of absoluteCursorPosition is: [", absoluteCursorPos, "]"); // would be adjusted +4 after text insertion.
                         let absCursorPosAdjust = absoluteCursorPos + 4;
-                        console.log("Debug: The value of absCursorPosAdjust is: [", absCursorPosAdjust, "]");
 
-                        let startIndex = newEditorTextFull.indexOf(selectedText);
-                        console.log("The value of startIndex is: ", startIndex);
-                        let endIndex, startIndexFinal, endIndexFinal = null;
-
-                        while(startIndex !== -1) {
-                            endIndex = startIndex + selectedText.length;
-                            if((startIndex <= absCursorPosAdjust) && (absCursorPosAdjust <= endIndex)) {
-                                startIndexFinal = startIndex;
-                                endIndexFinal = endIndex;
-                                break;
-                            }
-                            // Finding the next occurrence (if any):
-                            startIndex = newEditorTextFull.indexOf(selectedText, startIndex + 1);
-                        }
-
-                        console.log("YEE: The value of startIndexFinal is: ", startIndexFinal);
-                        console.log("YEE: The value of endIndexFinal is: ", endIndexFinal);
-
-                        console.log("yee: The value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
-                        console.log("yee: The value of anchorNode.offset is: [", anchorNode.offset, "]");
-
-                        console.log("YEE: The value of absCursorPosAdjust is: [", absCursorPosAdjust, "]");
-                        //newCursorPos = absCursorPosAdjust - startIndexFinal + 5;
-                        console.log("YEE: The value of newCursorPos is: ", newCursorPos);
-
-                        /* OKAY I THINK I HAVE THE LOGIC FIGURED OUT!!!
-                        So absCursorPosAdjust will be at the end of the text that I selected.
-                        What I can then do is find out the start index of updatedSelectedText and substract it from absCursorPosAdjust
-                        and then use that as the value I'll be using from the offset... (So I'm basically doubling the process here).
-                        ^ It makes sense in my head. */
-                        startIndex = newEditorTextFull.indexOf(updatedSelectedText);
-                        console.log("DEBUG: The value of newEditorTextFull.indexOf(updatedSelectedText); is: ", startIndex);
-                        while(startIndex !== -1) {
-                            endIndex = startIndex + updatedSelectedText.length;
-                            if((startIndex <= absCursorPosAdjust) && (absCursorPosAdjust <= endIndex)) {
-                                startIndexFinal = startIndex;
-                                endIndexFinal = endIndex;
-                                break;
-                            }
-                            // Finding the next occurrence (if any):
-                            startIndex = newEditorTextFull.indexOf(updatedSelectedText, startIndex + 1);
-                        }
-                        console.log("The value of startIndexFinal is: ", startIndexFinal);
-                        console.log("The value of endIndexFinal is: ", endIndexFinal);
-
-                        newCursorPos = absCursorPosAdjust - startIndexFinal + 1;
-
-
+                        sStrIndices = subStrIndices(absCursorPosAdjust, newEditorTextFull, updatedSelectedText);
+                        newCursorPos = absCursorPosAdjust - sStrIndices.startIndexFinal + 1;
                     }
+                } else {
+                    // This "else" branch will catch all scenarios where the line is NOT empty.
+                    console.log("DEBUG:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                    console.log("DEBUG: THE ELSE BRANCH WAS ENTERED!!!");
+                    console.log("DEBUG:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                    console.log("debug: The value of selectedText is: [", selectedText, "]");
 
 
 
 
+                    // DEBUG: The code below is almost certainly buggy.
 
+                    if(selectedText !== "") {
+                        // Scenario 2. There is highlighted text ->{`}highlighted_text{`} (also NOTE: cursor would be moved prior to the second {`}):
+                        wrappedText = `${"`"}${selectedText}${"`"}`;  
+                    } else {
+                        // Scenario 3. No highlighted text but the line is NOT empty (and cursor is not at the start) -> existing_line{`cursor_pos`}:
+                        wrappedText = `${selectedText}${"``"}`;
+                    }
+                    selection.insertText(wrappedText);
+                    newCursorPos = selection.anchor.offset - 1;
 
+                    // DEBUG: ^ The code above is almost certainly buggy.
+                    // DEBUG: ^ Figure all of this out Wednesday morning and finish the rest of the buttons (should be smooth sailing from now on out).
 
                 }
 
                 newSelection = $createRangeSelection();
                 newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
                 $setSelection(newSelection);
-
-
             }
         })
-
     }
 
 
