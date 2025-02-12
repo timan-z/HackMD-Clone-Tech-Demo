@@ -1,0 +1,5 @@
+Issue to address later (not the biggest deal yet):
+
+Sometimes at the start of a new line, when you press the tab button (after already typing some text), it won't go the full tab length, it'll do like tab-length - length of already existing characters, if that makes sense.
+
+like it'll go: 123  | when tab usually goes 5 spaces ahead. (here only 2) 
