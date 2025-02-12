@@ -349,25 +349,21 @@ function Toolbar() {
 
 
 
+        // Function for finding substring (start and end) indices in a string given an "anchor" value:
+        function subStrIndices(anchorVal, stringVal, subStrVal) {
+            let startIndex = stringVal.indexOf(subStrVal);
+            let endIndex, startIndexFinal, endIndexFinal = null;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            while(startIndex !== -1) {
+                endIndex = startIndex + subStrVal.length;
+                if(startIndex <= anchorVal && anchorVal <= endIndex) {
+                    return { startIndexFinal: startIndex, endIndexFinal: endIndex }; 
+                }
+                // Finding the next occurrence (if there is any):
+                startIndex = stringVal.indexOf(subStrVal, startIndex + 1);
+            }
+            return null;
+        }
 
         editor.update(() => {
             /* NOTE-TO-SELF:
@@ -444,8 +440,6 @@ function Toolbar() {
                         // Scenario 1b (multi-line highlighted):
 
 
-                        
-
                         console.log("Debug: selectedText: [", selectedText, "]");
                         console.log("Debug: editorTextFull: [", newEditorTextFull, "]");
                         console.log("Debug: The value of absoluteCursorPosition is: [", absoluteCursorPos, "]"); // would be adjusted +4 after text insertion.
@@ -474,20 +468,30 @@ function Toolbar() {
                         console.log("yee: The value of anchorNode.offset is: [", anchorNode.offset, "]");
 
                         console.log("YEE: The value of absCursorPosAdjust is: [", absCursorPosAdjust, "]");
-
-
-                        newCursorPos = absCursorPosAdjust - startIndexFinal + 5;
-
+                        //newCursorPos = absCursorPosAdjust - startIndexFinal + 5;
                         console.log("YEE: The value of newCursorPos is: ", newCursorPos);
 
-
-
                         /* OKAY I THINK I HAVE THE LOGIC FIGURED OUT!!!
-                        So newCursorPos will be at the end of the text that I selected.
-                        What I can then do is find out the start index of updatedSelectedText and substract it from newCursorPos
+                        So absCursorPosAdjust will be at the end of the text that I selected.
+                        What I can then do is find out the start index of updatedSelectedText and substract it from absCursorPosAdjust
                         and then use that as the value I'll be using from the offset... (So I'm basically doubling the process here).
-                        ^ It makes sense in my head.
-                        */
+                        ^ It makes sense in my head. */
+                        startIndex = newEditorTextFull.indexOf(updatedSelectedText);
+                        console.log("DEBUG: The value of newEditorTextFull.indexOf(updatedSelectedText); is: ", startIndex);
+                        while(startIndex !== -1) {
+                            endIndex = startIndex + updatedSelectedText.length;
+                            if((startIndex <= absCursorPosAdjust) && (absCursorPosAdjust <= endIndex)) {
+                                startIndexFinal = startIndex;
+                                endIndexFinal = endIndex;
+                                break;
+                            }
+                            // Finding the next occurrence (if any):
+                            startIndex = newEditorTextFull.indexOf(updatedSelectedText, startIndex + 1);
+                        }
+                        console.log("The value of startIndexFinal is: ", startIndexFinal);
+                        console.log("The value of endIndexFinal is: ", endIndexFinal);
+
+                        newCursorPos = absCursorPosAdjust - startIndexFinal + 1;
 
 
                     }
