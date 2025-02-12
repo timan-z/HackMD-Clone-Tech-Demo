@@ -123,145 +123,7 @@ function Toolbar() {
         });
     };
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // Sep Function for applying "Code" since it works differently depending on the context of the line:
-    /* Markdown Logic:
-    - If the currently selected line is an empty line, I want to append "```\n" and "\n```" to the left and right of the cursor position.
-    - If the currently selected line has text (including padded whitespace), I'm just appending "`" and "`" to the right of the recent text (cursor inbetween them).
-    - If the currently selected line had text highlighted, I'm just appending "`" and "`" to the left and right of the highlighted text.
-    - DEBUG: For highlighted text spanning multiple lines, I'm basically just doing the first point (but come back to this).
-    - DEBUG: Upon page load, I should also remember to make the editor be automatically selected (otherwise, if I just load the page
-    and click the Code button nothing will happen, same with the others, but this is understandable for now). */
-    // DEBUG: ^ DON'T DELETE THIS COMMENT, IT'S VALUABLE AND GOOD FOR MY README DOC!!!
-
-    // DEBUG: When I'm done writing this function. try to break it with multi-line stuff...
-    const applyMarkdownFormatCodeOLD = (editor) => {
-        editor.update(() => {
-            const selection = $getSelection();
-            const selectedText = selection.getTextContent();
-            const {anchor, focus} = selection;
-            let anchorNode = anchor.getNode();
-            const focusNode = focus.getNode();
-            let wrappedText = null;
-            let newCursorPos = null;
-            let newSelection = null;
-            let updatedSelection = null;
-
-            if($isRangeSelection(selection)) {
-
-                /* When selectedText is "", that implies that no text was highlighted (in this case anchorNode and focusNode will be the same
-                since selection is collapsed). Thus, I can ensure the line is empty, and I will be applying the appropriate markdown structuring,
-                by checking if selectedText is "" but moreover doing an equivalence check between it and anchorNode's text content (focusNode would work too). */
-                if((selectedText === "" && selectedText === anchorNode.getTextContent()) || selectedText.includes("\n")) {
-                    // Scenario 1. If the line is currently empty -> {```\n}cursor{\n```} OR multi-line text highlighted -> {```\n}text{\n```}:
-                    wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
-                    selection.insertText(wrappedText);
-
-                    updatedSelection = $getSelection();
-
-                    let updatedSelectedText = updatedSelection.getTextContent();
-                    console.log("DEBAG: The value of updatedSelection.getTextContent() is: [", updatedSelectedText, "]");
-
-                    // Moving the cursor position to just before the second set of backticks (`):
-                    if(selectedText == "") {
-                        newCursorPos = String(anchorNode.getTextContent()).length - 4;  // Calculating new cursor position (prior to first `, after last \n).
-
-                        /* NOTE: The two subsequent lines of code are critical here...
-                        I am relying on function setTextNodeRange(...) to move the cursor position after inserText(...) but this is
-                        the branch for where the "</>" code button is clicked on an empty line. The issue is that setTextNodeRange(...)
-                        won't work properly unless there is existing non-"" empty string text to be dealt with, and that's why I need to
-                        re-get the selection via $getSelection() to update it with the text that was inserted earlier. */
-                        // updatedSelection = $getSelection();  <-- UPDATE: moved this outside of this branch.
-                        anchorNode = updatedSelection.anchor.getNode();
-
-
-
-                        // debug: get rid of these debug statements afterwards...
-                        console.log("debugs: the value of anchorNode.getTextContent() is: [", anchorNode.getTextContent(), "]");
-                        console.log("debugs: the value of anchorNode.getTextContent().length is: [", anchorNode.getTextContent().length, "]");
-
-
-
-                        
-                    } else {
-                        // Scenario 1b (multi-line highlighted):
-                        newCursorPos = anchor.offset - (anchor.offset - wrappedText.length);    
-                        
-                        // wrapped.length returns wrappedText length and everything before it. <-- idk if this is true...
-
-                        console.log("DEBUG: The value of anchor.offset is: [", anchor.offset, "]");
-                        console.log("DEBUG: The value of wrappedText.length is: [", wrappedText.length, "]");
-                        // DEBUG: ^ friday morning use these commands to figure out what's going on and what i can do to fix the logic -- lazy and want to watch a movie tonight.
-
-                    }
-                } else {
-                    // This "else" branch will catch all scenarios where the line is NOT empty.
-
-                    if(selectedText !== "") {
-                        // Scenario 2. There is highlighted text ->{`}highlighted_text{`} (also NOTE: cursor would be moved prior to the second {`}):
-                        wrappedText = `${"`"}${selectedText}${"`"}`;
-
-                    } else {
-                        // Scenario 3: No highlighted text but the line is NOT empty -> existing_line{`cursor_pos`}:
-                        wrappedText = `${selectedText}${"``"}`;
-                    }
-                    selection.insertText(wrappedText);
-                    // After inserting the new text in place of the highlighted text, the cursor position will be right after the second {`}.
-                    newCursorPos = selection.anchor.offset - 1;
-                }
-
-
-                // Applying new cursor position using value of newCursorPos (steps are the samae for all branch-condition outcomes):
-                newSelection = $createRangeSelection();
-
-                console.log("DEBUG: The problem is the line below for sure...");
-
-                newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                $setSelection(newSelection);
-                // ^ DEBUG: This conflicts with when there's an empty line and I'm clicking it for the empty line...
-            }
-        })
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    // Sep Function for applying "Code" since it also works differently (appends ```\n{text}\n``` or `{text}` depending on the situation):
     const applyMarkdownFormatCode = (editor) => {
 
         // Function for finding the (absolute) cursor index position within the text editor:
@@ -363,12 +225,6 @@ function Toolbar() {
             return null;
         }
 
-
-
-
-
-
-
         editor.update(() => {
             /* NOTE-TO-SELF:
             - selection refers to the actual stretch of text IN the text editor "highlighted" when the button was clicked (including "" aka nothing).
@@ -437,15 +293,6 @@ function Toolbar() {
                     }
                 } else {
                     // This "else" branch will catch all scenarios where the line is NOT empty.
-                    console.log("DEBUG:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                    console.log("DEBUG: THE ELSE BRANCH WAS ENTERED!!!");
-                    console.log("DEBUG:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                    console.log("debug: The value of selectedText is: [", selectedText, "]");
-
-
-
-
-                    // DEBUG: The code below is almost certainly buggy.
 
                     if(selectedText !== "") {
                         // Scenario 2. There is highlighted text ->{`}highlighted_text{`} (also NOTE: cursor would be moved prior to the second {`}):
@@ -455,11 +302,9 @@ function Toolbar() {
                         wrappedText = `${selectedText}${"``"}`;
                     }
                     selection.insertText(wrappedText);
+
+                    // Since the "else" branch deals with single-line scenarios, anchor.offset *will* refer to the cursor position (within the line).
                     newCursorPos = selection.anchor.offset - 1;
-
-                    // DEBUG: ^ The code above is almost certainly buggy.
-                    // DEBUG: ^ Figure all of this out Wednesday morning and finish the rest of the buttons (should be smooth sailing from now on out).
-
                 }
 
                 newSelection = $createRangeSelection();
@@ -469,100 +314,6 @@ function Toolbar() {
         })
     }
 
-
-
-
-
-    /*
-    if(selectedText.includes("\n") || (selectedText === "" && (selectedText === editorTextFull || cursorPosChar === "\n" || absoluteCursorPos === 0))) {
-        // Scenario 1. If the current line is empty -> {```\n}cursor{\n```} OR multi-line text highlighted -> {```\n}text{\n```}: 
-        wrappedText = `${"```\n"}${selectedText}${"\n```"}`;
-        selection.insertText(wrappedText);
-        
-
-
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // IMPORTANT-DEBUG: EVERYTHING ABOVE IN THIS FUNCTION IS *GOOD* (EVERYTHING BELOW STILL NEEDS SOME WORK):
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-
-
-
-         NOTE: As will be seen in the contents of the other if-condition branches, I want to move the current cursor 
-        position of the text editor to just before the first backtick (`) of the second set of backticks. I do this with
-        function "setTextNodeRange" and a variable that targets a new cursor index position, but it is problematic to use with 
-        selections of text that are empty (""), so I must "re-get" the selection. (This issue isn't encountered in the other branches). 
-        updatedSelection = $getSelection();
-        let updatedSelectedText = updatedSelection.getTextContent();
-
-        if(selectedText === "") {
-            // Scenario 1a (current line is empty):
-            //newCursorPos = absoluteCursorPos + 4;   // DEBUG: okay this is causing some problems too but with how i'm setting the new cursor position... (this sometimes exceeds anchorNode).
-
-            console.log("failed to execute because of the line below...");
-            selection.focus.offset += 4;
-            console.log("failed to execute because of the line above...");
-
-            // can I do setSelection with rootNOde? probably not...
-
-
-
-
-
-
-             NOTE: The two subsequent lines of code are critical here...
-            I am relying on function setTextNodeRange(...) to move the cursor position after inserText(...) but this is
-            the branch for where the "</>" code button is clicked on an empty line. The issue is that setTextNodeRange(...)
-            won't work properly unless there is existing non-"" empty string text to be dealt with, and that's why I need to
-            re-get the selection via $getSelection() to update it with the text that was inserted earlier. 
-            //anchorNode = updatedSelection.anchor.getNode();
-
-        } else {
-            // DEBUG: This should genuinely be a lot more tricky than the previous branch clearly...
-
-            // Scenario 1b (multi-line highlighted):
-            //newCursorPos = anchor.offset - (anchor.offset - wrappedText.length); // DEBUG: There's something wrong with my calculations and it probably has to do with this line here...
-            // DEBUG: ^ Would probably be quite easy to just use absoluteCursorPos here?
-
-            // debug: get rid of these debug statements afterwards...
-            //console.log("debug: The value of anchor.offset is: [", anchor.offset, "]");
-            //console.log("debug: The value of wrappedText.length is: [", wrappedText.length, "]");
-        }
-    } else {
-        // This "else" branch will catch all scenarios where the line is NOT empty.
-
-
-        //console.log("DEBUG: COME BACK HERE AFTER AFTER DEBUGGING THE OTHER BIG BRANCH!!!");
-
-
-
-    }
-    // Applying new cursor position using value of newCursorPos (steps are the same for all branch outcomes):
-    newSelection = $createRangeSelection();
-    newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-    $setSelection(newSelection);*/
-
-
-
-
-    /* DEBUG: ^ So applyMarkdownFormatCode is basically DONE -- the only minor bug I need to tweak and adjust for is
-    when I highlight the WHOLE editor space and click the code button, the cursor position isn't moving where I want it to be
-    (but this is an easy fix and I should just need to change the newCursorPos assignment equation for when the selected text
-    is equivalent to the entire editor!!! -- should just be subtracting by four in that scenario I'm pretty sure).
-    */
-    // DEBUG: ALSO ^ There's some weird behavior when I'm selecting text that has ` within it <-- look into this (but also HackMD handles this weirdly too).
-    // DEBUG: Okay wait no there's still some problems with getting the cursor position where I want it to be regardless of ` characters...
-    // DEBUG: ^ fix this Thursday night -- shouldn't be super hard, it's just a mathematical logic thing...
-
-    /* Before I stop programming for the day, I want to COMPLETE the applyMarkdownFormatCode function and 
-    the applyMarkdownFormatHead function -- if I can do this, it's been a day well spent. I think I can.
-    I need to adjust them to be able to work with multiple lines... (NOTE: The "applyMarkdownFormatBIS" function integrates perfectly).
-
-    - Code Button + Multiple Lines: I'm just doing {```\n}[highlighted space]{\n```} in all scenarios.
-    - Header Button + Multiple Lines: I'm just adding # to each individual line encompassed in the highlighted space.
-    */
 
 
 
@@ -603,15 +354,12 @@ function Toolbar() {
             applyMarkdownFormatHead(editor)
         }}>H</button>
 
-
-
-
-
-
         {/* Creating the button that responds to "code" (adding the ```code``` etc block thing, which will require a seperate function) */}
         <button onClick={()=>{
             applyMarkdownFormatCode(editor)
         }}>&#60;/&#62;</button>
+
+
 
 
 
