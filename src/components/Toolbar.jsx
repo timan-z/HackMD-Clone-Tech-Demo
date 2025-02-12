@@ -396,10 +396,6 @@ function Toolbar() {
             let newSelection = null;
 
 
-            console.log("DEBUG: -- Use these two console.log statements below to figure out the issue...");
-            console.log("DEBUG: The value of absoluteCursorPosition is: ", absoluteCursorPos);
-            console.log("DEBUG: The value of editorTextFull is: ", editorTextFull);
-
 
             // $isRangeSelection(...) is a type-checking function, ensuring "selection" (cursor area) exists within the editor:
             if($isRangeSelection(selection)) {
@@ -422,51 +418,27 @@ function Toolbar() {
                         if(updatedSelectedText === "```\n\n```") {
                             newCursorPos = updatedSelectedText.length - 4;
                         } else {
+                            /* Repositioning the cursor index when the insertText is invoked on a line that is *not* the latest empty line
+                            in the text editor is tricky. My solution is verbose but works: The text editor content is broken up into nodes 
+                            (the full text content is partitioned) and I need to reposition the cursor within the specific node that is being
+                            dealt with. I can do this by finding the start and end indices of said node's string within the complete editor text,
+                            figuring out if it's correct via absoluteCursorPosition, and then repositioning the cursor based on those values alone. */
 
-                            if(updatedSelectedText === newEditorTextFull) {
-                                newCursorPos = absoluteCursorPos + 4;
-                                // ^ this isn't reliable because it will eventually break off...
-                            } else {
-                                newCursorPos = 0;
+                            let startIndex = newEditorTextFull.indexOf(updatedSelectedText);
+                            let endIndex, startIndexFinal, endIndexFinal = null;
+
+                            while(startIndex !== -1) {
+                                endIndex = startIndex + updatedSelectedText.length;
+                                //nodeOccurrences.push({startIndex, endIndex});
+                                if(startIndex <= absoluteCursorPos && absoluteCursorPos <= endIndex) {
+                                    startIndexFinal = startIndex;
+                                    endIndexFinal = endIndex;
+                                }                                
+                                // Finding the next occurence (if there is any):
+                                startIndex = newEditorTextFull.indexOf(updatedSelectedText, startIndex + 1);
                             }
 
-
-
-                            
-                            /* A long verbose solution that *should work* would be to find out the updatedSelectedText
-                            position within newEditorTextFull... (because it will always be a subset even if they match),
-                            verify what I found was the correct position (potential duplicates) -- using absoluteCursorPos -- 
-                            and then calculate the proper position from there... */
-
-
-
-
-                            /*newCursorPos = absoluteCursorPos + 4;
-                            DEBUG: ^ This is mostly sound but there's still one primary edge case I need to deal with when the cursor position
-                            is on the final line of the text editor (non-empty) and I get the "IndexSizeError: offset is larger than node's length"
-                            error... Hard one to keep an eye out for because I can't really tell when the node will break off into multiple parts... 
-
-                            // DEBUG: ^ For avoiding the error mentioned in the comment above...
-                            const cursorPosArea = "`\n\n`";
-                            if(newCursorPos > updatedSelectedText.length) {
-
-                                console.log("INSIDE-DEBUG: If you see this post-error, the newCursorPos > updatedSelectedText.length fix may not be foolproof. Alas.");
-                                // DEBUG: ^ Remove the comment above after exhaustive debugging and confirming that all edge cases are fixed...
-
-                                let lastIndex = updatedSelectedText.lastIndexOf(cursorPosArea);
-                                if(lastIndex === -1) {
-                                    console.log("ERROR: This if-condition should NEVER be entered. (lastIndex issue).");
-                                }
-                                let subThis = updatedSelectedText.length - (lastIndex + 2);
-                                newCursorPos = updatedSelectedText.length - subThis;
-                            }*/
-
-
-
-
-
-
-
+                            newCursorPos = (absoluteCursorPos + 4) - startIndexFinal;
                         }
 
 
@@ -474,29 +446,17 @@ function Toolbar() {
 
                         
 
-
-                        /*console.log("DEBUG: The value of String(anchorNode.getTextContent()).length is: [", String(anchorNode.getTextContent()), "]");
-                        console.log("DEBUG: The value of newCursorPos is: [", newCursorPos, "]");
-                        console.log("debug: The value of absoluteCursorPos is: [", absoluteCursorPos, "]");
-                        console.log("debug: The value of updatedSelectedText is: [", updatedSelectedText, "]");*/
-
-                        // DEBUG: Next three lines are pretty universal for all situations but we still focusing just on ==="" empty string rn...
-                        newSelection = $createRangeSelection();
-                        newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                        $setSelection(newSelection);
-                        // DEBUG: ^ Keeping it here for now, should probably be repositioned later.
-                
-
                     }
 
 
 
-
-
-                    // ^ works when i'm invoking it on an empty line, but not otherwise... no boundary issues yet... (good sign).
-                    // ^ occasional errors when i "go back" up the editor and invoke it on previous empty lines.
-                    // ^ think i can solve all of these by inspecting values with the absolute cursor position.
                 }
+
+                newSelection = $createRangeSelection();
+                newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+                $setSelection(newSelection);
+
+
             }
         })
 
