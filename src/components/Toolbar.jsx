@@ -320,9 +320,9 @@ function Toolbar() {
 
 
 
-    
-    // Sep Function for applying "Quote" (just adds "> " to the start of the current line)...
-    const applyMarkdownFormatQuote = (editor) => {
+
+    // Sep Function for applying "Quote", "Generic List", "Numbered List", or "Check List" (just adds "[symbol] " to the start of the current line)...
+    const applyMarkdownFormatQGNC = (editor, whichOne) => {
 
         editor.update(() => {
             const selection = $getSelection();
@@ -342,7 +342,17 @@ function Toolbar() {
             // NOTE: Must use "==" here for the equivalence when using anchorNodeKey.
             if(anchorNodeKey == 2 && selectedText === "") {
                 // Scenario 1. When the Quote button is invoked for a single empty line (getKey value will always be 2):
-                wrappedText = `${"> "}${selectedText}`;
+                if(whichOne === "quote") {
+                    wrappedText = `${"> "}${selectedText}`;
+                } else if(whichOne === "generic") {
+                    wrappedText = `${"* "}${selectedText}`;
+                } else if(whichOne === "numbered") {
+                    wrappedText = `${"1. "}${selectedText}`; // NOTE: "1." is always being prepended even on single lines that follow something like "2. something\n" (when clicking the button).
+                } else {
+                    // this branch will be for checkList...
+                    wrappedText = `${"- [ ] "}${selectedText}`;
+                }
+
                 selection.insertText(wrappedText);
             } else if (!selectedText.includes("\n")) {
                 // Scenario 2. When the Quote button is invoked for a single line but it's not empty.
@@ -369,7 +379,7 @@ function Toolbar() {
                     }
                 }
 
-                /* To insert "> " before the current line text (or the Alt), I am going to need the value of anchor.offset but I'm also going to
+                /* To insert "[symbol] " before the current line text (or the Alt), I am going to need the value of anchor.offset but I'm also going to
                 have to apply the deleteLine() function, which will alter anchor.offset, so I must preserve its value somehow (or at least,
                 preserve the fact that it potentially had a value that is significant to how the logic progresses): */  
                 // NOTE: selectedText === lineText needed for a bizarre bug that occurs where offset is different when you slide the cursor right-to-left to highlight full line text rather than double-clicking.              
@@ -378,17 +388,77 @@ function Toolbar() {
                     anchorOffsetFreeze = 0;
                 }
 
-                // If "> " is already at the start of the line, then it's just undone (NOTE: This is how it's done in HackMD).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                // If "[symbol] " is already at the start of the line, then it's just undone (NOTE: This is how it's done in HackMD).
                 // NOTE: ^ It'll be undone in this situation but not if multiple lines are highlighted... (so I'll follow that too).
-                if (lineText.length >=2 && lineText[0] === ">" && lineText[1] === " ") {
-                    if(lineText.length === 2) {
-                        updatedLineT = "";
+                if ((whichOne === "quote" && (lineText.length >=2 && lineText[0] === ">" && lineText[1] === " ")) ||
+                    (whichOne === "generic" && (lineText.length >= 2 && lineText[0] === "*" && lineText[1] === " ")) ||
+                    (whichOne === "numbered" && (lineText.length >= 3 && lineText[0] === "1" && lineText[1] === "." && lineText[2] === " ")) ||
+                    (whichOne === "checkList" && (lineText.length >= 6 && lineText[0] === "-" && lineText[1] === " " && lineText[2] === "[" && lineText[3] === " " && lineText[4] === "]" && lineText[5] === " "))) {
+
+                    if(whichOne === "quote") {
+                        if(lineText.length === 2) {
+                            updatedLineT = "";
+                        } else {
+                            updatedLineT = lineText.substring(2, lineText.length);
+                        }
+                    } else if (whichOne === "generic") {
+                        if(lineText.length === 2) {
+                            updatedLineT = "";
+                        } else {
+                            updatedLineT = lineText.substring(2, lineText.length);
+                        }
+                    } else if (whichOne === "numbered") {
+                        if(lineText.length === 3) {
+                            updatedLineT = "";
+                        } else {
+                            updatedLineT = lineText.substring(3, lineText.length);
+                        }
                     } else {
-                        updatedLineT = lineText.substring(2, lineText.length);
+                        // checkList:
+                        if(lineText.length === 6) {
+                            updatedLineT = "";
+                        } else {
+                            updatedLineT = lineText.substring(6, lineText.length);
+                        }
                     }
                 } else {
-                    updatedLineT = "> " + lineText;
+                    if(whichOne === "quote") {
+                        updatedLineT = "> " + lineText;
+                    } else if (whichOne === "generic") {
+                        updatedLineT = "* " + lineText;
+                    } else if (whichOne === "numbered") {
+                        updatedLineT = "1. " + lineText;
+                    } else {
+                        updatedLineT = "- [ ] " + lineText;
+                    }
                 }
+
+
+
+
+
+
+
+
+
+
+                
+
 
                 selection.deleteLine();
                 // When anchor.offset pre-deleteLine() is 0, I don't want to have those two following lines (but otherwise I do).
@@ -406,7 +476,16 @@ function Toolbar() {
                 const selectionNodes = selection.getNodes();
                 selectionNodes.forEach((sNode) => {
                     if($isTextNode(sNode)) {
-                        updatedLineT = "> " + sNode.getTextContent();
+                        if(whichOne === "quote") {
+                            updatedLineT = "> " + sNode.getTextContent();
+                        } else if(whichOne === "generic") {
+                            updatedLineT = "* " + sNode.getTextContent();
+                        } else if(whichOne === "numbered") {
+                            updatedLineT = "1. " + sNode.getTextContent();
+                        } else {
+                            updatedLineT = "- [ ] " + sNode.getTextContent();
+                        }
+
                         sNode.setTextContent(updatedLineT);
                     }
                 });
@@ -416,13 +495,13 @@ function Toolbar() {
                 and click the Quote button... should I then undo the "> " starting the string? Well, the way HackMD handles it is that
                 -- for mult-line highlighted text -- you stack the "> "s prepended to the string, and so I will handle it that way as well.
                 (For single-line Quote invocations though, it seems HackMD will undo the "> " quotes). */
+                // DEBUG: ^ Nevermind, I want to clear all of this too...
+                /* NOTE: ^ THE WAY TO DO THIS WILL BE VERY EASY.
+                Just look at the content below the "// If "[symbol] " is already at the start of the line, then it's just undone (NOTE: This is how it's done in HackMD)."
+                comment and turn those into external functions which I can plug into there and reuse... */
             }
         })
     };
-
-
-    // Sep Function for applying ""
-
 
 
 
@@ -465,12 +544,38 @@ function Toolbar() {
             applyMarkdownFormatCode(editor)
         }}>&#60;/&#62;</button>
 
+
+
+
+
         {/* Creating the button that responds to "quote" */}
         <button onClick={()=>{
-            applyMarkdownFormatQuote(editor)
+            const applyQuote = "quote";
+            applyMarkdownFormatQGNC(editor, applyQuote)
         }}>" "</button>
 
-        
+        {/* Creating the button that responds to "generic" */}
+        <button onClick={()=> {
+            const applyGeneric = "generic";
+            applyMarkdownFormatQGNC(editor, applyGeneric)
+        }}>*</button>
+
+        {/* Creating the button that responds to "numbered list" */}
+        <button onClick={()=> {
+            const applyNumbered = "numbered";
+            applyMarkdownFormatQGNC(editor, applyNumbered)
+        }}>#.</button>
+
+        {/* Creating the button that responds to "check list" */}
+        <button onClick={()=> {
+            const applyCheckList = "checkList";
+            applyMarkdownFormatQGNC(editor, applyCheckList)
+        }}>-[]</button>
+
+
+
+
+
 
 
 
@@ -478,10 +583,9 @@ function Toolbar() {
         to how I have to manually write a listener for the Tab key) -- and that is, when I press enter and go to a new line, that line will start
         off with a ">" unless I press enter/newline again which will clear the > on the current line, and so on). I probably need this
         for some other functions too and not just the Quote one... 
-        NOTE: You only see > on the newline IF the prior line has "> " BUT also something more after that (otherwise nah). */}
-
-
-
+        NOTE: You only see > on the newline IF the prior line has "> " BUT also something more after that (otherwise nah). 
+        ^ Yeah so Quote, Generic List, Numbered List, Check List, should all have them.
+        */}
 
 
 
