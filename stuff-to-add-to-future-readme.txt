@@ -9,3 +9,7 @@ One creative choice I want to make to differentiate my project from HackMD is th
                 (For single-line Quote invocations though, it seems HackMD will undo the "> " quotes). */
 
                 ^ multi-line stuff, I won't undo the > things present. But single line I will! (HackMD does the same thing so idk).
+
+
+
+^ also a new creative difference I can add is, in HackMd's numberedlist, when you highlight multiple lines and apply the button (it prepends "1." to all the lines -- but here I know how I can make them all numbered!)
