@@ -316,13 +316,65 @@ function Toolbar() {
         })
     };
 
-
-
-
-
-
     // Sep Function for applying "Quote", "Generic List", "Numbered List", or "Check List" (just adds "[symbol] " to the start of the current line)...
+    // NOTE: What separates the "Heading" function from this one is that the symbols will "stack" in the "Heading" function (unlike here).
     const applyMarkdownFormatQGNC = (editor, whichOne) => {
+
+        // Function will determine what string should be inserted into the text editor based on the function arguments:
+        /* NOTE: arg "multiLine" is mostly relevant if whichOne === "numbered" (so that multi-line insertions will be numbered ascendingly).
+        "multiLine" will be a boolean value and multiLineS will be the symbol to prepend (these will be passed in by the calling code. 
+        NOTE: When multiLine is false, multiLineS will have 1 passed in by default... */
+        function calcUpdatedLineT(whichOne, lineText, multiLine, multiLineS) {
+
+            let updatedLineT = null;
+            if ((whichOne === "quote" && (lineText.length >=2 && lineText[0] === ">" && lineText[1] === " ")) ||
+                (whichOne === "generic" && (lineText.length >= 2 && lineText[0] === "*" && lineText[1] === " ")) ||
+                (whichOne === "numbered" && (lineText.length >= 3 && lineText[0] === String(multiLineS) && lineText[1] === "." && lineText[2] === " ")) ||
+                (whichOne === "checkList" && (lineText.length >= 6 && lineText[0] === "-" && lineText[1] === " " && lineText[2] === "[" && lineText[3] === " " && lineText[4] === "]" && lineText[5] === " "))) {
+
+                if(whichOne === "quote") {
+                    if(lineText.length === 2) {
+                        updatedLineT = "";
+                    } else {
+                        updatedLineT = lineText.substring(2, lineText.length);
+                    }
+                } else if (whichOne === "generic") {
+                    if(lineText.length === 2) {
+                        updatedLineT = "";
+                    } else {
+                        updatedLineT = lineText.substring(2, lineText.length);
+                    }
+                } else if (whichOne === "numbered") {
+                    if(lineText.length === 3) {
+                        updatedLineT = "";
+                    } else {
+                        updatedLineT = lineText.substring(3, lineText.length);
+                    }
+                } else {
+                    // checkList:
+                    if(lineText.length === 6) {
+                        updatedLineT = "";
+                    } else {
+                        updatedLineT = lineText.substring(6, lineText.length);
+                    }
+                }
+            } else {
+                if(whichOne === "quote") {
+                    updatedLineT = "> " + lineText;
+                } else if (whichOne === "generic") {
+                    updatedLineT = "* " + lineText;
+                } else if (whichOne === "numbered") {
+                    if(multiLine === false) {
+                        updatedLineT = "1. " + lineText;
+                    } else {
+                        updatedLineT = String(multiLineS) + ". " + lineText;
+                    }
+                } else {
+                    updatedLineT = "- [ ] " + lineText;
+                }
+            }
+            return updatedLineT;
+        }
 
         editor.update(() => {
             const selection = $getSelection();
@@ -388,77 +440,10 @@ function Toolbar() {
                     anchorOffsetFreeze = 0;
                 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 // If "[symbol] " is already at the start of the line, then it's just undone (NOTE: This is how it's done in HackMD).
                 // NOTE: ^ It'll be undone in this situation but not if multiple lines are highlighted... (so I'll follow that too).
-                if ((whichOne === "quote" && (lineText.length >=2 && lineText[0] === ">" && lineText[1] === " ")) ||
-                    (whichOne === "generic" && (lineText.length >= 2 && lineText[0] === "*" && lineText[1] === " ")) ||
-                    (whichOne === "numbered" && (lineText.length >= 3 && lineText[0] === "1" && lineText[1] === "." && lineText[2] === " ")) ||
-                    (whichOne === "checkList" && (lineText.length >= 6 && lineText[0] === "-" && lineText[1] === " " && lineText[2] === "[" && lineText[3] === " " && lineText[4] === "]" && lineText[5] === " "))) {
-
-                    if(whichOne === "quote") {
-                        if(lineText.length === 2) {
-                            updatedLineT = "";
-                        } else {
-                            updatedLineT = lineText.substring(2, lineText.length);
-                        }
-                    } else if (whichOne === "generic") {
-                        if(lineText.length === 2) {
-                            updatedLineT = "";
-                        } else {
-                            updatedLineT = lineText.substring(2, lineText.length);
-                        }
-                    } else if (whichOne === "numbered") {
-                        if(lineText.length === 3) {
-                            updatedLineT = "";
-                        } else {
-                            updatedLineT = lineText.substring(3, lineText.length);
-                        }
-                    } else {
-                        // checkList:
-                        if(lineText.length === 6) {
-                            updatedLineT = "";
-                        } else {
-                            updatedLineT = lineText.substring(6, lineText.length);
-                        }
-                    }
-                } else {
-                    if(whichOne === "quote") {
-                        updatedLineT = "> " + lineText;
-                    } else if (whichOne === "generic") {
-                        updatedLineT = "* " + lineText;
-                    } else if (whichOne === "numbered") {
-                        updatedLineT = "1. " + lineText;
-                    } else {
-                        updatedLineT = "- [ ] " + lineText;
-                    }
-                }
-
-
-
-
-
-
-
-
-
-
-                
-
+                // EDIT: Ported all the code below into external function "calcUpdatedLineT"...
+                updatedLineT = calcUpdatedLineT(whichOne, lineText, false, 1);
 
                 selection.deleteLine();
                 // When anchor.offset pre-deleteLine() is 0, I don't want to have those two following lines (but otherwise I do).
@@ -473,32 +458,15 @@ function Toolbar() {
                 // Scenario 3. When the Quote button is invoked for a multi-line selection...
                
                 // selection.getNodes() retrieves all the nodes affected by the highlighted text (and from there I can alter their content):
+                let multiLineS = 1;
                 const selectionNodes = selection.getNodes();
                 selectionNodes.forEach((sNode) => {
                     if($isTextNode(sNode)) {
-                        if(whichOne === "quote") {
-                            updatedLineT = "> " + sNode.getTextContent();
-                        } else if(whichOne === "generic") {
-                            updatedLineT = "* " + sNode.getTextContent();
-                        } else if(whichOne === "numbered") {
-                            updatedLineT = "1. " + sNode.getTextContent();
-                        } else {
-                            updatedLineT = "- [ ] " + sNode.getTextContent();
-                        }
-
+                        updatedLineT = calcUpdatedLineT(whichOne, sNode.getTextContent(), true, multiLineS);
                         sNode.setTextContent(updatedLineT);
+                        multiLineS += 1;
                     }
                 });
-
-                // NOTE: Put the comment below in the README.md documentation later.
-                /* NOTE: So there's the issue of handling behavior when lines already start with "> " and then you highlight that line
-                and click the Quote button... should I then undo the "> " starting the string? Well, the way HackMD handles it is that
-                -- for mult-line highlighted text -- you stack the "> "s prepended to the string, and so I will handle it that way as well.
-                (For single-line Quote invocations though, it seems HackMD will undo the "> " quotes). */
-                // DEBUG: ^ Nevermind, I want to clear all of this too...
-                /* NOTE: ^ THE WAY TO DO THIS WILL BE VERY EASY.
-                Just look at the content below the "// If "[symbol] " is already at the start of the line, then it's just undone (NOTE: This is how it's done in HackMD)."
-                comment and turn those into external functions which I can plug into there and reuse... */
             }
         })
     };
