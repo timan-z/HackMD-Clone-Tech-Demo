@@ -33,6 +33,10 @@ function Toolbar() {
         });
     };
 
+
+
+
+
     // Sep Function for applying "Heading" since it works differently than the others (prepends a "# " string and "builds" on repeated clicks):
     const applyMarkdownFormatHead = (editor) => {
         editor.update(() => {
@@ -124,6 +128,21 @@ function Toolbar() {
             }
         });
     };
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     // Sep Function for applying "Code" since it also works differently (appends ```\n{text}\n``` or `{text}` depending on the situation):
     const applyMarkdownFormatCode = (editor) => {
@@ -516,6 +535,13 @@ function Toolbar() {
 
 
 
+
+
+
+        {/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        DO NOT FORGET THAT THE FOUR BUTTONS BELOW NEED SOME EXTRA FUNCTIONALITY
+        THAT IS PROBABLY TO BE WRITTEN OUTSIDE OF THIS Toolbar.jsx FILE. (SEE DEBUG COMMENT BELOW THEM). */}
+
         {/* Creating the button that responds to "quote" */}
         <button onClick={()=>{
             const applyQuote = "quote";
@@ -540,20 +566,17 @@ function Toolbar() {
             applyMarkdownFormatQGNC(editor, applyCheckList)
         }}>-[]</button>
 
-
-
-
-
-
-
-
         {/* DEBUG: ^ Don't forget that there's one last addition I need to make to this function -- presumably external to Toolbar.jsx (similar
         to how I have to manually write a listener for the Tab key) -- and that is, when I press enter and go to a new line, that line will start
         off with a ">" unless I press enter/newline again which will clear the > on the current line, and so on). I probably need this
         for some other functions too and not just the Quote one... 
         NOTE: You only see > on the newline IF the prior line has "> " BUT also something more after that (otherwise nah). 
-        ^ Yeah so Quote, Generic List, Numbered List, Check List, should all have them.
-        */}
+        ^ Yeah so Quote, Generic List, Numbered List, Check List, should all have them. */}
+
+
+
+
+
 
 
 
@@ -561,20 +584,13 @@ function Toolbar() {
 
 
         {/*        
-        - For the Generic List [idk] button, I'm doing the same as the Quote button but with the * symbol (same enter/newline situation).
-
-        - For the Numbered List [123] button, I'm doing the same as the two above BUT with "123...(etc)" (same enter/newline situation 
-        BUT the numbers escalate upwards of course. Now if I stop at like 3 or something and re-click the button, it just starts again at 1).
-
-        - For the Check List button, I'm just doing the same as Quote and Generic List with "- [ ]" showing up at the start of the line.
-        
         - For the Create Link button, I'm just adding "[](https://)" to the text (after current selection) unless I've highlighted some text,
         in which case that highlighted text goes within the [] enclosing (i.e., [highlighted-text]).
+        ^ VERY EASY.
 
         - For the Insert Table button, I'm doing some wacky stuff (way too much to add here just look at HackMD for what I'm doing).
         - For the Insert Horizontal Line button, ^ basically same idea.
         - For the Leave Comment button, bit more complicated so just go see the HackMD stuff.
-
         - I can leave the Insert Image button last because there's extra work that needs to go into that...
         */}
 
