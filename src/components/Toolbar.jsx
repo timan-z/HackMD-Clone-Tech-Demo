@@ -320,24 +320,7 @@ function Toolbar() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
     // Sep Function for applying "Quote" (just adds "> " to the start of the current line)...
     const applyMarkdownFormatQuote = (editor) => {
 
@@ -438,7 +421,7 @@ function Toolbar() {
     };
 
 
-
+    // Sep Function for applying ""
 
 
 
@@ -487,28 +470,25 @@ function Toolbar() {
             applyMarkdownFormatQuote(editor)
         }}>" "</button>
 
-
-
-
-
-
-
-
-
-
-        {/*
-
-
-        - For the Quote [""] button, I'm just adding a ">" symbol at the start of the line regardless of if current line is empty or not. (Easy).
-        (Granted, when I press enter and go to new line, that line will start off with a ">" unless I press enter/newline again which will clear
-        the > on the current line, and so on).
         
-        ^ now the part about pressing enter to go to a new line will probably need to be made outside of the const function...
-        (like programmed elsewhere maybe in Editor.jsx)
 
 
 
-        
+        {/* DEBUG: ^ Don't forget that there's one last addition I need to make to this function -- presumably external to Toolbar.jsx (similar
+        to how I have to manually write a listener for the Tab key) -- and that is, when I press enter and go to a new line, that line will start
+        off with a ">" unless I press enter/newline again which will clear the > on the current line, and so on). I probably need this
+        for some other functions too and not just the Quote one... 
+        NOTE: You only see > on the newline IF the prior line has "> " BUT also something more after that (otherwise nah). */}
+
+
+
+
+
+
+
+
+
+        {/*        
         - For the Generic List [idk] button, I'm doing the same as the Quote button but with the * symbol (same enter/newline situation).
 
         - For the Numbered List [123] button, I'm doing the same as the two above BUT with "123...(etc)" (same enter/newline situation 
