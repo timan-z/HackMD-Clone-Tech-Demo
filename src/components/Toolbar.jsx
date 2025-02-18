@@ -129,21 +129,6 @@ function Toolbar() {
         });
     };
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
     // Sep Function for applying "Code" since it also works differently (appends ```\n{text}\n``` or `{text}` depending on the situation):
     const applyMarkdownFormatCode = (editor) => {
 
@@ -501,12 +486,6 @@ function Toolbar() {
 
 
 
-
-
-
-
-
-
     return (<div>
         {/* Creating the button that responds to "bold" */}
         <button onClick={()=>{
@@ -531,52 +510,46 @@ function Toolbar() {
             applyMarkdownFormatCode(editor)
         }}>&#60;/&#62;</button>
 
-
-
-
-
-
-
-
         {/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         DO NOT FORGET THAT THE FOUR BUTTONS BELOW NEED SOME EXTRA FUNCTIONALITY
         THAT IS PROBABLY TO BE WRITTEN OUTSIDE OF THIS Toolbar.jsx FILE. (SEE DEBUG COMMENT BELOW THEM). */}
 
-        {/* Creating the button that responds to "quote" */}
+        {/* #1 - Creating the button that responds to "quote" */}
         <button onClick={()=>{
             const applyQuote = "quote";
             applyMarkdownFormatQGNC(editor, applyQuote)
         }}>" "</button>
 
-        {/* Creating the button that responds to "generic" */}
+        {/* #2 - Creating the button that responds to "generic" */}
         <button onClick={()=> {
             const applyGeneric = "generic";
             applyMarkdownFormatQGNC(editor, applyGeneric)
         }}>*</button>
 
-        {/* Creating the button that responds to "numbered list" */}
+        {/* #3 - Creating the button that responds to "numbered list" */}
         <button onClick={()=> {
             const applyNumbered = "numbered";
             applyMarkdownFormatQGNC(editor, applyNumbered)
         }}>#.</button>
 
-        {/* Creating the button that responds to "check list" */}
+        {/* #4 - Creating the button that responds to "check list" */}
         <button onClick={()=> {
             const applyCheckList = "checkList";
             applyMarkdownFormatQGNC(editor, applyCheckList)
         }}>-[]</button>
 
-        {/* DEBUG: ^ Don't forget that there's one last addition I need to make to this function -- presumably external to Toolbar.jsx (similar
-        to how I have to manually write a listener for the Tab key) -- and that is, when I press enter and go to a new line, that line will start
-        off with a ">" unless I press enter/newline again which will clear the > on the current line, and so on). I probably need this
-        for some other functions too and not just the Quote one... 
-        NOTE: You only see > on the newline IF the prior line has "> " BUT also something more after that (otherwise nah). 
-        ^ Yeah so Quote, Generic List, Numbered List, Check List, should all have them. */}
 
 
 
 
 
+
+        {/* Creating the button that responds to "create link" (DEBUG: Think I can just re-use applyMarkdownFormatBIS() here). */}
+        <button onClick={()=> {
+            applyMarkdownFormatBIS("[", "]https://")
+        }}>HTTPS</button>
+        {/* DEBUG: ^ okay so this works -- but an issue I'll need to fix with applyMarkdownFormatBIS is that it's NOT moving
+        the cursor position back with the formatting insertions... so i'll need to fix this and the Header function early Tuesday. (Shouldn't be so bad). */}
 
 
 
@@ -593,6 +566,16 @@ function Toolbar() {
         - For the Leave Comment button, bit more complicated so just go see the HackMD stuff.
         - I can leave the Insert Image button last because there's extra work that needs to go into that...
         */}
+
+
+        {/* DEBUG: ^ Don't forget that there's one last addition I need to make to this function -- presumably external to Toolbar.jsx (similar
+        to how I have to manually write a listener for the Tab key) -- and that is, when I press enter and go to a new line, that line will start
+        off with a ">" unless I press enter/newline again which will clear the > on the current line, and so on). I probably need this
+        for some other functions too and not just the Quote one... 
+        NOTE: You only see > on the newline IF the prior line has "> " BUT also something more after that (otherwise nah). 
+        ^ Yeah so Quote, Generic List, Numbered List, Check List, should all have them. */}
+
+
 
 
     </div>);
