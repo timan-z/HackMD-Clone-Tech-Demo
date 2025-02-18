@@ -37,6 +37,88 @@ function Toolbar() {
 
 
 
+
+
+
+    /* NEW: Function "applyMarkdownFormatBISC" will be the updated version of applyMkardownFormatBIS which reworks it so
+    that the cursor position is also moved after text insertion (this is something that I failed to do with the original func). */
+    const applyMarkdownFormatBISC = (wrapper1, wrapper2) => {
+
+        editor.update(() => {
+
+            const selection = $getSelection();
+            if(!$isRangeSelection(selection)) {
+                return;
+            }
+
+            const selectedText = selection.getTextContent();
+            const selectionNodes = selection.getNodes();
+            const {anchor} = selection;
+            let anchorNode = anchor.getNode();
+            let anchorNodeKey = anchorNode.getKey();
+            let editorTextFull = $getRoot().getTextContent();
+            let wrappedText = null;
+
+            console.log("The value of selectedText is: [", selectedText, "]");
+            console.log("The value of anchor.offset is: ", anchor.offset);
+
+            // When the "Create Link" button is invoked on an empty line (first of the editor or subsequent newlines):
+            if(selectedText === "" && (selectedText === editorTextFull) || selectedText === "" && anchor.offset == 2) {
+
+                console.log("RAH: The value of anchorNodeKey is: ", anchorNodeKey);
+                console.log("RAH: The value of anchor.offset is: ", anchor.offset);
+
+            } else {
+
+                console.log("You are currently in the \"else\" branch...");
+
+            }
+
+
+
+
+
+
+
+
+            /*if(selectedText === "") {
+                // Scenario 1. Current text selection is non-highlighted (doesn't matter if the cursor is on an empty or non-empty line):
+                wrappedText = `${wrapper1}${selectedText}${wrapper2}`;
+
+                console.log("The value of anchor.offset is: [", anchor.offset, "]");
+
+
+
+
+                // Now I would need to move the cursor position to be prior to wrapper2... (this is single-line).
+                // so if it's an empty line vs if it's a non-empty line -- would that matter here? Possibly...
+
+                TO DO:
+                - need to figure out how to reposition the cursor position for an empty line 
+                - need to figure out how to reposition the cursor position for a non-empty line
+                - ^ figure out if it's the same process for both, and then write the code...
+
+                selectionNodes.forEach((sNode) => {
+                    if($isTextNode(sNode)) {
+
+                    }
+                });
+
+
+
+            } else {
+                // Scenario 2. Current text selection is highlighted (doesn't matter if the highlighted text is single or multi-line):
+
+            }*/
+
+
+        });
+    };
+
+
+
+
+
     // Sep Function for applying "Heading" since it works differently than the others (prepends a "# " string and "builds" on repeated clicks):
     const applyMarkdownFormatHead = (editor) => {
         editor.update(() => {
@@ -546,7 +628,7 @@ function Toolbar() {
 
         {/* Creating the button that responds to "create link" (DEBUG: Think I can just re-use applyMarkdownFormatBIS() here). */}
         <button onClick={()=> {
-            applyMarkdownFormatBIS("[", "]https://")
+            applyMarkdownFormatBISC("[", "]https://")
         }}>HTTPS</button>
         {/* DEBUG: ^ okay so this works -- but an issue I'll need to fix with applyMarkdownFormatBIS is that it's NOT moving
         the cursor position back with the formatting insertions... so i'll need to fix this and the Header function early Tuesday. (Shouldn't be so bad). */}
