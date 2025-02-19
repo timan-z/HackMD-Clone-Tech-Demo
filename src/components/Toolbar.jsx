@@ -18,6 +18,114 @@ function Toolbar() {
     // The line below is useful for applying the styling changes in the toolbar:
     const[editor] = useLexicalComposerContext();
 
+
+
+
+    // Function for finding the (absolute) cursor index position within the text editor (only called when cursor is present within the editor space):
+    function findCursorPos(paraNodes, anchorNode, anchorOffset) {
+        console.log("~~~Code Button Clicked (CBC) console.log statements BEGIN (mainly of relevance if no text is highlighted)~~~");
+
+        /* NOTE: anchorOffset is key to determining the absolute cursor position (ACP) in the text editor (its index position in the overall text display),
+        but its use will depend on if anchorNode is a TextNode or not. If it does, anchorOffset gives the position of the cursor within the current
+        text-editor line (a non-empty text line). Otherwise, the cursor position is on an empty line and anchorOffset's value is less immediately useful,
+        but can still be used to determine ACP. */
+        if($isTextNode(anchorNode)) {
+            console.log("CBC: Anchor Node is a Text Node. The cursor is within a text line.");
+        } else {
+            console.log("CBC: Anchor Node is not a Text Node. The cursor is within an empty line.");
+        }
+
+        /* Lexical does not store its text-editor content as a single string, rather it partitions its content into various paragraph nodes 
+        (see param "paraNodes"), which can be iterated through and inspected (for its child nodes, which are mostly TextNodes and LineBreakNodes). 
+        It also does not provide explicit functions for returning specific line contents so some logic is required to extract the ACP with what is known. */
+
+        // Variables for ACP calculation:
+        let cursorPosition = 0;
+        let absolutePosition = 0;
+        let nodeCount = 0;
+        let textNodeCount = 0;
+        let lineBreakNodeC = 0;
+        let keyMatch = false;
+
+        // This if-condition is for when the cursor position is on an empty line that comprises the whole text editor (ACP is 0, no further calculations needed).
+        if(!(!$isTextNode(anchorNode) && anchorOffset === 0)) {
+
+            // NOTE: Lexical appears to always (?) store its text-editor content in *one* specific paragraph node.
+            for(const paragraph of paraNodes) {
+                if(paragraph.getChildren()) {
+                    const paraChildren = paragraph.getChildren();
+
+                    /* Throughout the paragraph node iteration, as its children are inspected, a count is kept of nodes traversed.
+                    This is important for ACP calculation and determining when traversal should stop based on the values passed as arguments
+                    (this is how we determine at what point we "meet" the line in which the cursor position was positioned). */
+                    for(let i = 0; i < paraChildren.length; i++) {
+                        nodeCount += 1;
+                        const paraChild = paraChildren[i];
+
+                        if($isTextNode(paraChild)) {
+                            textNodeCount += 1;
+
+                            /* When anchorNode is a TextElement, then anchorNode.getKey() will have the same key value as the TextNode which 
+                            refers to the text line in which the cursor position was positioned. */
+                            if(anchorNode.getKey() === paraChild.getKey()) {
+                                // anchorOffset will be line index and lineBreakNodeC will be all the prior \n characters traversed. (These aren't stored in TextNodes).
+                                cursorPosition += (anchorOffset + lineBreakNodeC);
+                                keyMatch = true;
+                                break;  // stop traversal.
+                            }
+                            cursorPosition += paraChild.getTextContent().length;
+                        } else {
+                            lineBreakNodeC += 1;
+                        }
+
+                        /* When anchorNode is not a text node (cursor on empty line), the value of anchorOffset will refer not to
+                        line index, but the newline depth of the cursor (this will correspond with nodeCount): */
+                        if(!$isTextNode(anchorNode)) {
+                            if(nodeCount === anchorOffset) {
+                                break;   // stop traversal.
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        console.log("CBC: The cursor position is currently on line: ", (lineBreakNodeC + 1));
+        
+        // Calculating and returning the final absolute cursor position:
+        if(keyMatch === true) {                
+            absolutePosition = cursorPosition;
+        } else {
+            absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
+        }
+
+        console.log("CBC: The absolute cursor position in the text editor is: ", absolutePosition);
+        console.log("~~~Code Button Clicked (CBC) console.log statements END~~~");
+        return absolutePosition;
+    }
+
+    // Function for finding substring (start and end) indices in a string given an "anchor" value:
+    function subStrIndices(anchorVal, stringVal, subStrVal) {
+        let startIndex = stringVal.indexOf(subStrVal);
+        let endIndex = null;
+
+        while(startIndex !== -1) {
+            endIndex = startIndex + subStrVal.length;
+            if(startIndex <= anchorVal && anchorVal <= endIndex) {
+                return { startIndexFinal: startIndex, endIndexFinal: endIndex }; 
+            }
+            // Finding the next occurrence (if there is any):
+            startIndex = stringVal.indexOf(subStrVal, startIndex + 1);
+        }
+        return null;
+    }
+
+
+
+
+
+
+
     /* With the toolbar I create for the text entry area, I don't want the "bold", "italic", and "strikethrough" 
     buttons to apply the styling directly over the text being typed, instead I want the Markdown formatting for those
     stylings to be applied over the space. This function does that: */ 
@@ -41,12 +149,14 @@ function Toolbar() {
 
 
     /* NEW: Function "applyMarkdownFormatBISC" will be the updated version of applyMkardownFormatBIS which reworks it so
-    that the cursor position is also moved after text insertion (this is something that I failed to do with the original func). */
+    that the cursor position is also moved after text insertion (this is something that I failed to do with the original func). 
+    EDIT: Seems like I'll need to look to the "FormatCode" function for how I'll be having this work, basically... */
     const applyMarkdownFormatBISC = (wrapper1, wrapper2) => {
 
         editor.update(() => {
 
             const selection = $getSelection();
+            // invalid selection (cursor not present in the text editor space):
             if(!$isRangeSelection(selection)) {
                 return;
             }
@@ -58,58 +168,34 @@ function Toolbar() {
             let anchorNodeKey = anchorNode.getKey();
             let editorTextFull = $getRoot().getTextContent();
             let wrappedText = null;
+            let newSelection = null;
+            let newCursorPos = null;
 
-            console.log("The value of selectedText is: [", selectedText, "]");
-            console.log("The value of anchor.offset is: ", anchor.offset);
+        
 
-            // When the "Create Link" button is invoked on an empty line (first of the editor or subsequent newlines):
-            if(selectedText === "" && (selectedText === editorTextFull) || selectedText === "" && anchor.offset == 2) {
+            if(anchorNodeKey == 2 && selectedText === "") {
 
-                console.log("RAH: The value of anchorNodeKey is: ", anchorNodeKey);
-                console.log("RAH: The value of anchor.offset is: ", anchor.offset);
+                wrappedText = `${wrapper1}${selectedText}${wrapper2}`;
+                selection.insertText(wrappedText);
 
-            } else {
+                console.log("AFTER: The value of anchor.offset is: [", anchor.offset, "]");
+                newCursorPos = anchor.offset - 11;
+                console.log("The value of newCursorPos is: [", newCursorPos, "]");
 
-                console.log("You are currently in the \"else\" branch...");
+                // seems like i need to re-get the anchorNode?
+                let updatedSelection = $getSelection();
+                anchorNode = updatedSelection.anchor.getNode();
+
+                newSelection = $createRangeSelection();
+                newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+                $setSelection(newSelection);
+
+                // - 11
+
 
             }
 
 
-
-
-
-
-
-
-            /*if(selectedText === "") {
-                // Scenario 1. Current text selection is non-highlighted (doesn't matter if the cursor is on an empty or non-empty line):
-                wrappedText = `${wrapper1}${selectedText}${wrapper2}`;
-
-                console.log("The value of anchor.offset is: [", anchor.offset, "]");
-
-
-
-
-                // Now I would need to move the cursor position to be prior to wrapper2... (this is single-line).
-                // so if it's an empty line vs if it's a non-empty line -- would that matter here? Possibly...
-
-                TO DO:
-                - need to figure out how to reposition the cursor position for an empty line 
-                - need to figure out how to reposition the cursor position for a non-empty line
-                - ^ figure out if it's the same process for both, and then write the code...
-
-                selectionNodes.forEach((sNode) => {
-                    if($isTextNode(sNode)) {
-
-                    }
-                });
-
-
-
-            } else {
-                // Scenario 2. Current text selection is highlighted (doesn't matter if the highlighted text is single or multi-line):
-
-            }*/
 
 
         });
@@ -213,105 +299,6 @@ function Toolbar() {
     
     // Sep Function for applying "Code" since it also works differently (appends ```\n{text}\n``` or `{text}` depending on the situation):
     const applyMarkdownFormatCode = (editor) => {
-
-        // Function for finding the (absolute) cursor index position within the text editor:
-        function findCursorPos(paraNodes, anchorNode, anchorOffset) {
-            console.log("~~~Code Button Clicked (CBC) console.log statements BEGIN (mainly of relevance if no text is highlighted)~~~");
-
-            /* NOTE: anchorOffset is key to determining the absolute cursor position (ACP) in the text editor (its index position in the overall text display),
-            but its use will depend on if anchorNode is a TextNode or not. If it does, anchorOffset gives the position of the cursor within the current
-            text-editor line (a non-empty text line). Otherwise, the cursor position is on an empty line and anchorOffset's value is less immediately useful,
-            but can still be used to determine ACP. */
-            if($isTextNode(anchorNode)) {
-                console.log("CBC: Anchor Node is a Text Node. The cursor is within a text line.");
-            } else {
-                console.log("CBC: Anchor Node is not a Text Node. The cursor is within an empty line.");
-            }
-
-            /* Lexical does not store its text-editor content as a single string, rather it partitions its content into various paragraph nodes 
-            (see param "paraNodes"), which can be iterated through and inspected (for its child nodes, which are mostly TextNodes and LineBreakNodes). 
-            It also does not provide explicit functions for returning specific line contents so some logic is required to extract the ACP with what is known. */
-
-            // Variables for ACP calculation:
-            let cursorPosition = 0;
-            let absolutePosition = 0;
-            let nodeCount = 0;
-            let textNodeCount = 0;
-            let lineBreakNodeC = 0;
-            let keyMatch = false;
-
-            // This if-condition is for when the cursor position is on an empty line that comprises the whole text editor (ACP is 0, no further calculations needed).
-            if(!(!$isTextNode(anchorNode) && anchorOffset === 0)) {
-
-                // NOTE: Lexical appears to always (?) store its text-editor content in *one* specific paragraph node.
-                for(const paragraph of paraNodes) {
-                    if(paragraph.getChildren()) {
-                        const paraChildren = paragraph.getChildren();
-
-                        /* Throughout the paragraph node iteration, as its children are inspected, a count is kept of nodes traversed.
-                        This is important for ACP calculation and determining when traversal should stop based on the values passed as arguments
-                        (this is how we determine at what point we "meet" the line in which the cursor position was positioned). */
-                        for(let i = 0; i < paraChildren.length; i++) {
-                            nodeCount += 1;
-                            const paraChild = paraChildren[i];
-
-                            if($isTextNode(paraChild)) {
-                                textNodeCount += 1;
-
-                                /* When anchorNode is a TextElement, then anchorNode.getKey() will have the same key value as the TextNode which 
-                                refers to the text line in which the cursor position was positioned. */
-                                if(anchorNode.getKey() === paraChild.getKey()) {
-                                    // anchorOffset will be line index and lineBreakNodeC will be all the prior \n characters traversed. (These aren't stored in TextNodes).
-                                    cursorPosition += (anchorOffset + lineBreakNodeC);
-                                    keyMatch = true;
-                                    break;  // stop traversal.
-                                }
-                                cursorPosition += paraChild.getTextContent().length;
-                            } else {
-                                lineBreakNodeC += 1;
-                            }
-
-                            /* When anchorNode is not a text node (cursor on empty line), the value of anchorOffset will refer not to
-                            line index, but the newline depth of the cursor (this will correspond with nodeCount): */
-                            if(!$isTextNode(anchorNode)) {
-                                if(nodeCount === anchorOffset) {
-                                    break;   // stop traversal.
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            console.log("CBC: The cursor position is currently on line: ", (lineBreakNodeC + 1));
-            
-            // Calculating and returning the final absolute cursor position:
-            if(keyMatch === true) {                
-                absolutePosition = cursorPosition;
-            } else {
-                absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
-            }
-
-            console.log("CBC: The absolute cursor position in the text editor is: ", absolutePosition);
-            console.log("~~~Code Button Clicked (CBC) console.log statements END~~~");
-            return absolutePosition;
-        }
-
-        // Function for finding substring (start and end) indices in a string given an "anchor" value:
-        function subStrIndices(anchorVal, stringVal, subStrVal) {
-            let startIndex = stringVal.indexOf(subStrVal);
-            let endIndex = null;
-
-            while(startIndex !== -1) {
-                endIndex = startIndex + subStrVal.length;
-                if(startIndex <= anchorVal && anchorVal <= endIndex) {
-                    return { startIndexFinal: startIndex, endIndexFinal: endIndex }; 
-                }
-                // Finding the next occurrence (if there is any):
-                startIndex = stringVal.indexOf(subStrVal, startIndex + 1);
-            }
-            return null;
-        }
 
         editor.update(() => {
             /* NOTE-TO-SELF:
@@ -628,7 +615,7 @@ function Toolbar() {
 
         {/* Creating the button that responds to "create link" (DEBUG: Think I can just re-use applyMarkdownFormatBIS() here). */}
         <button onClick={()=> {
-            applyMarkdownFormatBISC("[", "]https://")
+            applyMarkdownFormatBISC("[", "](https://)")
         }}>HTTPS</button>
         {/* DEBUG: ^ okay so this works -- but an issue I'll need to fix with applyMarkdownFormatBIS is that it's NOT moving
         the cursor position back with the formatting insertions... so i'll need to fix this and the Header function early Tuesday. (Shouldn't be so bad). */}
