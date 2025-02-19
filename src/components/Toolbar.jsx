@@ -164,21 +164,6 @@ function Toolbar() {
         });
     };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // Sep Function for applying "Heading" since it works differently than the others (prepends a "# " string and "builds" on repeated clicks):
     const applyMarkdownFormatHead = (editor) => {
 
@@ -250,15 +235,6 @@ function Toolbar() {
             }
         });  
     };
-
-
-
-
-
-
-
-
-
 
     // Sep Function for applying "Code" since it also works differently (appends ```\n{text}\n``` or `{text}` depending on the situation):
     const applyMarkdownFormatCode = (editor) => {
@@ -515,9 +491,6 @@ function Toolbar() {
 
 
 
-
-
-
     return (<div>
         {/* Creating the button that responds to "bold" */}
         <button onClick={()=>{
@@ -584,17 +557,16 @@ function Toolbar() {
 
 
 
-        {/* DEBUG: ^ okay so this works -- but an issue I'll need to fix with applyMarkdownFormatBIS is that it's NOT moving
-        the cursor position back with the formatting insertions... so i'll need to fix this and the Header function early Tuesday. (Shouldn't be so bad). */}
-
-
-
-
-
-
         {/*
         - For the Insert Table button, I'm doing some wacky stuff (way too much to add here just look at HackMD for what I'm doing).
         - For the Insert Horizontal Line button, ^ basically same idea.
+
+
+
+        [NOTE: these two at the end i can leave for later -- after doing horizontal line + table, try getting the dual view screen
+        thing started and up on the view... (ig after the thing i need to write similar to the tab key you know what im talking about)]
+
+
         - For the Leave Comment button, bit more complicated so just go see the HackMD stuff.
         - I can leave the Insert Image button last because there's extra work that needs to go into that...
         */}
