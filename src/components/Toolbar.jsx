@@ -6,8 +6,6 @@ import React from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, $isTextNode, $createTextNode, $getRoot, COMMAND_PRIORITY_CRITICAL, $isParagraphNode } from "lexical";
 
-
-
 /* ^ NOTE-TO-SELF:
 - $getSelection is pretty self explanatory
 - $isRangeSelection is a type-checking function verifying the current selection is a range selection. (Empty highlighted space counts). 
@@ -17,14 +15,6 @@ since it's important for ensuring these formatting operations take precedence. *
 function Toolbar() {
     // The line below is useful for applying the styling changes in the toolbar:
     const[editor] = useLexicalComposerContext();
-
-
-
-
-
-
-
-
 
     // Function for finding the (absolute) cursor index position within the text editor (only called when cursor is present within the editor space):
     function findCursorPos(paraNodes, anchorNode, anchorOffset) {
@@ -125,21 +115,6 @@ function Toolbar() {
         return null;
     }
 
-    /* With the toolbar I create for the text entry area, I don't want the "bold", "italic", and "strikethrough" 
-    buttons to apply the styling directly over the text being typed, instead I want the Markdown formatting for those
-    stylings to be applied over the space. This function does that: */ 
-    /*const applyMarkdownFormatBIS = (wrapper1, wrapper2) => {
-        editor.update(() => {
-            const selection = $getSelection();
-
-            if($isRangeSelection(selection)) {
-                const selectedText = selection.getTextContent();
-                const wrappedText = `${wrapper1}${selectedText}${wrapper2}`;
-                selection.insertText(wrappedText);
-            }
-        });
-    };*/
-
     /* With the toolbar I create for the text entry area, I don't want the "bold", "italic", "strikethrough", and "create link"
     buttons to apply the styling directly over the text being typed, instead I want the Markdown formatting for those
     stylings to be applied over the space. This function does that: */ 
@@ -196,8 +171,10 @@ function Toolbar() {
 
 
 
+
+
     // Sep Function for applying "Heading" since it works differently than the others (prepends a "# " string and "builds" on repeated clicks):
-    const applyMarkdownFormatHead = (editor) => {
+    const applyMarkdownFormatHeadOLD = (editor) => {
         editor.update(() => {
             const selection = $getSelection();
 
@@ -288,6 +265,94 @@ function Toolbar() {
         });
     };
     
+
+
+
+
+
+
+
+    // Sep Function for applying "Heading" since it works differently than the others (prepends a "# " string and "builds" on repeated clicks):
+    const applyMarkdownFormatHead = (editor) => {
+
+        editor.update(() => {
+            const selection = $getSelection();
+            // invalid selection (cursor not present in the text editor space):
+            if(!$isRangeSelection(selection)) {
+                return;
+            }
+
+            const selectedText = selection.getTextContent(); 
+            const selectionNodes = selection.getNodes();
+            let {anchor} = selection;
+            let anchorNode = anchor.getNode();
+            let anchorNodeKey = anchorNode.getKey();
+            let wrappedText = null;
+            let currentLineT = null;
+            let updatedLineT = null;
+            let newSelection = null;
+
+            // NOTE: We *do* want to use "==" for the anchorNodeKey value comp...
+            if(anchorNodeKey == 2 && selectedText === "") {
+                // Scenario 1. When the Header button is invoked for a single empty line (getKeyValue will always be 2).
+                console.log("Empty line targeted with adding of header symbol.");
+                wrappedText = `${"# "}${selectedText}`;
+                selection.insertText(wrappedText);
+            } else {
+                // Scenario 2. When the Header button is invoked for single or multi-line highlighted selection.
+
+                selectionNodes.forEach((sNode) => {
+                    if($isTextNode(sNode)) {
+
+                        // For applying the actual "Header" format insertion:
+                        /* So I want to count the number of "#" characters at the start of this line.
+                        And I only want to truly consider them if the substring of # characters is followed by a whitespace.
+                        If it's followed by anything else -- as per how it functions on HackMD -- they aren't counted as part of the heading config.
+                        Also HackMD only counts the first 6 # characters "stacked" together (so that's the deepest depth).
+                        - So if it's "###### text" on the line and the user selects "H" button, then it wipes those #s entirely.
+                        - If there is <6 #s, it "stacks" and if there are >6 #s, it prepends "# "
+                        - Something like #######text is treated as any arbitrary string (we prepend "# "). */
+                        currentLineT = sNode.getTextContent();
+                        const hashMatch = currentLineT.match(/^(#+)(\s?)/);
+                        const hashCount = hashMatch ? hashMatch[1].length: 0;
+                        const wSpaceSuffix = hashMatch ? hashMatch[2] === " " : false;
+                        console.log("Line \"" + currentLineT + "\" targeted with adding of Header symbol. There are " + hashCount + " #s and whitespace suffix status: " + wSpaceSuffix);            
+
+                        if(!wSpaceSuffix) {
+                            updatedLineT = "# " + currentLineT;         // "# " is prepended to the line.
+                            console.log("Line targeted for adding Header symbol will have \"# \" prepended. (No discernable whitespace prefix following possible #s).");
+                        }else if(wSpaceSuffix && hashCount < 6) {
+                            updatedLineT = "#" + currentLineT;          // "#" is prepended to the line.
+                            console.log("Line targeted for adding Header symbol will have \"#\" prepended. (Existing #(s)whitespace detected).");
+                        } else if (wSpaceSuffix && hashCount === 6) {
+                            updatedLineT = currentLineT.slice(7);       // trim out the "###### " line prefix.
+                            console.log("Line targeted for adding Header symbol will trim its #+ prefix. (Maximum depth of #s is 6).");
+                        } else {
+                            updatedLineT = "# " + currentLineT;         // >6 #s with whitespace will be treated as an irrelevant string.
+                            console.log("Line targeted for adding Header symbol will have \"#\" prepended. (No pre-existing #+whitespace present).");
+                        }
+
+                        // Reposition cursor by reconfiguring selection (loop will inevitably end at the line we were on in the editor): 
+                        newSelection = $createRangeSelection();
+                        newSelection.anchor.set(sNode.getKey(), updatedLineT.length, "text");
+                        newSelection.focus.set(sNode.getKey(), updatedLineT.length, "text");
+                        $setSelection(newSelection);
+                        sNode.setTextContent(updatedLineT); // set new text content!
+                    }
+                });
+            }
+        });  
+    };
+
+
+
+
+
+
+
+
+
+
     // Sep Function for applying "Code" since it also works differently (appends ```\n{text}\n``` or `{text}` depending on the situation):
     const applyMarkdownFormatCode = (editor) => {
 
@@ -606,6 +671,12 @@ function Toolbar() {
 
 
 
+
+
+
+
+
+
         {/* DEBUG: ^ okay so this works -- but an issue I'll need to fix with applyMarkdownFormatBIS is that it's NOT moving
         the cursor position back with the formatting insertions... so i'll need to fix this and the Header function early Tuesday. (Shouldn't be so bad). */}
 
@@ -614,17 +685,12 @@ function Toolbar() {
 
 
 
-        {/*        
-        - For the Create Link button, I'm just adding "[](https://)" to the text (after current selection) unless I've highlighted some text,
-        in which case that highlighted text goes within the [] enclosing (i.e., [highlighted-text]).
-        ^ VERY EASY.
-
+        {/*
         - For the Insert Table button, I'm doing some wacky stuff (way too much to add here just look at HackMD for what I'm doing).
         - For the Insert Horizontal Line button, ^ basically same idea.
         - For the Leave Comment button, bit more complicated so just go see the HackMD stuff.
         - I can leave the Insert Image button last because there's extra work that needs to go into that...
         */}
-
 
         {/* DEBUG: ^ Don't forget that there's one last addition I need to make to this function -- presumably external to Toolbar.jsx (similar
         to how I have to manually write a listener for the Tab key) -- and that is, when I press enter and go to a new line, that line will start
@@ -632,9 +698,6 @@ function Toolbar() {
         for some other functions too and not just the Quote one... 
         NOTE: You only see > on the newline IF the prior line has "> " BUT also something more after that (otherwise nah). 
         ^ Yeah so Quote, Generic List, Numbered List, Check List, should all have them. */}
-
-
-
 
     </div>);
 }
