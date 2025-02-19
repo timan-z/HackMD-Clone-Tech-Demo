@@ -489,14 +489,29 @@ function Toolbar() {
 
 
     // Sep Function for applying the Table insertion:
-    // NOTE: ^ There is a lot more to this function compared to the others, but I think I will have to return to that stuff *after* (still far off):
+    /* NOTE: ^ There is a lot more to this function compared to the others, but I think I will have to return to that stuff *after* (still far off):
+
+    after inserting the default insertion, there's supposed to be like options and stuff that you can add when the cursor is inside of the table space... (i can leave this for later though).
+
+    ^ so like the given line must adhere to a structure or else those options dissapear (also the visualization in the panel i make will dissapear as well).
+
+    */
     const applyMarkdownFormatTable = (editor) => {
+        editor.update(() => {
+            const selection = $getSelection();
+            // invalid selection (cursor not present in the text editor space):
+            if(!$isRangeSelection(selection)) {
+                return;
+            }
+
+            /* So this function will mainly focus on inserting the "default" table insertion
+
+            */
 
 
+
+        });
     }
-
-
-
 
 
 
