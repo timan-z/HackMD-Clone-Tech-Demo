@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, $isTextNode, $createTextNode, $getRoot, COMMAND_PRIORITY_CRITICAL, $isParagraphNode } from "lexical";
+import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, $isTextNode, $createTextNode, $createLineBreakNode, $getRoot, COMMAND_PRIORITY_CRITICAL, $isParagraphNode } from "lexical";
 
 /* ^ NOTE-TO-SELF:
 - $getSelection is pretty self explanatory
@@ -488,6 +488,44 @@ function Toolbar() {
 
 
 
+    // Sep Function for applying the Table insertion:
+    // NOTE: ^ There is a lot more to this function compared to the others, but I think I will have to return to that stuff *after* (still far off):
+    const applyMarkdownFormatTable = (editor) => {
+
+
+    }
+
+
+
+
+
+
+
+    // Sep Function for applying the Horizontal Line insertion:
+    const applyMarkdownFormatHLine = (editor) => {
+
+        editor.update(() => {
+            const selection = $getSelection();
+            // invalid selection (cursor not present in the text editor space):
+            if(!$isRangeSelection(selection)) {
+                return;
+            }
+
+            /* This should be fairly obvious, I'm just inserting \n\n---\n (and cursor is just placed *after* the line, which is one of the
+            stylistic deviations I will be taking away from HackMD). */
+            let selectionText = selection.getTextContent();
+            let wrappedText = `${selectionText}${"\n\n---"}`;
+            selection.insertText(wrappedText);
+
+            /* wrappedText should really be "\n\n---\n" but ending the insertion text with "\n" causes strange behavior, 
+            so a manual linebreak will have to do here: */
+            const updatedSelection = $getSelection();
+            const lineBreakNode = $createLineBreakNode();
+            updatedSelection.insertNodes([lineBreakNode]);
+        });
+    }
+
+
 
 
 
@@ -535,7 +573,7 @@ function Toolbar() {
         <button onClick={()=> {
             const applyNumbered = "numbered";
             applyMarkdownFormatQGNC(editor, applyNumbered)
-        }}>#.</button>
+        }}>1.</button>
 
         {/* #4 - Creating the button that responds to "check list" */}
         <button onClick={()=> {
@@ -546,9 +584,17 @@ function Toolbar() {
         {/* Creating the button that responds to "create link" */}
         <button onClick={()=> {
             applyMarkdownFormatBISC("[", "](https://)")
-        }}>HTTPS</button>
+        }}>LINK</button>
 
+        {/* Creating the button that responds to "insert table" */}
+        <button onClick={()=> {
+            /* COME BACK HERE!!! */
+        }}>TABLE</button>
 
+        {/* Creating the button that responds to "insert horizontal line" */}
+        <button onClick={()=> {
+            applyMarkdownFormatHLine(editor)
+        }}>LINE</button>
 
 
 
@@ -558,15 +604,15 @@ function Toolbar() {
 
 
         {/*
+        Insert Horizontal Line will be very easy but insert table might be harder because, after inserting the default insertion, there's supposed 
+        to be like options and stuff that you can add when the cursor is inside of the table space... (i can leave this for later though).
+        */}
+        {/*
         - For the Insert Table button, I'm doing some wacky stuff (way too much to add here just look at HackMD for what I'm doing).
         - For the Insert Horizontal Line button, ^ basically same idea.
 
-
-
         [NOTE: these two at the end i can leave for later -- after doing horizontal line + table, try getting the dual view screen
         thing started and up on the view... (ig after the thing i need to write similar to the tab key you know what im talking about)]
-
-
         - For the Leave Comment button, bit more complicated so just go see the HackMD stuff.
         - I can leave the Insert Image button last because there's extra work that needs to go into that...
         */}

@@ -13,3 +13,7 @@ One creative choice I want to make to differentiate my project from HackMD is th
 
 
 ^ also a new creative difference I can add is, in HackMd's numberedlist, when you highlight multiple lines and apply the button (it prepends "1." to all the lines -- but here I know how I can make them all numbered!)
+
+
+another minor creative change is, after inserting table or line break (---), I'm moving the cursor position after their insertion (this is not the case
+in HackMD -- the cursor position does not change at all -- but I don't think that really makes sense).
