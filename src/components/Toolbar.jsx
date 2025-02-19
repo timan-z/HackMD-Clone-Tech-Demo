@@ -125,14 +125,6 @@ function Toolbar() {
         return null;
     }
 
-
-
-
-
-
-
-
-
     /* With the toolbar I create for the text entry area, I don't want the "bold", "italic", and "strikethrough" 
     buttons to apply the styling directly over the text being typed, instead I want the Markdown formatting for those
     stylings to be applied over the space. This function does that: */ 
@@ -148,17 +140,9 @@ function Toolbar() {
         });
     };*/
 
-
-
-
-
-
-
-
-
-
-    /* NEW: Function "applyMarkdownFormatBISC" will be the updated version of applyMkardownFormatBIS which reworks it so
-    that the cursor position is also moved after text insertion (this is something that I failed to do with the original func). */
+    /* With the toolbar I create for the text entry area, I don't want the "bold", "italic", "strikethrough", and "create link"
+    buttons to apply the styling directly over the text being typed, instead I want the Markdown formatting for those
+    stylings to be applied over the space. This function does that: */ 
     const applyMarkdownFormatBISC = (wrapper1, wrapper2) => {
 
         editor.update(() => {
@@ -166,6 +150,15 @@ function Toolbar() {
             // invalid selection (cursor not present in the text editor space):
             if(!$isRangeSelection(selection)) {
                 return;
+            }
+            
+            let reposValue = null;
+            if(wrapper2 == "**" || wrapper2 == "~~") {
+                reposValue = 2;
+            } else if (wrapper2 == "*") {
+                reposValue = 1;
+            } else {
+                reposValue = 11;
             }
 
             const selectedText = selection.getTextContent();
@@ -179,12 +172,12 @@ function Toolbar() {
 
             wrappedText = `${wrapper1}${selectedText}${wrapper2}`;
             selection.insertText(wrappedText);
-            newCursorPos = anchor.offset - 11;
+            newCursorPos = anchor.offset - reposValue;
         
             if(anchorNodeKey == 2 || selectedText.includes("\n")) {
                 /* This branch will handle both the scenarios where the "Create Link" functionality is invoked on an empty line in the
                 text editor and when it is invoked with multi-line highlighted text. */
-                newCursorPos = anchor.offset - 11;
+                newCursorPos = anchor.offset - reposValue;
 
                 updatedSelection = $getSelection();
                 anchorNode = updatedSelection.anchor.getNode();
@@ -556,15 +549,15 @@ function Toolbar() {
     return (<div>
         {/* Creating the button that responds to "bold" */}
         <button onClick={()=>{
-            applyMarkdownFormatBIS("**","**")
+            applyMarkdownFormatBISC("**","**")
         }}>B</button>
         {/* Creating the button that responds to "italic" */}
         <button onClick={()=>{
-            applyMarkdownFormatBIS("*","*")
+            applyMarkdownFormatBISC("*","*")
         }}>I</button>
         {/* Creating the button that responds to "strikethrough" */}
         <button onClick={()=>{
-            applyMarkdownFormatBIS("~~","~~")
+            applyMarkdownFormatBISC("~~","~~")
         }}>S</button>
 
         {/* Creating the button that responds to "header" (will require a separate function than those above) */}
@@ -605,16 +598,14 @@ function Toolbar() {
             applyMarkdownFormatQGNC(editor, applyCheckList)
         }}>-[]</button>
 
-
-
-
-
-
-
-        {/* Creating the button that responds to "create link" (DEBUG: Think I can just re-use applyMarkdownFormatBIS() here). */}
+        {/* Creating the button that responds to "create link" */}
         <button onClick={()=> {
             applyMarkdownFormatBISC("[", "](https://)")
         }}>HTTPS</button>
+
+
+
+
         {/* DEBUG: ^ okay so this works -- but an issue I'll need to fix with applyMarkdownFormatBIS is that it's NOT moving
         the cursor position back with the formatting insertions... so i'll need to fix this and the Header function early Tuesday. (Shouldn't be so bad). */}
 
