@@ -21,6 +21,11 @@ function Toolbar() {
 
 
 
+
+
+
+
+
     // Function for finding the (absolute) cursor index position within the text editor (only called when cursor is present within the editor space):
     function findCursorPos(paraNodes, anchorNode, anchorOffset) {
         console.log("~~~Code Button Clicked (CBC) console.log statements BEGIN (mainly of relevance if no text is highlighted)~~~");
@@ -126,10 +131,12 @@ function Toolbar() {
 
 
 
+
+
     /* With the toolbar I create for the text entry area, I don't want the "bold", "italic", and "strikethrough" 
     buttons to apply the styling directly over the text being typed, instead I want the Markdown formatting for those
     stylings to be applied over the space. This function does that: */ 
-    const applyMarkdownFormatBIS = (wrapper1, wrapper2) => {
+    /*const applyMarkdownFormatBIS = (wrapper1, wrapper2) => {
         editor.update(() => {
             const selection = $getSelection();
 
@@ -139,7 +146,9 @@ function Toolbar() {
                 selection.insertText(wrappedText);
             }
         });
-    };
+    };*/
+
+
 
 
 
@@ -149,12 +158,10 @@ function Toolbar() {
 
 
     /* NEW: Function "applyMarkdownFormatBISC" will be the updated version of applyMkardownFormatBIS which reworks it so
-    that the cursor position is also moved after text insertion (this is something that I failed to do with the original func). 
-    EDIT: Seems like I'll need to look to the "FormatCode" function for how I'll be having this work, basically... */
+    that the cursor position is also moved after text insertion (this is something that I failed to do with the original func). */
     const applyMarkdownFormatBISC = (wrapper1, wrapper2) => {
 
         editor.update(() => {
-
             const selection = $getSelection();
             // invalid selection (cursor not present in the text editor space):
             if(!$isRangeSelection(selection)) {
@@ -162,44 +169,35 @@ function Toolbar() {
             }
 
             const selectedText = selection.getTextContent();
-            const selectionNodes = selection.getNodes();
             const {anchor} = selection;
             let anchorNode = anchor.getNode();
             let anchorNodeKey = anchorNode.getKey();
-            let editorTextFull = $getRoot().getTextContent();
             let wrappedText = null;
+            let updatedSelection = null;
             let newSelection = null;
             let newCursorPos = null;
 
+            wrappedText = `${wrapper1}${selectedText}${wrapper2}`;
+            selection.insertText(wrappedText);
+            newCursorPos = anchor.offset - 11;
         
-
-            if(anchorNodeKey == 2 && selectedText === "") {
-
-                wrappedText = `${wrapper1}${selectedText}${wrapper2}`;
-                selection.insertText(wrappedText);
-
-                console.log("AFTER: The value of anchor.offset is: [", anchor.offset, "]");
+            if(anchorNodeKey == 2 || selectedText.includes("\n")) {
+                /* This branch will handle both the scenarios where the "Create Link" functionality is invoked on an empty line in the
+                text editor and when it is invoked with multi-line highlighted text. */
                 newCursorPos = anchor.offset - 11;
-                console.log("The value of newCursorPos is: [", newCursorPos, "]");
 
-                // seems like i need to re-get the anchorNode?
-                let updatedSelection = $getSelection();
+                updatedSelection = $getSelection();
                 anchorNode = updatedSelection.anchor.getNode();
+            } // Other scenario: selection includes multi-line highlighted text (no new action needs to be taken):
 
-                newSelection = $createRangeSelection();
-                newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
-                $setSelection(newSelection);
-
-                // - 11
-
-
-            }
-
-
-
-
+            newSelection = $createRangeSelection();
+            newSelection.setTextNodeRange(anchorNode, newCursorPos, anchorNode, newCursorPos);
+            $setSelection(newSelection);
         });
     };
+
+
+
 
 
 
