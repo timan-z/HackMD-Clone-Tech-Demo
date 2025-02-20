@@ -483,19 +483,14 @@ function Toolbar() {
         })
     };
 
-
-
-
-
-
     // Sep Function for applying the Table insertion:
     /* NOTE: ^ There is a lot more to this function compared to the others, but I think I will have to return to that stuff *after* (still far off):
+    DEBUG: This function will insert a "default table format", but after that -- when the user hovers over the table in the editor space, there's meant to be
+    options and stuff (like "add another column") in a bar that replaces the current one (maybe I can change this to a popup or something).
+    ^ It's a specific strict structure too -- if you add like a random character infront of one of the "|" characters or something, it breaks and the
+    options dissapear and also the visualization within the rendering panel... 
 
-    after inserting the default insertion, there's supposed to be like options and stuff that you can add when the cursor is inside of the table space... (i can leave this for later though).
-
-    ^ so like the given line must adhere to a structure or else those options dissapear (also the visualization in the panel i make will dissapear as well).
-
-    */
+    ^ Granted, I think all of this is stuff is handled externally and this function just inserts the "default table format": */
     const applyMarkdownFormatTable = (editor) => {
         editor.update(() => {
             const selection = $getSelection();
@@ -503,18 +498,24 @@ function Toolbar() {
             if(!$isRangeSelection(selection)) {
                 return;
             }
+            let selectionText = selection.getTextContent();
+            let wrappedText = null;
 
-            /* So this function will mainly focus on inserting the "default" table insertion
+            // This is the "default table format":
+            const firstLine = "\n\n| Column 1 | Column 2 | Column 3 |\n";
+            const secondLine = "| -------- | -------- | -------- |\n";
+            const thirdLine = "| Text     | Text     | Text     |";
 
-            */
+            wrappedText = `${selectionText}${firstLine}${secondLine}${thirdLine}`;
+            selection.insertText(wrappedText);
 
-
-
+            /* thirdLine should end with a \n but ending the insertion text with "\n" causes strange behavior,
+            so a manual linebreak will have to do here: */
+            const updatedSelection = $getSelection();
+            const lineBreakNode = $createLineBreakNode();
+            updatedSelection.insertNodes([lineBreakNode]);
         });
     }
-
-
-
 
     // Sep Function for applying the Horizontal Line insertion:
     const applyMarkdownFormatHLine = (editor) => {
@@ -537,6 +538,32 @@ function Toolbar() {
             const updatedSelection = $getSelection();
             const lineBreakNode = $createLineBreakNode();
             updatedSelection.insertNodes([lineBreakNode]);
+        });
+    }
+
+
+
+
+
+
+    const debugFunction = (editor) => {
+        editor.update(() => {
+            const selection = $getSelection();
+            const selectedText = selection.getTextContent();
+            let {anchor} = selection;
+            let anchorNode = anchor.getNode();
+
+            console.log("DEBUG-FUNCTION: The value of anchor.offset is: [", anchor.offset, "]");
+            console.log("DEBUG-FUNCTION: The value of anchorNode.getKey() is: [", anchorNode.getKey(), "]");
+
+            /* So I know that when the cursor is on an empty-line post-newline insertion, anchorNode.getKey() will always have value of 2
+            and anchor.offset will basically correspond to all of the combined lineBreakNodes and textNodes preceding this empty line that
+            the cursor currently rests on. */
+
+
+
+
+
         });
     }
 
@@ -603,7 +630,7 @@ function Toolbar() {
 
         {/* Creating the button that responds to "insert table" */}
         <button onClick={()=> {
-            /* COME BACK HERE!!! */
+            applyMarkdownFormatTable(editor)
         }}>TABLE</button>
 
         {/* Creating the button that responds to "insert horizontal line" */}
@@ -615,17 +642,18 @@ function Toolbar() {
 
 
 
+        {/* Creating a DEBUG button */}
+        <button onClick={()=> {
+            debugFunction(editor)
+        }}>DEBUG</button>
+
+
+
+
 
 
 
         {/*
-        Insert Horizontal Line will be very easy but insert table might be harder because, after inserting the default insertion, there's supposed 
-        to be like options and stuff that you can add when the cursor is inside of the table space... (i can leave this for later though).
-        */}
-        {/*
-        - For the Insert Table button, I'm doing some wacky stuff (way too much to add here just look at HackMD for what I'm doing).
-        - For the Insert Horizontal Line button, ^ basically same idea.
-
         [NOTE: these two at the end i can leave for later -- after doing horizontal line + table, try getting the dual view screen
         thing started and up on the view... (ig after the thing i need to write similar to the tab key you know what im talking about)]
         - For the Leave Comment button, bit more complicated so just go see the HackMD stuff.

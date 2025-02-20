@@ -14,7 +14,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useEffect, useState } from 'react';
 
 import Toolbar from "./Toolbar.jsx"
-import { $getRoot, $getSelection, $isRangeSelection, RootNode } from 'lexical';
+import { $getRoot, $getSelection, $isRangeSelection, $isTextNode, $isLineBreakNode, RootNode } from 'lexical';
 
 /* NOTE-TO-SELF:
   - LexicalComposer initializes the editor with the [theme], [namespace], and [onError] configs. (Additional plug-ins go within its tags).
@@ -155,7 +155,106 @@ function EditorContent() {
         }
       });
     }
+    
+    /* Special handling needed for "Enter" relating to Quote, Generic List, Numbered List, 
+    and Check List formatting (keeping ) */
+    /* EDIT:
+    Okay this is going to be a little tricky, event.preventdDefault() don't do nothing 
+    so I'm going to need to get crafty here and inspect the previous line.
+    */
+    if (event.key === "Enter") {
+      event.preventDefault(); // DEBUG: <-- does not seem to do anything lol 
+      editor.update(() => {
+
+        const selection = $getSelection();
+        const {anchor} = selection;
+        const selectedText = selection.getTextContent();
+        const paraNodes = $getRoot().getChildren();
+        let wrappedText = null;
+        let symbolToPrepend = null;
+        let numberToPrepend = null;
+
+        /* GAMEPLAN:
+        So I know that when the cursor is on an empty-line post-newline insertion, anchorNode.getKey() will always have value of 2
+        and anchor.offset will basically correspond to all of the combined lineBreakNodes and textNodes preceding this empty line that
+        the cursor currently rests on. 
+        - So I can get the children of the parent node, iterate through all of them and have a counter record up to (anchor.offset - 1)
+        so I know when I reach the textNode that I want to inspect...
+        - Inspect the text content of said node ^ ...
+        */
+        console.log("The value of anchor.offset is: ", anchor.offset);
+
+        let prevTextNodePos = anchor.offset - 2;
+        if(prevTextNodePos >= 0) {
+
+          for(const paragraph of paraNodes) {
+            if(paragraph.getChildren()) {
+              const paraChildren = paragraph.getChildren();
+              const paraChild = paraChildren[anchor.offset - 2];  // TAKEAWAY: the prior text node will always be anchor.offset - 2 away. (post newline).
+
+              if($isTextNode(paraChild)) {
+                console.log("DEBUG: Previous line was a NON-empty line.");
+                console.log("debug: The value of paraChild.getTextContent() is: [", paraChild.getTextContent(), "]");
+
+                /* paraChild.getTextContent() will contain the text content of the previous text node.
+                I want to now inspect its content to see if it's a string that begins with "> ", "* ", "{any number} ", or "- [ ] "
+                (and from there it will be seen if there's any additional string following this starting substring, from which
+                further action will be taken). */
+                const isNumeric = (str) => !isNaN(str) && str.trim() !== "";
+                let extractStart1 = paraChild.getTextContent().substring(0, 2);
+                let extractStart2Char = paraChild.getTextContent().charAt(0);
+                let startsWNumber = isNumeric(extractStart2Char);
+                let extractStart2 = paraChild.getTextContent().substring(1,3);
+                let extractStart3 = paraChild.getTextContent().substring(0,6);
+
+                if(extractStart1 === "> " || extractStart1 === "* ") {
+                  // If the prefix is equivalent to the whole line content, then I'm nuking that line's text content:
+                  if(paraChild.getTextContent().trim() === ">" || paraChild.getTextContent().trim() === "*") {
+                    paraChild.setTextContent("");
+                  } else {
+                    // There's something here past the prefix, so I need to make sure the current line has "> " or "* " prepended to it:
+                    if(extractStart1 === "> ") {
+                      symbolToPrepend = "> ";
+                    } else {
+                      symbolToPrepend = "* ";
+                    }
+                  }
+                } else if(startsWNumber && extractStart2 === ". " ) {
+                  if(paraChild.getTextContent().trim().length === 2) {
+                    // nuke that line's text content:
+                    paraChild.setTextContent("");
+                  } else {
+                    // There's something here past the prefix, so I need to make sure the current line has "{this line's # + 1} " prepended to it: 
+                    numberToPrepend = +extractStart2Char + 1;
+                    symbolToPrepend = numberToPrepend + ". ";
+                  }
+                } else if(extractStart3 === "- [ ] ") {
+                  if(paraChild.getTextContent().trim() === "- [ ]") {
+                    // nuke that line's text content:
+                    paraChild.setTextContent("");
+                  } else {
+                    symbolToPrepend = "- [ ] ";
+                  }
+                } else {
+                  // do nothing:
+                }
+              }
+            }
+          }
+          if(symbolToPrepend) {
+            // Over here, I want to prepend the symbol to the subsequent node...
+            wrappedText = `${symbolToPrepend}${selectedText}`;
+            selection.insertText(wrappedText);
+          }
+        }
+      });
+    }
   }
+
+
+
+
+
 
 
 
