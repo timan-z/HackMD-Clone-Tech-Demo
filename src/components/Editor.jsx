@@ -103,14 +103,6 @@ const initialConfig = {
   },
 };
 
-
-
-
-
-
-
-
-
 // Porting somethings into a child element of the LexicalComposer component...
 function EditorContent() {
 
@@ -182,7 +174,6 @@ function EditorContent() {
         so I know when I reach the textNode that I want to inspect...
         - Inspect the text content of said node ^ ...
         */
-        console.log("The value of anchor.offset is: ", anchor.offset);
 
         let prevTextNodePos = anchor.offset - 2;
         if(prevTextNodePos >= 0) {
@@ -193,8 +184,6 @@ function EditorContent() {
               const paraChild = paraChildren[anchor.offset - 2];  // TAKEAWAY: the prior text node will always be anchor.offset - 2 away. (post newline).
 
               if($isTextNode(paraChild)) {
-                console.log("DEBUG: Previous line was a NON-empty line.");
-                console.log("debug: The value of paraChild.getTextContent() is: [", paraChild.getTextContent(), "]");
 
                 /* paraChild.getTextContent() will contain the text content of the previous text node.
                 I want to now inspect its content to see if it's a string that begins with "> ", "* ", "{any number} ", or "- [ ] "
@@ -241,6 +230,7 @@ function EditorContent() {
               }
             }
           }
+          // No point of prepending "> ", "* " etc if the previous line didn't have anything related to that:
           if(symbolToPrepend) {
             // Over here, I want to prepend the symbol to the subsequent node...
             wrappedText = `${symbolToPrepend}${selectedText}`;
@@ -250,14 +240,6 @@ function EditorContent() {
       });
     }
   }
-
-
-
-
-
-
-
-
 
   return(
     <div className="editor-wrapper">

@@ -491,6 +491,9 @@ function Toolbar() {
     options dissapear and also the visualization within the rendering panel... 
 
     ^ Granted, I think all of this is stuff is handled externally and this function just inserts the "default table format": */
+    /* EDIT: + NOTE: ^ So I think what I can do here is like, have buttons for "add rows" or "add columns" and these will be buttons that appear
+    within the Toolbar -- but they'll be grayed out to imply they cannot be used unless your cursor is within the Table structure in the
+    text editor. Maybe when the cursor is inside of the table structure, the non-table related buttons in the Toolbar are grayed out? (Maybe!) */
     const applyMarkdownFormatTable = (editor) => {
         editor.update(() => {
             const selection = $getSelection();
@@ -540,11 +543,6 @@ function Toolbar() {
             updatedSelection.insertNodes([lineBreakNode]);
         });
     }
-
-
-
-
-
 
     const debugFunction = (editor) => {
         editor.update(() => {
@@ -660,12 +658,6 @@ function Toolbar() {
         - I can leave the Insert Image button last because there's extra work that needs to go into that...
         */}
 
-        {/* DEBUG: ^ Don't forget that there's one last addition I need to make to this function -- presumably external to Toolbar.jsx (similar
-        to how I have to manually write a listener for the Tab key) -- and that is, when I press enter and go to a new line, that line will start
-        off with a ">" unless I press enter/newline again which will clear the > on the current line, and so on). I probably need this
-        for some other functions too and not just the Quote one... 
-        NOTE: You only see > on the newline IF the prior line has "> " BUT also something more after that (otherwise nah). 
-        ^ Yeah so Quote, Generic List, Numbered List, Check List, should all have them. */}
 
     </div>);
 }
