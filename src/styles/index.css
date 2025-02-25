@@ -86,10 +86,11 @@
 
 /* Editor content should fill the available space: */
 .editor-container, .md-preview-panel {
+  white-space: pre-wrap; /* DEBUG: "keeps line breaks" */
+  word-wrap: break-word;
   width:100%;
   height:100%;
 }
-
 
 /* DEBUG: Everything ABOVE is for making the LHS/RHS, Text Editor, Preview Panel 50/50 thing work! */
 

@@ -9,3 +9,7 @@ Then I can have a button that makes it full screen for just the render panel.
 ^ want to change it so that it's side-by-side by default (no longer hidden is preview panel -- it's open by default)
 
 - I want to have the "Hide Preview"/"Show Preview" button to be placed better in some way (a better place where it's positioned).
+
+- Noticed another issue where if I begin the text editor with a series of newlines, that will not be recognized in the render panel...
+(I don't know if this is big enough of an issue to fix? -- It might be something I just leave in, seems like a weird thing to put the effort
+into fixing tbh).
