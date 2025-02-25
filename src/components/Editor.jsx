@@ -1,5 +1,8 @@
 import React from 'react';
 
+
+
+
 /* NOTE-TO-SELF: It is probably best practice to do all of these Lexical imports below individually
 (specifying /react/...) -- wasted too much time figuring out why nothing was appearing
 on screen when I tried to group import them all from @lexical/react smh. */
@@ -13,8 +16,10 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useEffect, useState } from 'react';
 
-import Toolbar from "./Toolbar.jsx"
+import Toolbar from "./Toolbar.jsx";
 import { $getRoot, $getSelection, $isRangeSelection, $isTextNode, $isLineBreakNode, RootNode } from 'lexical';
+
+import { parseMarkdown } from "./MDParser.jsx";
 
 /* NOTE-TO-SELF:
   - LexicalComposer initializes the editor with the [theme], [namespace], and [onError] configs. (Additional plug-ins go within its tags).
@@ -109,9 +114,18 @@ function EditorContent() {
   const [editor] = useLexicalComposerContext();
   const [lineCount, setLineCount] = useState(1); // 1 line is the default.
   
+
+  // DEBUG: Below is for the Markdown rendering stuff:
+  const [editorContent, setEditorContent] = useState(""); // Stores raw markdown.
+  const [parsedContent, setParsedContent] = useState(""); // Stores parsed HTML.
+  // DEBUG: Above is for the Markdown rendering stuff...
+
+
+
   useEffect(() => {
     const unregister = editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
+        // NOTE: The stuff below is for the text editor line counter...
         /* From the Lexical documentation:
         "There is only ever a single RootNode in an EditorState and it is always at the top and it represents the contenteditable itself. 
         This means that the RootNode does not have a parent or siblings. To get the text content of the entire editor, you should use 
@@ -121,6 +135,10 @@ function EditorContent() {
         setLineCount(lines);
 
         console.log("Current line count in text editor: ", lines);
+
+        // NOTE: The stuff below is for the Markdown renderer... 
+        setEditorContent(textContent);
+        setParsedContent(parseMarkdown(textContent));
       });
     });
 
@@ -256,6 +274,14 @@ function EditorContent() {
             ErrorBoundary={LexicalErrorBoundary}
           />
       </div>
+
+      { /* DEBUG: Markdown Preview Panel (tweak it later). */ }
+      <div className="markdown-preview">
+        <h3>Preview</h3>
+        <div dangerouslySetInnerHTML={{ __html: parsedContent}}/>
+      </div>
+
+
     </div>
   );
 }

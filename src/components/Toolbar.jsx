@@ -6,6 +6,9 @@ import React from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, $isTextNode, $createTextNode, $createLineBreakNode, $getRoot, COMMAND_PRIORITY_CRITICAL, $isParagraphNode } from "lexical";
 
+
+
+
 /* ^ NOTE-TO-SELF:
 - $getSelection is pretty self explanatory
 - $isRangeSelection is a type-checking function verifying the current selection is a range selection. (Empty highlighted space counts). 
@@ -558,10 +561,6 @@ function Toolbar() {
             and anchor.offset will basically correspond to all of the combined lineBreakNodes and textNodes preceding this empty line that
             the cursor currently rests on. */
 
-
-
-
-
         });
     }
 
@@ -644,8 +643,6 @@ function Toolbar() {
         <button onClick={()=> {
             debugFunction(editor)
         }}>DEBUG</button>
-
-
 
 
 
