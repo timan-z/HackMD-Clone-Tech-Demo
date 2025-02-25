@@ -10,3 +10,6 @@ Then I can have a button that makes it full screen for just the render panel.
 
 - I want to have the "Hide Preview"/"Show Preview" button to be placed better in some way (a better place where it's positioned).
 
+
+
+- Another problem. The render panel is not taking newlines into account.

@@ -16,6 +16,8 @@
   overflow-wrap: break-word;
   width:100%;
   max-width: 100%;
+  height:100%;
+  max-height:100%;
   box-sizing: border-box;
 }
 
@@ -34,17 +36,70 @@
 }
 
 
-/*.editor-wrapper {*/
-  /* Pretty sure display:relative does top to bottom... */
-  /*display:relative;
-}*/
-
 .editor-wrapper {
   /* NOTE-TO-SELF: So, "display:flex" will organize the display such that items are sorted horizontally from left
   to right. I want this to make sure that the line numbers for the text editor appear top-to-bottom to the left of 
   the text editor itself. */
   display:flex;
 }
+
+
+
+
+
+
+
+
+
+/* DEBUG: Everything BELOW is for making the LHS/RHS, Text Editor, Preview Panel 50/50 thing work: */
+.editor-layout {
+  width: 100%;
+  height: calc(100vh - 80px); /* DEBUG: "Adjust for header and buttons" */
+  display: flex;
+  transition: all 0.3s ease-in-out;
+}
+
+/* For when the preview panel is hidden: */
+.editor-layout.full-view .text-editor-space {
+  width: 100%;
+}
+
+/* For when the preview panel is active: */
+.editor-layout.split-view .text-editor-space,
+.editor-layout.split-view .preview-panel-space {
+  flex: 1;
+}
+
+/* General styles for the text editor and preview panel: */
+.text-editor-space, .preview-panel-space {
+  padding:10px;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+/* Ensuring that the editor and preview fill their sections: */
+.main-text-editor, .markdown-preview {
+  flex: 1;
+  overflow: auto;
+}
+
+/* Editor content should fill the available space: */
+.editor-container, .md-preview-panel {
+  width:100%;
+  height:100%;
+}
+
+
+/* DEBUG: Everything ABOVE is for making the LHS/RHS, Text Editor, Preview Panel 50/50 thing work! */
+
+
+
+
+
+
+
+
 
 .text-editor-space {
   display:relative;
@@ -58,10 +113,16 @@
 
 .main-text-editor {
   display:flex;
+  flex-grow: 1; /* should make it full stretch fully in the vertical direction? */
+  flex-direction: row;
+  height:100%;
 }
 
 .editor-container {
   flex-grow: 1; /* Expand the content area to take up the remaining space */
+  height:100%;
+  display:flex;
+  flex-direction:column;
 }
 
 .md-preview-panel {

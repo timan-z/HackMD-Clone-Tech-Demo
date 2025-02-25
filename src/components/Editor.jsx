@@ -117,7 +117,7 @@ function EditorContent() {
   // DEBUG: Below is for the Markdown rendering stuff:
   const [editorContent, setEditorContent] = useState(""); // Stores raw markdown.
   const [parsedContent, setParsedContent] = useState(""); // Stores parsed HTML.
-  const [showPreview, setShowPreview] = useState(false); // For the Preview Panel toggling...
+  const [showPreview, setShowPreview] = useState(true); // For the Preview Panel toggling...
   // DEBUG: Above is for the Markdown rendering stuff...
 
 
@@ -267,63 +267,99 @@ function EditorContent() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   return(
     <div className="editor-wrapper">
 
-      {/* "text-editor-space" will be the wrapping for the, well, text editor space: The "Text Editor" header, toolbar, and editor space
-      where the user can type their markdown text. By default, this is the left-hand side of the webpage. I want it to be organized top to bottom.
-      That is, the "Text Editor" header is at the top, followed by the toolbar, and then the editor space at the bottom... (style=relative )
-      DEBUG: Don't forget to tweak the CSS so it's centered as I want it, and that the editor space spans the full height of the page. */}
-      <div className="text-editor-space">
-        <h3>Text Editor</h3>
+      {/* DEBUG: Adding a toggle button for the Preview Panel: */}
+      {/* NOTE:+DEBUG: I AM GOING TO MOVE THE PREVIEW PANEL TOGGLE BUTTON OUTSIDE OF THE STUFF BELOW...
+      (IT SHOULD BE MOVED SOMEWHERE ELSE BUT FOR NOW I'M GOING TO KEEP IT OUT OF THE WAY). */}
+      <button className="toggle-preview-btn" onClick={() => setShowPreview(!showPreview)}>
+        {showPreview ? "Hide Preview": "Show Preview"}
+      </button>
 
-        {/* DEBUG: At this moment, the Toolbar is above the <h3>Text Editor</h3> -- I want it below it... which might be tricky given
-        that Toolbar isn't inserted here -- but figure out how I can rearrange things later... */}
-        
-        {/* "main-text-editor" is basically the wrapping for the editable text editor space -- it exists mostly so that the line numbers 
-        can align with the rows of the text editor (style=flex): */}
-        <div className="main-text-editor">
-          <div className="line-numbers">
-            {Array.from({ length: lineCount}, (_,i) => (
-              <div key={i+1}>{i + 1}</div>
-            ))}
-          </div>
 
-          <div className="editor-container">
-              <ContentEditable className="content-editable black-outline" onKeyDown={handleKeyInput} />
-              <PlainTextPlugin
-                placeholder={<div>Write here...</div>}
-                ErrorBoundary={LexicalErrorBoundary}
-              />
+
+
+
+      {/* Main Layout: It's going to be split view (lhs = editable text space; rhs = "preview panel"): */}
+
+      <div className={`editor-layout ${showPreview ? "split-view": "full-view"}`}>
+        {/* "text-editor-space" will be the wrapping for the, well, text editor space: The "Text Editor" header, toolbar, and editor space
+        where the user can type their markdown text. By default, this is the left-hand side of the webpage. I want it to be organized top to bottom.
+        That is, the "Text Editor" header is at the top, followed by the toolbar, and then the editor space at the bottom... (style=relative )
+        DEBUG: Don't forget to tweak the CSS so it's centered as I want it, and that the editor space spans the full height of the page. */}
+        <div className="text-editor-space">
+
+          <h3>Text Editor</h3>
+
+          {/* DEBUG: At this moment, the Toolbar is above the <h3>Text Editor</h3> -- I want it below it... which might be tricky given
+          that Toolbar isn't inserted here -- but figure out how I can rearrange things later... */}
+          
+          {/* "main-text-editor" is basically the wrapping for the editable text editor space -- it exists mostly so that the line numbers 
+          can align with the rows of the text editor (style=flex): */}
+          <div className="main-text-editor">
+            <div className="line-numbers">
+              {Array.from({ length: lineCount}, (_,i) => (
+                <div key={i+1}>{i + 1}</div>
+              ))}
+            </div>
+
+            <div className="editor-container">
+                <ContentEditable className="content-editable black-outline" onKeyDown={handleKeyInput} />
+                <PlainTextPlugin
+                  placeholder={<div>Write here...</div>}
+                  ErrorBoundary={LexicalErrorBoundary}
+                />
+            </div>
           </div>
         </div>
-      </div>
-        
-
-      <div className="preview-panel-space">
+          
 
 
-        
-        { /* DEBUG: Markdown Preview Panel (tweak it later). 
-        EDIT: Adding a thing so that it works with the Toggle-Preview button above... */ }
-        {showPreview && (
-          <>
-            <h3>Preview</h3>
-            <div className="markdown-preview" >
-              <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent}}/>
-            </div>
-          </>
-        )}
 
-        {/* DEBUG: Adding a toggle button for the Preview Panel: */}
-        <button className="toggle-preview-btn" onClick={() => setShowPreview(!showPreview)}>
-          {showPreview ? "Hide Preview": "Show Preview"}
-        </button>
+
+
+
+        <div className="preview-panel-space">
+          { /* DEBUG: Markdown Preview Panel (tweak it later). 
+          EDIT: Adding a thing so that it works with the Toggle-Preview button above... */ }
+          {showPreview && (
+            <>
+              <h3>Preview</h3>
+              <div className="markdown-preview" >
+                <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent}}/>
+              </div>
+            </>
+          )}
+        </div>
 
       </div>
-
     </div>
   );
+
+
+
+
+
+
+
+
+
+
 }
 
 function Editor() {
