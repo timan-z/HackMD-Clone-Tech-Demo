@@ -341,7 +341,8 @@ function EditorContent() {
             <>
               <h3>Preview</h3>
               <div className="markdown-preview" >
-                <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent}}/>
+                {/* NOTE: Need the "/\n/g,"<br>"" stuff because Markdown-It only recognizes newlines as <br>... */}
+                <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent.replace(/\n/g, "<br>") }}/>
               </div>
             </>
           )}
