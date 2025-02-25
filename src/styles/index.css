@@ -1,11 +1,13 @@
 
+.black-outline {
+  border: 1px solid black;
+}
+
+
 .content-editable {
   outline: none;
 
-
   background-color:lightgray; /* DEBUG: Tentative setting -- just so I can see the space I'm working with. */
-
-
 
   /* NOTE-TO-SELF: The styling below is necessary to incorporate typed text wraparound:
   - "word-wrap" and "overflow-wrap" make sure typed text wraps around.

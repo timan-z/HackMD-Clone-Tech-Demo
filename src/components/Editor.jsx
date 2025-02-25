@@ -113,12 +113,13 @@ function EditorContent() {
 
   const [editor] = useLexicalComposerContext();
   const [lineCount, setLineCount] = useState(1); // 1 line is the default.
-  
 
   // DEBUG: Below is for the Markdown rendering stuff:
   const [editorContent, setEditorContent] = useState(""); // Stores raw markdown.
   const [parsedContent, setParsedContent] = useState(""); // Stores parsed HTML.
+  const [showPreview, setShowPreview] = useState(false); // For the Preview Panel toggling...
   // DEBUG: Above is for the Markdown rendering stuff...
+
 
 
 
@@ -272,7 +273,7 @@ function EditorContent() {
         </div>
 
         <div className="editor-container">
-            <ContentEditable className="content-editable" onKeyDown={handleKeyInput} />
+            <ContentEditable className="content-editable black-outline" onKeyDown={handleKeyInput} />
             <PlainTextPlugin
               placeholder={<div>Write here...</div>}
               ErrorBoundary={LexicalErrorBoundary}
@@ -283,12 +284,21 @@ function EditorContent() {
 
 
 
-      { /* DEBUG: Markdown Preview Panel (tweak it later). */ }
-      <h3>Preview</h3>
-      <div className="markdown-preview">
-        <div className="md-preview-panel" dangerouslySetInnerHTML={{ __html: parsedContent}}/>
-      </div>
 
+      {/* DEBUG: Adding a toggle button for the Preview Panel: */}
+      <button className="toggle-preview-btn" onClick={() => setShowPreview(!showPreview)}>
+        {showPreview ? "Hide Preview": "Show Preview"}
+      </button>
+      { /* DEBUG: Markdown Preview Panel (tweak it later). 
+      EDIT: Adding a thing so that it works with the Toggle-Preview button above... */ }
+      {showPreview && (
+        <>
+          <h3>Preview</h3>
+          <div className="markdown-preview" >
+            <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent}}/>
+          </div>
+        </>
+      )}
 
     </div>
   );
