@@ -1,0 +1,7 @@
+For the MarkdownIt Markdown Parser that I'm using:
+- It recognizes Bold, Italics, Strikethrough, Heading, Code, Generic List, Numbered List, Creat Link, Create Table, Create Line
+
+- It does NOT recognize Quote and CheckList (<-- so I'm probably going to need to look into extra support for this stuff or whatever,
+lookup what the HackMD people did and mimic them).
+^ CheckList kinda works if you just want to use the raw text manually (typing an "X" or something inbetween the [] lol).
+^ Quote and the CheckList HackMD uses is definitely some external stuff they added themselves...

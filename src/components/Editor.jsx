@@ -261,24 +261,32 @@ function EditorContent() {
 
   return(
     <div className="editor-wrapper">
-      <div className="line-numbers">
-        {Array.from({ length: lineCount}, (_,i) => (
-          <div key={i+1}>{i + 1}</div>
-        ))}
+
+      <h3>Text Editor</h3>
+      <div className="main-text-editor"> 
+        
+        <div className="line-numbers">
+          {Array.from({ length: lineCount}, (_,i) => (
+            <div key={i+1}>{i + 1}</div>
+          ))}
+        </div>
+
+        <div className="editor-container">
+            <ContentEditable className="content-editable" onKeyDown={handleKeyInput} />
+            <PlainTextPlugin
+              placeholder={<div>Write here...</div>}
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+        </div>
+        
       </div>
 
-      <div className="editor-container">
-          <ContentEditable className="content-editable" onKeyDown={handleKeyInput} />
-          <PlainTextPlugin
-            placeholder={<div>Write here...</div>}
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-      </div>
+
 
       { /* DEBUG: Markdown Preview Panel (tweak it later). */ }
+      <h3>Preview</h3>
       <div className="markdown-preview">
-        <h3>Preview</h3>
-        <div dangerouslySetInnerHTML={{ __html: parsedContent}}/>
+        <div className="md-preview-panel" dangerouslySetInnerHTML={{ __html: parsedContent}}/>
       </div>
 
 
