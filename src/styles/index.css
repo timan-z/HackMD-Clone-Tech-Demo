@@ -86,7 +86,6 @@
 
 /* Editor content should fill the available space: */
 .editor-container, .md-preview-panel {
-  /*white-space: pre-wrap;*/ /* DEBUG: "keeps line breaks" */
   word-wrap: break-word;
   width:100%;
   height:100%;
