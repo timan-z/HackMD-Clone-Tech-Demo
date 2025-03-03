@@ -307,6 +307,10 @@ function EditorContent() {
 
           <h3>Text Editor</h3>
 
+
+          <Toolbar />
+
+
           {/* DEBUG: At this moment, the Toolbar is above the <h3>Text Editor</h3> -- I want it below it... which might be tricky given
           that Toolbar isn't inserted here -- but figure out how I can rearrange things later... */}
           
@@ -347,16 +351,6 @@ function EditorContent() {
       </div>
     </div>
   );
-
-
-
-
-
-
-
-
-
-
 }
 
 function Editor() {

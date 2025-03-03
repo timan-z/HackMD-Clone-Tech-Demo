@@ -10,11 +10,6 @@ const md = new MarkdownIt({
 
 // This function below is supposed to take Markdown text and convert it to HTML:
 export const parseMarkdown = (markdownText) => {
-
-
-    
-
-    // this works below:
     console.log("parseMarkdown-DEBUG: [", JSON.stringify(markdownText), "]");
     //let parsedContent = md.render(markdownText.replace(/\n/g, "<br>"));
     let parsedContent = md.render(markdownText);
