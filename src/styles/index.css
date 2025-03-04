@@ -94,11 +94,15 @@
 /* DEBUG: Everything ABOVE is for making the LHS/RHS, Text Editor, Preview Panel 50/50 thing work! */
 
 .text-editor-space {
-  display:relative;
+  /*display:relative;*/
+  flex: 0 0 auto !important; 
+  /* ^ so I have flex:1; activated in one of the things above, which tells the panels to be in a 50/50 split, but
+  i need to override that here. */
 }
 
 .preview-panel-space {
-  display:relative;
+  /*display:relative;*/
+  flex: 0 0 auto !important; 
 }
 
 
@@ -128,3 +132,18 @@
   max-width: 100%;
   box-sizing: border-box;
 }
+
+.resizeTEPP {
+  width: 25px; /* debug: Thin draggable area */
+  cursor: ew-resize; /* debug: Change cursor when hovering over it */
+  /*background: #ccc; /* debug: Light gray bar */
+  background: red;
+  transition: background 0.2s ease-in-out;
+  border: 3px solid black;
+}
+
+.resizeTEPP:hover {
+  background: #888; /* debug: Darker gray when hovered */
+}
+
+

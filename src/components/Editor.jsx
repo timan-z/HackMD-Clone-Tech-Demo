@@ -14,7 +14,7 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 
 // 1. DEBUG: [1/2] Two lines below were added for the line numbering feature...
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import Toolbar from "./Toolbar.jsx";
 import { $getRoot, $getSelection, $isRangeSelection, $isTextNode, $isLineBreakNode, RootNode } from 'lexical';
@@ -122,6 +122,12 @@ function EditorContent() {
 
 
 
+  // DEBUG: Below is for the "draggable space" I've added for the Text Editor and Preview Panel...
+  const [editorWidth, setEditorWidth] = useState(50); // debug: Initial width percentage
+  const isResizing = useRef(false);
+  // DEBUG: Above is for the "draggable space" I've added for the Text Editor and Preview Panel...
+
+
 
   useEffect(() => {
     const unregister = editor.registerUpdateListener(({ editorState }) => {
@@ -149,6 +155,44 @@ function EditorContent() {
       unregister();
     };
   }, [editor]);
+
+
+  // DEBUG: The const functions below are for the "draggable" space between the Text Editor and Preview Panel.
+  const handleMouseDown = (event) => {
+    // "handleMouseDown" as in you begin to click *down* on the "draggable" space and it's now "draggable"
+
+    console.log("DEBUG: Mouse Down...");
+
+    isResizing.current = true;
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+  const handleMouseMove = (event) => {
+    if (isResizing.current) {
+
+      console.log("DEBUG: Mouse Moving... ");
+
+      const newWidth = (event.clientX / window.innerWidth) * 100; // debug: Convert px to %
+      const clampedWidth = Math.max(30, Math.min(70, newWidth));
+
+      console.log("DEBUG: ", clampedWidth);
+
+      setEditorWidth(clampedWidth); // debug: Clamp width between 30% - 70%
+    }
+  };
+  const handleMouseUp = () => {
+
+    console.log("DEBUG: Mouse up...");
+
+    isResizing.current = false;
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+  };
+  // DEBUG: The const functions above are for the "draggable" space between the Text Editor and Preview Panel.
+
+
+
+
 
   // Configuring event listeners for certain keys:
   const handleKeyInput = (event) => {
@@ -292,7 +336,7 @@ function EditorContent() {
         where the user can type their markdown text. By default, this is the left-hand side of the webpage. I want it to be organized top to bottom.
         That is, the "Text Editor" header is at the top, followed by the toolbar, and then the editor space at the bottom... (style=relative )
         DEBUG: Don't forget to tweak the CSS so it's centered as I want it, and that the editor space spans the full height of the page. */}
-        <div className="text-editor-space">
+        <div className="text-editor-space" style={{ width: `${editorWidth}%`}}>
 
           <h3>Text Editor</h3>
 
@@ -325,21 +369,19 @@ function EditorContent() {
 
 
 
-        <div className="preview-panel-space">
-          { /* DEBUG: Markdown Preview Panel (tweak it later). 
-          EDIT: Adding a thing so that it works with the Toggle-Preview button above... */ }
-          {showPreview && (
-            <>
-              <h3>Preview</h3>
 
-              <div className="markdown-preview" >
-                {/* NOTE: Need the "/\n/g,"<br>"" stuff because Markdown-It only recognizes newlines as <br>... */}
-                <div className="md-preview-panel black-outline" style={{ whiteSpace: "normal" }} dangerouslySetInnerHTML={{ __html: parsedContent }}/>
-                {/* .replace(/\n/g, "<br>") */}
-              </div>
-            </>
-          )}
-        </div>
+        {/* Adding a "resizable divider" between the Text Editor and the Preview Panel such that I can drag it left or right
+        to increase the Text Editor width/decrease the Preview Panel width or vice versa (just like HackMD does it). */}
+        {showPreview && <div className="resizeTEPP" onMouseDown={handleMouseDown}></div>}
+
+        {showPreview && 
+          <div className="preview-panel-space" style={{ width: `${100 - editorWidth}%`}}>
+            <h3>Preview</h3>
+            <div className="markdown-preview">
+              <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent }} />
+            </div>
+          </div>        
+        }
 
       </div>
     </div>
