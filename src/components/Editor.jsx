@@ -340,9 +340,7 @@ function EditorContent() {
 
           <h3>Text Editor</h3>
 
-
           <Toolbar />
-
 
           {/* DEBUG: At this moment, the Toolbar is above the <h3>Text Editor</h3> -- I want it below it... which might be tricky given
           that Toolbar isn't inserted here -- but figure out how I can rearrange things later... */}
@@ -366,23 +364,17 @@ function EditorContent() {
           </div>
         </div>
 
-
-
-
-
         {/* Adding a "resizable divider" between the Text Editor and the Preview Panel such that I can drag it left or right
         to increase the Text Editor width/decrease the Preview Panel width or vice versa (just like HackMD does it). */}
-        {showPreview && <div className="resizeTEPP" onMouseDown={handleMouseDown}></div>}
+        <div className="resizeTEPP" onMouseDown={handleMouseDown}></div>
 
-        {showPreview && 
-          <div className="preview-panel-space" style={{ width: `${100 - editorWidth}%`}}>
-            <h3>Preview</h3>
-            <div className="markdown-preview">
-              <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent }} />
-            </div>
-          </div>        
-        }
-
+        <div className="preview-panel-space" style={{ width: `${100 - editorWidth}%`}}>
+          <h3>Preview</h3>
+          <div className="markdown-preview">
+            <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent }} />
+          </div>
+        </div>        
+        
       </div>
     </div>
   );

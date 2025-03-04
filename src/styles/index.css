@@ -72,7 +72,7 @@
 
 /* General styles for the text editor and preview panel: */
 .text-editor-space, .preview-panel-space {
-  padding:8px;
+  /*padding:8px;*/
   height:100%;
   display:flex;
   flex-direction:column;
