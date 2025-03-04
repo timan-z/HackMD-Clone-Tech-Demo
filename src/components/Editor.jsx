@@ -285,17 +285,6 @@ function EditorContent() {
   return(
     <div className="editor-wrapper">
 
-      {/* DEBUG: Adding a toggle button for the Preview Panel: */}
-      {/* NOTE:+DEBUG: I AM GOING TO MOVE THE PREVIEW PANEL TOGGLE BUTTON OUTSIDE OF THE STUFF BELOW...
-      (IT SHOULD BE MOVED SOMEWHERE ELSE BUT FOR NOW I'M GOING TO KEEP IT OUT OF THE WAY). */}
-      <button className="toggle-preview-btn" onClick={() => setShowPreview(!showPreview)}>
-        {showPreview ? "Hide Preview": "Show Preview"}
-      </button>
-
-
-
-
-
       {/* Main Layout: It's going to be split view (lhs = editable text space; rhs = "preview panel"): */}
 
       <div className={`editor-layout ${showPreview ? "split-view": "full-view"}`}>
@@ -332,13 +321,17 @@ function EditorContent() {
             </div>
           </div>
         </div>
-          
+
+
+
+
         <div className="preview-panel-space">
           { /* DEBUG: Markdown Preview Panel (tweak it later). 
           EDIT: Adding a thing so that it works with the Toggle-Preview button above... */ }
           {showPreview && (
             <>
               <h3>Preview</h3>
+
               <div className="markdown-preview" >
                 {/* NOTE: Need the "/\n/g,"<br>"" stuff because Markdown-It only recognizes newlines as <br>... */}
                 <div className="md-preview-panel black-outline" style={{ whiteSpace: "normal" }} dangerouslySetInnerHTML={{ __html: parsedContent }}/>
@@ -357,7 +350,6 @@ function Editor() {
   return (
     <LexicalComposer initialConfig={initialConfig}>
 
-      <Toolbar />
       {/* NOTE-TO-SELF:
       The structure below is a little weird but the way I'm understanding it is that "<ContentEditable/>" is the main
       text-entry area and the <PlainTextPlugin> beneath basically scaffolds this area (hence "contentEditable={<ContentEditable/>")

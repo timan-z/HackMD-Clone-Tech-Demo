@@ -72,7 +72,7 @@
 
 /* General styles for the text editor and preview panel: */
 .text-editor-space, .preview-panel-space {
-  padding:10px;
+  padding:8px;
   height:100%;
   display:flex;
   flex-direction:column;
@@ -92,14 +92,6 @@
 }
 
 /* DEBUG: Everything ABOVE is for making the LHS/RHS, Text Editor, Preview Panel 50/50 thing work! */
-
-
-
-
-
-
-
-
 
 .text-editor-space {
   display:relative;
