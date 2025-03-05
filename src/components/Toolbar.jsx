@@ -575,64 +575,49 @@ function Toolbar() {
 
 
     // Sep Function for applying the Image insertion:
-    const applyMarkdownFormatImage = (editor) => {
-        // this creates an input element for file/image selection (will be initiated with a .click() at the bottom of this func):
-        const inputFile = document.createElement('input');
-        inputFile.type = 'file';
-        inputFile.accept = 'image/*';
-        inputFile.multiple = false; // NOTE: JUST FOR NOW. HackMD for multiple files to be selected.
+    const applyMarkdownFormatImage = (editor) => {    
+        // So I'm using Cloudinary here. I'll be uploading files to the server via their widget...
+        window.cloudinary.openUploadWidget(
+            {
+                cloudName: cloudName,
+                uploadPreset: cloudUploadPreset,
+                sources: ["local", "url", "camera"],
+                multiple:false,
+                theme: "minimal",
+            },
+            (error, result) => {
+                if(result && result.event === "success") {
+                    // When the upload is successful, handle the result:
+                    const uploadedImageURL = result.info.secure_url;
+                    console.log("DEBUG: IMAGE HAS BEEN SENT TO THE CLOUDINARY SERVER!!!");
 
-        inputFile.onchange = async (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
+                    // Adding the uploaded image URL into the Text Editor space:
+                    editor.update(() => {
 
+                        console.log("INSIDE-DEBUG: IS THIS PART BEING ENTERED?");
 
-            console.log("DEBUG: The value of cloudName is: ", cloudName);
-            console.log("DEBUG: The value of cloudUploadPreset is: [", cloudUploadPreset, "]");
+                        const selection = $getSelection();
 
+                        console.log("INSIDE-DEBUG: The value of selection is [", selection, "]");
 
-            // So I'm using Cloudinary here. I'll be uploading files to the server via their widget...
-            window.cloudinary.openUploadWidget(
-                {
-                    cloudName: cloudName,
-                    uploadPreset: cloudUploadPreset,
-                    sources: ["local", "url", "camera"],
-                    multiple:false,
-                    theme: "minimal",
-                },
-                (error, result) => {
-                    if(result && result.event === "success") {
-                        // When the upload is successful, handle the result:
-                        const uploadedImageURL = result.info.secure_url;
-                        console.log("DEBUG: IMAGE HAS BEEN SENT TO THE CLOUDINARY SERVER!!!");
+                        if(!$isRangeSelection(selection)) {
+                            return;
+                        }
+                        let selectionText = selection.getTextContent();
+                        const imageMDFormat = `![Image](${uploadedImageURL})`;
+                        selection.insertText(`${selectionText}${imageMDFormat}`);
 
-                        // Adding the uploaded image URL into the Text Editor space:
-                        editor.update(() => {
-
-                            console.log("INSIDE-DEBUG: IS THIS PART BEING ENTERED?");
-
-                            const selection = $getSelection();
-
-                            console.log("INSIDE-DEBUG: The value of selection is [", selection, "]");
-
-                            if(!$isRangeSelection(selection)) {
-                                return;
-                            }
-                            let selectionText = selection.getTextContent();
-                            const imageMDFormat = `![Image](${uploadedImageURL})`;
-                            selection.insertText(`${selectionText}${imageMDFormat}`);
-
-                            // Add a line break after the image
-                            const updatedSelection = $getSelection();
-                            const lineBreakNode = $createLineBreakNode();
-                            updatedSelection.insertNodes([lineBreakNode]);
-                        });
-                    } else {
-                        console.error("Upload Failed: ", error);
-                    }
+                        // Add a line break after the image
+                        const updatedSelection = $getSelection();
+                        const lineBreakNode = $createLineBreakNode();
+                        updatedSelection.insertNodes([lineBreakNode]);
+                    });
+                } else {
+                    console.error("Upload Failed: ", error);
                 }
-            );
-        };
+            }
+        );
+        
         
         // Triggering the file input click event that starts everything above:
         inputFile.click();
