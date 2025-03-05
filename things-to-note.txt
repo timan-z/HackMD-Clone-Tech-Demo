@@ -1,15 +1,4 @@
 To do list:
 - Add a dropdown button that lets you select the colour background for BOTH the text editor AND the render panel (also maybe a dropdown button for changing the text font).
 
-- Need to figure out a way to have the Toolbar be under the "Text Editor" header (I can probably leave this for later).
-
-- I want to move the render panel to be side-by-side with the text editor (have kinda done this already but I want to play with the CSS to make it look proper).
-Then I can have a button that makes it full screen for just the render panel.
-(You can hide the render panel so that it's just full screen for the Text Editor).
-^ want to change it so that it's side-by-side by default (no longer hidden is preview panel -- it's open by default)
-
-- I want to have the "Hide Preview"/"Show Preview" button to be placed better in some way (a better place where it's positioned).
-
-- Noticed another issue where if I begin the text editor with a series of newlines, that will not be recognized in the render panel...
-(I don't know if this is big enough of an issue to fix? -- It might be something I just leave in, seems like a weird thing to put the effort
-into fixing tbh).
+- *Maybe* I should get rid of the line numbers things if it's too complex to make it work with the super lengthy single-line text that goes to a new line (and instead just add a "line counters" thing to the bottom of the Text Editor panel).

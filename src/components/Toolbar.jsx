@@ -6,9 +6,6 @@ import React from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, $isTextNode, $createTextNode, $createLineBreakNode, $getRoot, COMMAND_PRIORITY_CRITICAL, $isParagraphNode } from "lexical";
 
-
-
-
 /* ^ NOTE-TO-SELF:
 - $getSelection is pretty self explanatory
 - $isRangeSelection is a type-checking function verifying the current selection is a range selection. (Empty highlighted space counts). 
@@ -547,22 +544,111 @@ function Toolbar() {
         });
     }
 
-    const debugFunction = (editor) => {
-        editor.update(() => {
-            const selection = $getSelection();
-            const selectedText = selection.getTextContent();
-            let {anchor} = selection;
-            let anchorNode = anchor.getNode();
 
-            console.log("DEBUG-FUNCTION: The value of anchor.offset is: [", anchor.offset, "]");
-            console.log("DEBUG-FUNCTION: The value of anchorNode.getKey() is: [", anchorNode.getKey(), "]");
 
-            /* So I know that when the cursor is on an empty-line post-newline insertion, anchorNode.getKey() will always have value of 2
-            and anchor.offset will basically correspond to all of the combined lineBreakNodes and textNodes preceding this empty line that
-            the cursor currently rests on. */
 
-        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Sep Function for applying the Image insertion:
+    const applyMarkdownFormatImage = (editor) => {
+        // this creates an input element for file/image selection (will be initiated with a .click() at the bottom of this func):
+        const inputFile = document.createElement('input');
+        inputFile.type = 'file';
+        inputFile.accept = 'image/*';
+        inputFile.multiple = true; // NOTE: HackMD for multiple files to be selected.
+
+        // when files are selected:
+        inputFile.onchange = (e) => {
+            const files = e.target.files;
+            // no files were selected/uploaded:
+            if(!files || files.length === 0) {
+                return;
+            }
+
+            /* NOTE: I will be using Base64 to encrypt the uploaded images as B64 strings.
+            This approach has its limitations but at the end of the day I'm not trying to get too fancy (B64 is self-contained).
+            I just want something that *works* here... */
+
+            // Iterate through each file and read them as B64:
+            Array.from(files).forEach((file) => {
+                const reader = new FileReader();
+
+                // onloadend = when the file is fully read
+                reader.onloadend = () => {
+                    const base64Image = reader.result;
+
+                    // inserting the base64 image string into the Text Editor space under the proper format:
+                    editor.update(() => {
+                        const selection = $getSelection();
+                        if(!$isRangeSelection(selection)) {
+                            return;
+                        }
+                        let selectionText = selection.getTextContent();
+                        const imageMDFormat = `![Image](${base64Image})`;
+                        selection.insertText(`${selectionText}${imageMDFormat}`);
+                        // adding a linebreak after the image:
+                        const updatedSelection = $getSelection();
+                        const lineBreakNode = $createLineBreakNode();
+                        updatedSelection.insertNodes([lineBreakNode]);
+                    });
+                };
+
+                // Read the selected image file as a Base64 Data URL (a string representing an image) aka trigger the onloadend above:
+                reader.readAsDataURL(file); 
+            });
+        }
+
+        // trigger the stuff above:
+        inputFile.click();
     }
+    //const imageUrl = prompt("Enter image URL or upload an image (URL format)");
+    // NOTE: ^ maybe also add an option (separate button) to add images via URL using this later ^ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -635,26 +721,10 @@ function Toolbar() {
             applyMarkdownFormatHLine(editor)
         }}>LINE</button>
 
-
-
-
-
-        {/* Creating a DEBUG button */}
+        {/* Creating the button that responds to "Insert image" */}
         <button onClick={()=> {
-            debugFunction(editor)
-        }}>DEBUG</button>
-
-
-
-
-
-        {/*
-        [NOTE: these two at the end i can leave for later -- after doing horizontal line + table, try getting the dual view screen
-        thing started and up on the view... (ig after the thing i need to write similar to the tab key you know what im talking about)]
-        - For the Leave Comment button, bit more complicated so just go see the HackMD stuff.
-        - I can leave the Insert Image button last because there's extra work that needs to go into that...
-        */}
-
+            applyMarkdownFormatImage(editor)
+        }}>IMAGE</button>
 
     </div>);
 }

@@ -7,7 +7,8 @@ it does seem to work and if I remove it the emote for the checkbox dissapears. *
 const md = new MarkdownIt({
     html: true,
     linkify: true,
-    typographer: true
+    typographer: true,
+    breaks: true
 }).use(markdownItTaskLists);
 
 // This function below is supposed to take Markdown text and convert it to HTML:
