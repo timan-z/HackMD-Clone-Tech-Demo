@@ -1,8 +1,5 @@
 import React from 'react';
 
-
-
-
 /* NOTE-TO-SELF: It is probably best practice to do all of these Lexical imports below individually
 (specifying /react/...) -- wasted too much time figuring out why nothing was appearing
 on screen when I tried to group import them all from @lexical/react smh. */
@@ -304,20 +301,6 @@ function EditorContent() {
       });
     }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

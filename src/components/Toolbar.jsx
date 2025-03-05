@@ -567,14 +567,30 @@ function Toolbar() {
 
 
 
+    // Sep Function for applying the Image insertion:
+    const applyMarkdownFormatImage = (editor) => {
+        // this creates an input element for file/image selection (will be initiated with a .click() at the bottom of this func):
+        const inputFile = document.createElement('input');
+        inputFile.type = 'file';
+        inputFile.accept = 'image/*';
+        inputFile.multiple = false; // NOTE: JUST FOR NOW. HackMD for multiple files to be selected.
 
+        inputFile.onchange = async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+
+        }
+
+
+    }
 
 
 
 
 
     // Sep Function for applying the Image insertion:
-    const applyMarkdownFormatImage = (editor) => {
+    // DEBUG: SCRAPPING THIS -- NO LONGER GOING FOR B64 ENCODING...
+    /*const applyMarkdownFormatImage = (editor) => {
         // this creates an input element for file/image selection (will be initiated with a .click() at the bottom of this func):
         const inputFile = document.createElement('input');
         inputFile.type = 'file';
@@ -591,7 +607,7 @@ function Toolbar() {
 
             /* NOTE: I will be using Base64 to encrypt the uploaded images as B64 strings.
             This approach has its limitations but at the end of the day I'm not trying to get too fancy (B64 is self-contained).
-            I just want something that *works* here... */
+            I just want something that *works* here... 
 
             // Iterate through each file and read them as B64:
             Array.from(files).forEach((file) => {
@@ -624,7 +640,7 @@ function Toolbar() {
 
         // trigger the stuff above:
         inputFile.click();
-    }
+    }*/
     //const imageUrl = prompt("Enter image URL or upload an image (URL format)");
     // NOTE: ^ maybe also add an option (separate button) to add images via URL using this later ^ 
 

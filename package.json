@@ -12,6 +12,8 @@
   "dependencies": {
     "@lexical/markdown": "^0.23.1",
     "@lexical/react": "^0.23.1",
+    "cloudinary": "^2.5.1",
+    "cloudinary-react": "^1.8.1",
     "lexical": "^0.23.1",
     "markdown-it": "^14.1.0",
     "markdown-it-task-lists": "^2.1.1",
