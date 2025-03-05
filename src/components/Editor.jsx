@@ -117,12 +117,21 @@ function EditorContent() {
   const [showPreview, setShowPreview] = useState(true); // For the Preview Panel toggling...
   // DEBUG: Above is for the Markdown rendering stuff...
 
-
-
   // DEBUG: Below is for the "draggable space" I've added for the Text Editor and Preview Panel...
   const [editorWidth, setEditorWidth] = useState(50); // debug: Initial width percentage
   const isResizing = useRef(false);
   // DEBUG: Above is for the "draggable space" I've added for the Text Editor and Preview Panel...
+
+  // DEBUG: Below is for the Text Editor and Preview Panel toggle view thing:
+  const [viewMode, setViewMode] = useState("split"); // default state.
+  // DEBUG: Above is for the Text Editor and Preview Panel toggle view thing...
+
+
+  // DEBUG: Functions below are for the Text Editor and Preview Panel toggle view thing:
+  const handleViewChange = (mode) => {
+    setViewMode(mode);
+  };
+  // DEBUG: Functions above are for the Text Editor and Preview Panel toggle view thing...
 
 
 
@@ -186,10 +195,6 @@ function EditorContent() {
     document.removeEventListener("mouseup", handleMouseUp);
   };
   // DEBUG: The const functions above are for the "draggable" space between the Text Editor and Preview Panel.
-
-
-
-
 
   // Configuring event listeners for certain keys:
   const handleKeyInput = (event) => {
@@ -302,28 +307,44 @@ function EditorContent() {
     }
   }
 
-
-
-
-
-
-
-
   return(
     <div className="editor-wrapper">
 
-
-
       {/*<h1>SOMETHING SOMETHING SOMETHING</h1>*/}
-      <h1>HACKMD CLONE!!!</h1>
+      {/*<h1>HACKMD CLONE!!!</h1>*/}
       {/* Target tommorow is to do the TEXT-EDITOR-ONLY|SPLIT-VIEW(DEFAULT)|PREV-PANEL-ONLY thing... */}
+      {/* ^ This should not be that hard since I already figured out how to do the "Hide Preview" and "Show Preview" button.
+      The middle button is basically default state of fairs; text-editor-only is basically "Hide Preview" and prev-panel-only
+      is basically "Hide Text Editor"  */}
+      <div className="editor-preview-overhead">
+        <h1>HACKMD CLONE!!!</h1>
+        <div className="editor-preview-toggle">
+          <button onClick={()=> handleViewChange("editor-only")} disabled={viewMode==="editor-only"}>Text Editor</button>
+          <button onClick={()=> handleViewChange("split")} disabled={viewMode==="split"}>Split-View</button>
+          <button onClick={()=> handleViewChange("preview-only")} disabled={viewMode==="preview-only"}>Preview Panel</button>
+        </div>
+      </div>
+
+
+
+
+
 
       {/* Main Layout: It's going to be split view (lhs = editable text space; rhs = "preview panel"): */}
-      <div className={`editor-layout ${showPreview ? "split-view": "full-view"}`}>
+      <div className="editor-layout">
+
+
+
         {/* "text-editor-space" will be the wrapping for the, well, text editor space: The "Text Editor" header, toolbar, and editor space
         where the user can type their markdown text. By default, this is the left-hand side of the webpage. I want it to be organized top to bottom.
         That is, the "Text Editor" header is at the top, followed by the toolbar, and then the editor space at the bottom... (style=relative )
         DEBUG: Don't forget to tweak the CSS so it's centered as I want it, and that the editor space spans the full height of the page. */}
+        
+        
+
+        
+        
+        
         <div className="text-editor-space" style={{ width: `${editorWidth}%`}}>
 
           <h3>Text Editor</h3>
@@ -351,6 +372,14 @@ function EditorContent() {
             </div>
           </div>
         </div>
+
+
+
+
+
+
+
+
 
         {/* Adding a "resizable divider" between the Text Editor and the Preview Panel such that I can drag it left or right
         to increase the Text Editor width/decrease the Preview Panel width or vice versa (just like HackMD does it). */}
