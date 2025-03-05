@@ -75,19 +75,19 @@
 }
 
 /* For when the preview panel is hidden: */
-.editor-layout.full-view .text-editor-space {
+.editor-layout.full-view .text-editor-space-split
+.editor-layout.full-view .preview-panel-space-split {
   width: 100%;
 }
 
 /* For when the preview panel is active: */
-.editor-layout.split-view .text-editor-space,
-.editor-layout.split-view .preview-panel-space {
+.editor-layout.split-view .text-editor-space-split,
+.editor-layout.split-view .preview-panel-space-split {
   flex: 1;
 }
 
 /* General styles for the text editor and preview panel: */
-.text-editor-space, .preview-panel-space {
-  /*padding:8px;*/
+.text-editor-space-split, .preview-panel-space-split {
   height:100%;
   display:flex;
   flex-direction:column;
@@ -108,17 +108,37 @@
 
 /* DEBUG: Everything ABOVE is for making the LHS/RHS, Text Editor, Preview Panel 50/50 thing work! */
 
-.text-editor-space {
+
+
+/* DEBUG: Everything below is for the Text Editor Preview Toggle Functionality... */
+.text-editor-space-split {
   /*display:relative;*/
-  flex: 0 0 auto !important; 
+  flex: 0 0 auto !important;
+  /*flex:1;*/
   /* ^ so I have flex:1; activated in one of the things above, which tells the panels to be in a 50/50 split, but
   i need to override that here. */
 }
-
-.preview-panel-space {
+.preview-panel-space-split {
   /*display:relative;*/
-  flex: 0 0 auto !important; 
+  flex: 0 0 auto !important;
+  /*flex:1;*/
 }
+.text-editor-space-full {
+  flex:1; 
+  /* flex:1; will make it so that the whole screen width is taken up (0 0 auto etc prevents it but makes the draggable divider work). 
+  DEBUG: ^ wait no this is not true, there's other stuff I need to add too, just looks like this way because my css is really messy (need to fix). */
+}
+.preview-panel-space-full {
+  flex:1;
+}
+/* DEBUG: Everything above is for the Text Editor Preview Toggle Functionality... */
+
+
+
+
+
+
+
 
 
 

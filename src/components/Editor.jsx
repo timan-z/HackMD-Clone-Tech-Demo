@@ -127,11 +127,52 @@ function EditorContent() {
   // DEBUG: Above is for the Text Editor and Preview Panel toggle view thing...
 
 
+
+
+
+
+
   // DEBUG: Functions below are for the Text Editor and Preview Panel toggle view thing:
   const handleViewChange = (mode) => {
     setViewMode(mode);
+
+    let textEdSpace = document.getElementById("text-editor-space");
+    let prevPanSpace = document.getElementById("preview-panel-space");
+
+    if(mode === "split") {
+      prevPanSpace.classList.remove("preview-panel-space-full");
+      prevPanSpace.classList.add("preview-panel-space-split");
+      textEdSpace.classList.remove("text-editor-space-full");
+      textEdSpace.classList.add("text-editor-space-split");
+    } else if(mode === "editor-only") {
+      textEdSpace.classList.remove("text-editor-space-split");
+      textEdSpace.classList.add("text-editor-space-full");
+    } else {
+      prevPanSpace.classList.remove("preview-panel-space-split");
+      prevPanSpace.classList.add("preview-panel-space-full");
+    }
+
+    // if mode === "split"
+    // if mode === "editor-only"
+    // if mode === "preview-only"
+
+    /* SOME ISSUES TO TAKE CARE OF:
+    - When Preview Panel is empty and I change to its full view, it will reduce in height (sure this is an easy CSS fix though).
+    - When I return to Split after either full view, the draggable divider bar bloats back to the fat red rectangle... (also likely
+    a CSS thing that I'm missing somewhere).
+
+
+    */
+
+
   };
   // DEBUG: Functions above are for the Text Editor and Preview Panel toggle view thing...
+
+
+
+
+
+
 
 
 
@@ -325,27 +366,15 @@ function EditorContent() {
         </div>
       </div>
 
-
-
-
-
-
       {/* Main Layout: It's going to be split view (lhs = editable text space; rhs = "preview panel"): */}
-      <div className="editor-layout">
-
-
+      <div className={`editor-layout ${viewMode === "split" ? "split-view" : "full-view"}`}>
 
         {/* "text-editor-space" will be the wrapping for the, well, text editor space: The "Text Editor" header, toolbar, and editor space
         where the user can type their markdown text. By default, this is the left-hand side of the webpage. I want it to be organized top to bottom.
         That is, the "Text Editor" header is at the top, followed by the toolbar, and then the editor space at the bottom... (style=relative )
         DEBUG: Don't forget to tweak the CSS so it's centered as I want it, and that the editor space spans the full height of the page. */}
         
-        
-
-
-        
-        
-        {(viewMode === "split" || viewMode === "editor-only") && (<div className="text-editor-space" style={{ width: `${editorWidth}%`}}>
+        {(viewMode === "split" || viewMode === "editor-only") && (<div id="text-editor-space" className="text-editor-space-split" style={{ width: `${editorWidth}%`}}>
 
           <h3>Text Editor</h3>
 
@@ -377,17 +406,13 @@ function EditorContent() {
         to increase the Text Editor width/decrease the Preview Panel width or vice versa (just like HackMD does it). */}
         {viewMode === "split" && <div className="resizeTEPP" onMouseDown={handleMouseDown}></div>}
 
-        {(viewMode === "split" || viewMode === "preview-only") && (<div className="preview-panel-space" style={{ width: `${100 - editorWidth}%`}}>
+        {(viewMode === "split" || viewMode === "preview-only") && (<div id="preview-panel-space" className="preview-panel-space-split" style={{ width: `${100 - editorWidth}%`}}>
           <h3>Preview</h3>
           <div className="markdown-preview">
             <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent }} />
           </div>
         </div>)}
         
-
-        
-
-
       </div>
     </div>
   );
