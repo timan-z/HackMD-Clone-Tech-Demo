@@ -572,9 +572,8 @@ function Toolbar() {
 
 
 
-
-
     // Sep Function for applying the Image insertion:
+    // NOTE: Worry about optimization and that other stuff yourself later... (probably just some extra stuff to add to the cloudName: cloudName area tbh).
     const applyMarkdownFormatImage = (editor) => {    
         // So I'm using Cloudinary here. I'll be uploading files to the server via their widget...
         window.cloudinary.openUploadWidget(

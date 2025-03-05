@@ -312,8 +312,13 @@ function EditorContent() {
   return(
     <div className="editor-wrapper">
 
-      {/* Main Layout: It's going to be split view (lhs = editable text space; rhs = "preview panel"): */}
 
+
+      {/*<h1>SOMETHING SOMETHING SOMETHING</h1>*/}
+      <h1>HACKMD CLONE!!!</h1>
+      {/* Target tommorow is to do the TEXT-EDITOR-ONLY|SPLIT-VIEW(DEFAULT)|PREV-PANEL-ONLY thing... */}
+
+      {/* Main Layout: It's going to be split view (lhs = editable text space; rhs = "preview panel"): */}
       <div className={`editor-layout ${showPreview ? "split-view": "full-view"}`}>
         {/* "text-editor-space" will be the wrapping for the, well, text editor space: The "Text Editor" header, toolbar, and editor space
         where the user can type their markdown text. By default, this is the left-hand side of the webpage. I want it to be organized top to bottom.

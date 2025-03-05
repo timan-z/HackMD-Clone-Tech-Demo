@@ -40,7 +40,7 @@
   /* NOTE-TO-SELF: So, "display:flex" will organize the display such that items are sorted horizontally from left
   to right. I want this to make sure that the line numbers for the text editor appear top-to-bottom to the left of 
   the text editor itself. */
-  display:flex;
+  display:relative;
 }
 
 
