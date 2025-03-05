@@ -342,10 +342,10 @@ function EditorContent() {
         
         
 
+
         
         
-        
-        <div className="text-editor-space" style={{ width: `${editorWidth}%`}}>
+        {(viewMode === "split" || viewMode === "editor-only") && (<div className="text-editor-space" style={{ width: `${editorWidth}%`}}>
 
           <h3>Text Editor</h3>
 
@@ -371,27 +371,23 @@ function EditorContent() {
                 />
             </div>
           </div>
-        </div>
-
-
-
-
-
-
-
-
+        </div>)}
 
         {/* Adding a "resizable divider" between the Text Editor and the Preview Panel such that I can drag it left or right
         to increase the Text Editor width/decrease the Preview Panel width or vice versa (just like HackMD does it). */}
-        <div className="resizeTEPP" onMouseDown={handleMouseDown}></div>
+        {viewMode === "split" && <div className="resizeTEPP" onMouseDown={handleMouseDown}></div>}
 
-        <div className="preview-panel-space" style={{ width: `${100 - editorWidth}%`}}>
+        {(viewMode === "split" || viewMode === "preview-only") && (<div className="preview-panel-space" style={{ width: `${100 - editorWidth}%`}}>
           <h3>Preview</h3>
           <div className="markdown-preview">
             <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent }} />
           </div>
-        </div>        
+        </div>)}
         
+
+        
+
+
       </div>
     </div>
   );
