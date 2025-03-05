@@ -139,15 +139,28 @@ function EditorContent() {
     let textEdSpace = document.getElementById("text-editor-space");
     let prevPanSpace = document.getElementById("preview-panel-space");
 
+
+    console.log("THING-DEBUG: The value of editorWidth is: ", editorWidth);
+
+
     if(mode === "split") {
-      prevPanSpace.classList.remove("preview-panel-space-full");
+
+      setEditorWidth(50); // Needed for resetting the Text Editor and Preview Panel dimensions after potential adjustments with the slider. 
+
+      prevPanSpace.classList.remove("preview-panel-space-full"); // DEBUG: Maybe cast this in a JS try-block or whatever (i get console errors for doesnt exist)
       prevPanSpace.classList.add("preview-panel-space-split");
       textEdSpace.classList.remove("text-editor-space-full");
       textEdSpace.classList.add("text-editor-space-split");
     } else if(mode === "editor-only") {
+
+      setEditorWidth(100); // Needed to make sure the Text Editor takes up the whole thing (by scaling it up to 100%)
+
       textEdSpace.classList.remove("text-editor-space-split");
       textEdSpace.classList.add("text-editor-space-full");
     } else {
+
+      setEditorWidth(0); // Needed to make sure the Preview Panel takes up the whole thing (by reducing the Text Editor to nothing).
+
       prevPanSpace.classList.remove("preview-panel-space-split");
       prevPanSpace.classList.add("preview-panel-space-full");
     }
@@ -155,15 +168,6 @@ function EditorContent() {
     // if mode === "split"
     // if mode === "editor-only"
     // if mode === "preview-only"
-
-    /* SOME ISSUES TO TAKE CARE OF:
-    - When Preview Panel is empty and I change to its full view, it will reduce in height (sure this is an easy CSS fix though).
-    - When I return to Split after either full view, the draggable divider bar bloats back to the fat red rectangle... (also likely
-    a CSS thing that I'm missing somewhere).
-
-
-    */
-
 
   };
   // DEBUG: Functions above are for the Text Editor and Preview Panel toggle view thing...

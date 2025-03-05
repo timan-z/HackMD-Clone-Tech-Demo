@@ -3,7 +3,6 @@
   border: 1px solid black;
 }
 
-
 .content-editable {
   outline: none;
 
@@ -20,8 +19,6 @@
   max-height:100%;
   box-sizing: border-box;
 }
-
-
 
 .editor-textBold {
   font-weight: bold;
@@ -43,15 +40,9 @@
   display:relative;
 }
 
-
-
 .editor-preview-overhead {
   display: flex;
 }
-
-
-
-
 
 /* This ".editor-preview-toggle" class is for the <div> container holding the side-by-side
 "Text-Editor|Split-View|Preview-Panel" buttons in the header space at the top of the webpage. */
@@ -61,10 +52,6 @@
   padding:3px;
   background-color:darkgray;
 }
-
-
-
-
 
 /* DEBUG: Everything BELOW is for making the LHS/RHS, Text Editor, Preview Panel 50/50 thing work: */
 .editor-layout {
@@ -105,10 +92,7 @@
   width:100%;
   height:100%;
 }
-
 /* DEBUG: Everything ABOVE is for making the LHS/RHS, Text Editor, Preview Panel 50/50 thing work! */
-
-
 
 /* DEBUG: Everything below is for the Text Editor Preview Toggle Functionality... */
 .text-editor-space-split {
@@ -124,23 +108,22 @@
   /*flex:1;*/
 }
 .text-editor-space-full {
-  flex:1; 
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  flex:1 !important;
   /* flex:1; will make it so that the whole screen width is taken up (0 0 auto etc prevents it but makes the draggable divider work). 
   DEBUG: ^ wait no this is not true, there's other stuff I need to add too, just looks like this way because my css is really messy (need to fix). */
 }
 .preview-panel-space-full {
-  flex:1;
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  flex:1 !important;
 }
 /* DEBUG: Everything above is for the Text Editor Preview Toggle Functionality... */
-
-
-
-
-
-
-
-
-
 
 .main-text-editor {
   display:flex;
@@ -169,16 +152,13 @@
 }
 
 .resizeTEPP {
-  width: 25px; /* debug: Thin draggable area */
+  /*width: 10px;*/ /* debug: Thin draggable area */
   cursor: ew-resize; /* debug: Change cursor when hovering over it */
   /*background: #ccc; /* debug: Light gray bar */
-  background: red;
   transition: background 0.2s ease-in-out;
-  border: 3px solid black;
+  border: 2.5px solid black;
 }
 
 .resizeTEPP:hover {
   background: #888; /* debug: Darker gray when hovered */
 }
-
-
