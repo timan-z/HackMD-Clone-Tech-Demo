@@ -2,9 +2,16 @@
 // Reference point: https://www.youtube.com/watch?v=aXAQ_ZVFI5Q
 // Actual reference point for the toolbar is just what HackMD uses...
 
-import React from 'react';
+import React, { useState } from 'react';
+import cloudinary from "cloudinary-core";
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, $isTextNode, $createTextNode, $createLineBreakNode, $getRoot, COMMAND_PRIORITY_CRITICAL, $isParagraphNode } from "lexical";
+
+// DEBUG: Below is for the "Insert Image" functionality... (I'm using Cloudinary as a server to store uploads)
+const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const cloudAPIKey = import.meta.env.VITE_CLOUDINARY_API_KEY;
+const cloudUploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+// DEBUG: Above is for the "Insert Image" functionality... 
 
 /* ^ NOTE-TO-SELF:
 - $getSelection is pretty self explanatory
@@ -579,12 +586,57 @@ function Toolbar() {
             const file = e.target.files[0];
             if(!file) return;
 
-        }
+
+            console.log("DEBUG: The value of cloudName is: ", cloudName);
+            console.log("DEBUG: The value of cloudUploadPreset is: [", cloudUploadPreset, "]");
 
 
-    }
+            // So I'm using Cloudinary here. I'll be uploading files to the server via their widget...
+            window.cloudinary.openUploadWidget(
+                {
+                    cloudName: cloudName,
+                    uploadPreset: cloudUploadPreset,
+                    sources: ["local", "url", "camera"],
+                    multiple:false,
+                    theme: "minimal",
+                },
+                (error, result) => {
+                    if(result && result.event === "success") {
+                        // When the upload is successful, handle the result:
+                        const uploadedImageURL = result.info.secure_url;
+                        console.log("DEBUG: IMAGE HAS BEEN SENT TO THE CLOUDINARY SERVER!!!");
 
+                        // Adding the uploaded image URL into the Text Editor space:
+                        editor.update(() => {
 
+                            console.log("INSIDE-DEBUG: IS THIS PART BEING ENTERED?");
+
+                            const selection = $getSelection();
+
+                            console.log("INSIDE-DEBUG: The value of selection is [", selection, "]");
+
+                            if(!$isRangeSelection(selection)) {
+                                return;
+                            }
+                            let selectionText = selection.getTextContent();
+                            const imageMDFormat = `![Image](${uploadedImageURL})`;
+                            selection.insertText(`${selectionText}${imageMDFormat}`);
+
+                            // Add a line break after the image
+                            const updatedSelection = $getSelection();
+                            const lineBreakNode = $createLineBreakNode();
+                            updatedSelection.insertNodes([lineBreakNode]);
+                        });
+                    } else {
+                        console.error("Upload Failed: ", error);
+                    }
+                }
+            );
+        };
+        
+        // Triggering the file input click event that starts everything above:
+        inputFile.click();
+    };
 
 
 
