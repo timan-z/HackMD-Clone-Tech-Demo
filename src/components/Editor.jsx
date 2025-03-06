@@ -147,6 +147,12 @@ function EditorContent() {
 
       setEditorWidth(50); // Needed for resetting the Text Editor and Preview Panel dimensions after potential adjustments with the slider. 
 
+      
+      /*
+      setTimeout(() => setEditorWidth(50), 10); // set quick re-render
+      */
+      
+
       prevPanSpace.classList.remove("preview-panel-space-full"); // DEBUG: Maybe cast this in a JS try-block or whatever (i get console errors for doesnt exist)
       prevPanSpace.classList.add("preview-panel-space-split");
       textEdSpace.classList.remove("text-editor-space-full");
