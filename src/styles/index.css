@@ -44,6 +44,11 @@
   display: flex;
 }
 
+.editor-overhead {
+  display:flex;
+}
+
+
 /* This ".editor-preview-toggle" class is for the <div> container holding the side-by-side
 "Text-Editor|Split-View|Preview-Panel" buttons in the header space at the top of the webpage. */
 .editor-preview-toggle {

@@ -133,16 +133,27 @@ function EditorContent() {
 
 
 
+  // DEBUG: Below is for the Text Editor and Preview Panel customization (font, zoom, and background colour):
+  const [editorFont, setEditorFont] = useState("Arial"); // default font for text editor.
+  const [previewFont, setPreviewFont] = useState("Arial"); // default font for preview panel.
+  const [fontSize, setFontSize] = useState(16); // default font size.
+  // DEBUG: Above is for the Text Editor and Preview Panel customization (font, zoom, and background colour)...
+  // debug: ^ add font colour too? (Maybe this is too much).
+
+
+
+
+
+
+
+
+
+
   // DEBUG: Functions below are for the Text Editor and Preview Panel toggle view thing:
   const handleViewChange = (mode) => {
     setViewMode(mode);
-
     let textEdSpace = document.getElementById("text-editor-space");
     let prevPanSpace = document.getElementById("preview-panel-space");
-
-
-    console.log("THING-DEBUG: The value of editorWidth is: ", editorWidth);
-
 
     if(mode === "split") {
 
@@ -166,12 +177,9 @@ function EditorContent() {
       prevPanSpace.classList.add("preview-panel-space-full");
     }
 
-    // if mode === "split"
-    // if mode === "editor-only"
-    // if mode === "preview-only"
-
   };
   // DEBUG: Functions above are for the Text Editor and Preview Panel toggle view thing...
+
 
 
 
@@ -207,7 +215,6 @@ function EditorContent() {
       unregister();
     };
   }, [editor]);
-
 
   // DEBUG: The const functions below are for the "draggable" space between the Text Editor and Preview Panel.
   const handleMouseDown = (event) => {
@@ -377,7 +384,31 @@ function EditorContent() {
 
           <h3>Text Editor</h3>
 
-          <Toolbar />
+
+
+
+          {/* "editor-overhead" ofc means the overhead bar above the Text Editor (where the Toolbar is): */}
+          <div className="editor-overhead">
+            <Toolbar />
+
+            {/* This is where I'll have the dropbox boxes for letting the user choose font, font-size, and background color: */}
+            <label>Editor Font:
+              <select onChange={(e) => setEditorFont(e.target.value)} value={editorFont}>
+                <option value="Arial">Arial</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Verdana">Verdana</option> {/* NOTE:+DEBUG: These are just random fonts ChatGPT reccomended. idk if these are best. */}
+              </select>
+            </label>
+            
+            {/* ^ Okay you know what pick up on this later... I want to sketch a little bit tonight. */}
+
+          </div>
+
+
+
+
 
           {/* DEBUG: At this moment, the Toolbar is above the <h3>Text Editor</h3> -- I want it below it... which might be tricky given
           that Toolbar isn't inserted here -- but figure out how I can rearrange things later... */}
