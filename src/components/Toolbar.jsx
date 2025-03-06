@@ -7,6 +7,10 @@ import cloudinary from "cloudinary-core";
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $createRangeSelection, $getSelection, $isRangeSelection, $setSelection, $isTextNode, $createTextNode, $createLineBreakNode, $getRoot, COMMAND_PRIORITY_CRITICAL, $isParagraphNode } from "lexical";
 
+// DEBUG: Below is for the "UNDO" and "REDO" functionality:
+import {UNDO_COMMAND, REDO_COMMAND} from "lexical";
+// DEBUG: Above is for the "UNDO" and "REDO" functionality...
+
 // DEBUG: Below is for the "Insert Image" functionality... (I'm using Cloudinary as a server to store uploads)
 const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const cloudAPIKey = import.meta.env.VITE_CLOUDINARY_API_KEY;
@@ -551,27 +555,6 @@ function Toolbar() {
         });
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // Sep Function for applying the Image insertion:
     // NOTE: Worry about optimization and that other stuff yourself later... (probably just some extra stuff to add to the cloudName: cloudName area tbh).
     const applyMarkdownFormatImage = (editor) => {    
@@ -621,19 +604,19 @@ function Toolbar() {
         inputFile.click();
     };
 
+    // Sep Function for applying the UNDO functionality:
+    const applyMarkdownFormatUndo = (editor) => {
+        editor.update(() => {
+            editor.dispatchCommand(UNDO_COMMAND, undefined);
+        });
+    };
 
-
-
-
-
-
-
-
-
-
-
-
-
+    // Sep Function for applying the REDO functionality:
+    const applyMarkdownFormatRedo = (editor) => {
+        editor.update(()=> {
+            editor.dispatchCommand(REDO_COMMAND, undefined);
+        });
+    };
 
 
 
@@ -646,6 +629,18 @@ function Toolbar() {
 
 
     return (<div>
+        {/* NOTE: Added these two buttons below (UNDO and REDO) well after finishing the ones below... */}
+        {/* UNDO BUTTON: */}
+        <button onClick={()=>{
+            applyMarkdownFormatUndo(editor);
+        }}>UNDO</button>
+
+        {/* REDO BUTTON: */}
+        <button onClick={()=>{
+            applyMarkdownFormatRedo(editor);
+        }}>REDO</button>
+
+        {/*--------------------------------------------------------- */}
         {/* Creating the button that responds to "bold" */}
         <button onClick={()=>{
             applyMarkdownFormatBISC("**","**")

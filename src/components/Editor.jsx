@@ -6,6 +6,7 @@ on screen when I tried to group import them all from @lexical/react smh. */
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer'; 
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 
@@ -146,12 +147,6 @@ function EditorContent() {
     if(mode === "split") {
 
       setEditorWidth(50); // Needed for resetting the Text Editor and Preview Panel dimensions after potential adjustments with the slider. 
-
-      
-      /*
-      setTimeout(() => setEditorWidth(50), 10); // set quick re-render
-      */
-      
 
       prevPanSpace.classList.remove("preview-panel-space-full"); // DEBUG: Maybe cast this in a JS try-block or whatever (i get console errors for doesnt exist)
       prevPanSpace.classList.add("preview-panel-space-split");
@@ -361,12 +356,6 @@ function EditorContent() {
   return(
     <div className="editor-wrapper">
 
-      {/*<h1>SOMETHING SOMETHING SOMETHING</h1>*/}
-      {/*<h1>HACKMD CLONE!!!</h1>*/}
-      {/* Target tommorow is to do the TEXT-EDITOR-ONLY|SPLIT-VIEW(DEFAULT)|PREV-PANEL-ONLY thing... */}
-      {/* ^ This should not be that hard since I already figured out how to do the "Hide Preview" and "Show Preview" button.
-      The middle button is basically default state of fairs; text-editor-only is basically "Hide Preview" and prev-panel-only
-      is basically "Hide Text Editor"  */}
       <div className="editor-preview-overhead">
         <h1>HACKMD CLONE!!!</h1>
         <div className="editor-preview-toggle">
@@ -404,6 +393,7 @@ function EditorContent() {
 
             <div className="editor-container">
                 <ContentEditable className="content-editable black-outline" onKeyDown={handleKeyInput} />
+                <HistoryPlugin/> {/* <-- Needed for Undo/Redo functionality in the Toolbar... (enables tracking or smth) */}
                 <PlainTextPlugin
                   placeholder={<div>Write here...</div>}
                   ErrorBoundary={LexicalErrorBoundary}
