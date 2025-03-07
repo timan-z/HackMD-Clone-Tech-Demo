@@ -132,15 +132,13 @@ function EditorContent() {
 
 
 
-
   // DEBUG: Below is for the Text Editor and Preview Panel customization (font, zoom, and background colour):
   const [editorFont, setEditorFont] = useState("Arial"); // default font for text editor.
   const [previewFont, setPreviewFont] = useState("Arial"); // default font for preview panel.
-  const [fontSize, setFontSize] = useState(16); // default font size.
+  const [edFontSize, setEdFontSize] = useState(16); // default font size.
+  const [prevFontSize, setPrevFontSize] = useState(16);
   // DEBUG: Above is for the Text Editor and Preview Panel customization (font, zoom, and background colour)...
   // debug: ^ add font colour too? (Maybe this is too much).
-
-
 
 
 
@@ -156,38 +154,22 @@ function EditorContent() {
     let prevPanSpace = document.getElementById("preview-panel-space");
 
     if(mode === "split") {
-
       setEditorWidth(50); // Needed for resetting the Text Editor and Preview Panel dimensions after potential adjustments with the slider. 
-
       prevPanSpace.classList.remove("preview-panel-space-full"); // DEBUG: Maybe cast this in a JS try-block or whatever (i get console errors for doesnt exist)
       prevPanSpace.classList.add("preview-panel-space-split");
       textEdSpace.classList.remove("text-editor-space-full");
       textEdSpace.classList.add("text-editor-space-split");
     } else if(mode === "editor-only") {
-
       setEditorWidth(100); // Needed to make sure the Text Editor takes up the whole thing (by scaling it up to 100%)
-
       textEdSpace.classList.remove("text-editor-space-split");
       textEdSpace.classList.add("text-editor-space-full");
     } else {
-
       setEditorWidth(0); // Needed to make sure the Preview Panel takes up the whole thing (by reducing the Text Editor to nothing).
-
       prevPanSpace.classList.remove("preview-panel-space-split");
       prevPanSpace.classList.add("preview-panel-space-full");
     }
-
   };
   // DEBUG: Functions above are for the Text Editor and Preview Panel toggle view thing...
-
-
-
-
-
-
-
-
-
 
   useEffect(() => {
     const unregister = editor.registerUpdateListener(({ editorState }) => {
@@ -362,7 +344,6 @@ function EditorContent() {
 
   return(
     <div className="editor-wrapper">
-
       <div className="editor-preview-overhead">
         <h1>HACKMD CLONE!!!</h1>
         <div className="editor-preview-toggle">
@@ -379,45 +360,43 @@ function EditorContent() {
         where the user can type their markdown text. By default, this is the left-hand side of the webpage. I want it to be organized top to bottom.
         That is, the "Text Editor" header is at the top, followed by the toolbar, and then the editor space at the bottom... (style=relative )
         DEBUG: Don't forget to tweak the CSS so it's centered as I want it, and that the editor space spans the full height of the page. */}
-        
         {(viewMode === "split" || viewMode === "editor-only") && (<div id="text-editor-space" className="text-editor-space-split" style={{ width: `${editorWidth}%`}}>
 
           <h3>Text Editor</h3>
-
-
-
 
           {/* "editor-overhead" ofc means the overhead bar above the Text Editor (where the Toolbar is): */}
           <div className="editor-overhead">
             <Toolbar />
 
             {/* This is where I'll have the dropbox boxes for letting the user choose font, font-size, and background color: */}
+            {/* 1. Font: */}
             <label>Editor Font:
               <select onChange={(e) => setEditorFont(e.target.value)} value={editorFont}>
                 <option value="Arial">Arial</option>
+                <option value="Brush Script MT">Brush Script MT</option>
                 <option value="Courier New">Courier New</option>
+                <option value="Garamond">Garamond</option>
                 <option value="Georgia">Georgia</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Trebuchet MS">Trebuchet MS</option>
                 <option value="Times New Roman">Times New Roman</option>
-                <option value="Verdana">Verdana</option> {/* NOTE:+DEBUG: These are just random fonts ChatGPT reccomended. idk if these are best. */}
+                <option value="Verdana">Verdana</option>
               </select>
             </label>
-            
-            {/* ^ Okay you know what pick up on this later... I want to sketch a little bit tonight. */}
 
+            {/* Zoom Controls (for Text Editor) */}
+            <button onClick={() => setEdFontSize((prev) => prev + 2)}>Zoom In</button>
+            <button onClick={() => setEdFontSize((prev) => Math.max(prev - 2, 12))}>Zoom Out</button>
           </div>
-
-
-
-
 
           {/* DEBUG: At this moment, the Toolbar is above the <h3>Text Editor</h3> -- I want it below it... which might be tricky given
           that Toolbar isn't inserted here -- but figure out how I can rearrange things later... */}
           
           {/* "main-text-editor" is basically the wrapping for the editable text editor space -- it exists mostly so that the line numbers 
           can align with the rows of the text editor (style=flex): */}
-          <div className="main-text-editor">
+          <div className="main-text-editor" style={{fontFamily: editorFont, fontSize:`${edFontSize}px`}}>
             <div className="line-numbers">
-              {Array.from({ length: lineCount}, (_,i) => (
+              {Array.from({length: lineCount}, (_,i) => (
                 <div key={i+1}>{i + 1}</div>
               ))}
             </div>
@@ -439,9 +418,31 @@ function EditorContent() {
 
         {(viewMode === "split" || viewMode === "preview-only") && (<div id="preview-panel-space" className="preview-panel-space-split" style={{ width: `${100 - editorWidth}%`}}>
           <h3>Preview</h3>
-          <div className="markdown-preview">
-            <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent }} />
+
+          <div className="preview-overhead">
+            {/* For the user to toggle font selection for the Preview Panel: */}
+            <label>Preview Font:
+              <select onChange={(e) => setPreviewFont(e.target.value)} value={previewFont}>
+                <option value="Arial">Arial</option>
+                <option value="Brush Script MT">Brush Script MT</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Garamond">Garamond</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Trebuchet MS">Trebuchet MS</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Verdana">Verdana</option>
+              </select>
+            </label>
+
+            {/* Zoom Controls (for Preview Panel) */}
+            <button onClick={() => setPrevFontSize((prev) => prev + 2)}>Zoom In</button>
+            <button onClick={() => setPrevFontSize((prev) => Math.max(prev - 2, 12))}>Zoom Out</button>
           </div>
+          <div className="markdown-preview">
+            <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent }} style={{fontFamily: previewFont, fontSize:`${prevFontSize}px`}}/>
+          </div>
+
         </div>)}
         
       </div>
