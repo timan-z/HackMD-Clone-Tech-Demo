@@ -129,14 +129,16 @@ function EditorContent() {
 
 
 
-
-
-
   // DEBUG: Below is for the Text Editor and Preview Panel customization (font, zoom, and background colour):
   const [editorFont, setEditorFont] = useState("Arial"); // default font for text editor.
   const [previewFont, setPreviewFont] = useState("Arial"); // default font for preview panel.
   const [edFontSize, setEdFontSize] = useState(16); // default font size.
   const [prevFontSize, setPrevFontSize] = useState(16);
+
+  const [editorBColour, setEditorBColour] = useState("#d3d3d3");
+  const [previewBColour, setPreviewBColour] = useState("#b0c4de");
+  const [editorTColour, setEditorTColour] = useState("#000000");
+  const [previewTColour, setPreviewTColour] = useState("#000000");
   // DEBUG: Above is for the Text Editor and Preview Panel customization (font, zoom, and background colour)...
   // debug: ^ add font colour too? (Maybe this is too much).
 
@@ -384,11 +386,34 @@ function EditorContent() {
               </select>
             </label>
 
-            {/* Zoom Controls (for Text Editor) */}
+            {/* 2. Zoom Controls (for Text Editor) */}
             <button onClick={() => setEdFontSize((prev) => prev + 2)}>Zoom In</button>
             <button onClick={() => setEdFontSize((prev) => Math.max(prev - 2, 12))}>Zoom Out</button>
-          </div>
 
+            {/* 3. Adding controls for changing Background Colour: */}
+            <label>Background Colour:
+              <select onChange={(e) => setEditorBColour(e.target.value)} value={editorBColour}>
+                <option value="#d3d3d3">Light Gray</option>
+                <option value="#FFFFFF">White</option>
+                <option value="#1E1E1E">Soft Black</option>
+                <option value="#F5E1C0">Paper-like</option>
+                <option value="#2E3B4E">Midnight Blue</option>
+                <option value="#233D2C">Forest Green</option>
+              </select>
+            </label>
+
+            {/* 4. Adding controls for changing Text Colour: */}
+            <label>Text Colour:
+              <select onChange={(e) => setEditorTColour(e.target.value)} value={editorTColour}>
+                <option value="#000000">Black</option>
+                <option value="#D4D4D4">Light Gray</option>
+                <option value="#5B4636">Deep Brown</option>
+                <option value="#333333">Dark Gray</option>
+                <option value="#E0E6F0">Ice Blue</option>
+                <option value="#C8E6C9">Soft Green</option>
+              </select>
+            </label>
+          </div>
           {/* DEBUG: At this moment, the Toolbar is above the <h3>Text Editor</h3> -- I want it below it... which might be tricky given
           that Toolbar isn't inserted here -- but figure out how I can rearrange things later... */}
           
@@ -402,7 +427,7 @@ function EditorContent() {
             </div>
 
             <div className="editor-container">
-                <ContentEditable className="content-editable black-outline" onKeyDown={handleKeyInput} />
+                <ContentEditable className="content-editable black-outline" onKeyDown={handleKeyInput} style={{backgroundColor:editorBColour, color:editorTColour}} />
                 <HistoryPlugin/> {/* <-- Needed for Undo/Redo functionality in the Toolbar... (enables tracking or smth) */}
                 <PlainTextPlugin
                   placeholder={<div>Write here...</div>}
@@ -420,7 +445,7 @@ function EditorContent() {
           <h3>Preview</h3>
 
           <div className="preview-overhead">
-            {/* For the user to toggle font selection for the Preview Panel: */}
+            {/* 1. For the user to toggle font selection for the Preview Panel: */}
             <label>Preview Font:
               <select onChange={(e) => setPreviewFont(e.target.value)} value={previewFont}>
                 <option value="Arial">Arial</option>
@@ -435,14 +460,36 @@ function EditorContent() {
               </select>
             </label>
 
-            {/* Zoom Controls (for Preview Panel) */}
+            {/* 2. Zoom Controls (for Preview Panel) */}
             <button onClick={() => setPrevFontSize((prev) => prev + 2)}>Zoom In</button>
             <button onClick={() => setPrevFontSize((prev) => Math.max(prev - 2, 12))}>Zoom Out</button>
-          </div>
-          <div className="markdown-preview">
-            <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent }} style={{fontFamily: previewFont, fontSize:`${prevFontSize}px`}}/>
+            {/* 3. Background Colour:*/}
+            <label>Background Colour:
+              <select onChange={(e) => setPreviewBColour(e.target.value)} value={previewBColour}>
+                <option value="#d3d3d3">Light Gray</option>
+                <option value="#FFFFFF">White</option>
+                <option value="#1E1E1E">Soft Black</option>
+                <option value="#F5E1C0">Paper-like</option>
+                <option value="#2E3B4E">Midnight Blue</option>
+                <option value="#233D2C">Forest Green</option>
+              </select>
+            </label>
+            {/* 4. Text Colour: */}
+            <label>Text Colour:
+              <select onChange={(e) => setPreviewTColour(e.target.value)} value={previewTColour}>
+                <option value="#000000">Black</option>
+                <option value="#D4D4D4">Light Gray</option>
+                <option value="#5B4636">Deep Brown</option>
+                <option value="#333333">Dark Gray</option>
+                <option value="#E0E6F0">Ice Blue</option>
+                <option value="#C8E6C9">Soft Green</option>
+              </select>
+            </label>
           </div>
 
+          <div className="markdown-preview">
+            <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent }} style={{fontFamily: previewFont, fontSize:`${prevFontSize}px`, backgroundColor:previewBColour, color:previewTColour}}/>
+          </div>
         </div>)}
         
       </div>

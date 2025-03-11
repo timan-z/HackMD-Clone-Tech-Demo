@@ -6,7 +6,7 @@
 .content-editable {
   outline: none;
 
-  background-color:lightgray; /* DEBUG: Tentative setting -- just so I can see the space I'm working with. */
+  background-color:#d3d3d3; /* DEBUG: Tentative setting -- just so I can see the space I'm working with. */
 
   /* NOTE-TO-SELF: The styling below is necessary to incorporate typed text wraparound:
   - "word-wrap" and "overflow-wrap" make sure typed text wraps around.
@@ -148,7 +148,7 @@
 .md-preview-panel {
   outline: black;
   outline-width:2px;
-  background-color:lightsteelblue;
+  background-color:#b0c4de;
 
   word-wrap: break-word;
   overflow-wrap: break-word;
