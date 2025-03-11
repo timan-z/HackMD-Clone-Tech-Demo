@@ -1,4 +1,19 @@
 To do list:
-- Add a dropdown button that lets you select the colour background for BOTH the text editor AND the render panel (also maybe a dropdown button for changing the text font).
-
 - *Maybe* I should get rid of the line numbers things if it's too complex to make it work with the super lengthy single-line text that goes to a new line (and instead just add a "line counters" thing to the bottom of the Text Editor panel).
+
+Adding the additioanl Table configuration adjustments (will be tricky):
+[ROW]
+- Add row (where cursor is / if appropriate)
+- Remove row (where cursor is / if appropriate)
+- Move row up/down (where cursor is / if appropriate)
+[COLUMN]
+- Insert column (doesnt rlly matter with the cursor here long as its in the table space)
+- Remove column (where cursor is)
+- Move column right/left (where cursor is)
+[ALIGNMENT]
+- Align left/center/right/align none (where cursor is)
+
+ ^ the render format that hackmd uses might auto do this stuff for me... (yup, it do)
+- *also* the HackMD seems to have an additional styling that adds boxes to what appears in the render panel...
+
+Perhaps I tweak the "Add Table" function of my program to also add a set of coordinates to a dictionary which denote the "Table Space" (and store them in an array since there may be multiple tabels -- though whenever that space is interfered with, i need to recheck if the table is still a valid table and if not i remove them from the space... this may be way too complicated though)
