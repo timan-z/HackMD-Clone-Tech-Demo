@@ -13,11 +13,10 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 // 1. DEBUG: [1/2] Two lines below were added for the line numbering feature...
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useEffect, useState, useRef } from 'react';
-
 import Toolbar from "./Toolbar.jsx";
 import { $getRoot, $getSelection, $isRangeSelection, $isTextNode, $isLineBreakNode, RootNode } from 'lexical';
-
 import { parseMarkdown } from "./MDParser.jsx";
+import { findCursorPos } from './UtilityFuncs.js'; // DEBUG: After removing findCursorPos() from here and moving it to UtilityFuncs.js
 
 /* NOTE-TO-SELF:
   - LexicalComposer initializes the editor with the [theme], [namespace], and [onError] configs. (Additional plug-ins go within its tags).
@@ -144,9 +143,6 @@ function EditorContent() {
   const [currentTableCol, setCurrentTableCol] = useState(null);
   // DEBUG: Above is for the enabling of the Table configuration tools...
 
-
-
-
   // DEBUG: Functions below are for the Text Editor and Preview Panel toggle view thing:
   const handleViewChange = (mode) => {
     setViewMode(mode);
@@ -174,6 +170,21 @@ function EditorContent() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // DEBUG: Function below is for adding the additional Table configurations:
   const checkWithinTable = (selection) => {
 
@@ -191,13 +202,9 @@ function EditorContent() {
             console.log("TABLE-DEBUG: The value of selectionNodeText is: [", selectionNodeText, "]");
             console.log("2. table-debug: The value of selectionNode.getKey() is: [", selectionNode.getKey(), "]");
                     
-
-
-
             // I want to check if this line is of format | [some string] | ... 
             /* So if the current line is of some valid regex, I want to iterate backwards to see if each preceding row
             */
-
 
           } else {
             setTableToolsActive(false);
@@ -209,6 +216,20 @@ function EditorContent() {
         }
   };
   // DEBUG: Function above is for adding the additional Table configurations...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -246,10 +267,6 @@ function EditorContent() {
       unregister();
     };
   }, [editor]);
-
-
-
-
 
   // DEBUG: The const functions below are for the "draggable" space between the Text Editor and Preview Panel.
   const handleMouseDown = (event) => {
