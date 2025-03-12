@@ -127,24 +127,22 @@ function EditorContent() {
   const [viewMode, setViewMode] = useState("split"); // default state.
   // DEBUG: Above is for the Text Editor and Preview Panel toggle view thing...
 
-
-
   // DEBUG: Below is for the Text Editor and Preview Panel customization (font, zoom, and background colour):
   const [editorFont, setEditorFont] = useState("Arial"); // default font for text editor.
   const [previewFont, setPreviewFont] = useState("Arial"); // default font for preview panel.
   const [edFontSize, setEdFontSize] = useState(16); // default font size.
   const [prevFontSize, setPrevFontSize] = useState(16);
-
   const [editorBColour, setEditorBColour] = useState("#d3d3d3");
   const [previewBColour, setPreviewBColour] = useState("#b0c4de");
   const [editorTColour, setEditorTColour] = useState("#000000");
   const [previewTColour, setPreviewTColour] = useState("#000000");
   // DEBUG: Above is for the Text Editor and Preview Panel customization (font, zoom, and background colour)...
-  // debug: ^ add font colour too? (Maybe this is too much).
 
-
-
-
+  // DEBUG: Below is for the enabling of the Table configuration tools:
+  const [tableToolsActive, setTableToolsActive] = useState(false);
+  const [currentTableRow, setCurrentTableRow] = useState(null);
+  const [currentTableCol, setCurrentTableCol] = useState(null);
+  // DEBUG: Above is for the enabling of the Table configuration tools...
 
 
 
@@ -173,6 +171,49 @@ function EditorContent() {
   };
   // DEBUG: Functions above are for the Text Editor and Preview Panel toggle view thing...
 
+
+
+
+  // DEBUG: Function below is for adding the additional Table configurations:
+  const checkWithinTable = (selection) => {
+
+    const selectionText = selection.getTextContent();
+        console.log("TABLE-DEBUG: The value of selectionText is: [", selectionText, "]");
+
+        if($isRangeSelection(selection) && selectionText === "") {
+          let selectionNodes = selection.getNodes(); // When selectionText === "", there should only be one node I'm retrieving here...
+          let selectionNode = selectionNodes[0];
+          console.log("1.table-debug: The value of selectionNode.getKey() is: [", selectionNode.getKey(), "]");
+
+          // ... And that one node I'm retrieving should be a text node (if it exists within a valid table structure).
+          if($isTextNode(selectionNode)) {
+            let selectionNodeText = selectionNode.getTextContent(); // Getting the line of text that the cursor is on.
+            console.log("TABLE-DEBUG: The value of selectionNodeText is: [", selectionNodeText, "]");
+            console.log("2. table-debug: The value of selectionNode.getKey() is: [", selectionNode.getKey(), "]");
+            
+
+
+
+            // I want to check if this line is of format | [some string] | ... 
+            /* So if the current line is of some valid regex, I want to iterate backwards to see if each preceding row
+            */
+
+
+          } else {
+            setTableToolsActive(false);
+            return false;
+          }
+        } else {
+          setTableToolsActive(false);
+          return false;
+        }
+  };
+  // DEBUG: Function above is for adding the additional Table configurations...
+
+
+
+
+
   useEffect(() => {
     const unregister = editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
@@ -191,6 +232,12 @@ function EditorContent() {
         setEditorContent(textContent);
         setParsedContent(parseMarkdown(textContent));
 
+
+        // TABLE-DEBUG: ALL OF THE STUFF BELOW IS FOR CHECKING TO SEE IF CURRENT CURSOR IS WITHIN APPROPRIATE TABLE BOUNDS!!!
+        // NOTE: Should probably make it so that Table Tools are only made active when selection = non-highlighted text... (creative choice).
+        const selection = $getSelection();
+        let cursorInTable = checkWithinTable(selection);
+
       });
     });
 
@@ -199,6 +246,10 @@ function EditorContent() {
       unregister();
     };
   }, [editor]);
+
+
+
+
 
   // DEBUG: The const functions below are for the "draggable" space between the Text Editor and Preview Panel.
   const handleMouseDown = (event) => {

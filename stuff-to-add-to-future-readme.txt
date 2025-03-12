@@ -17,3 +17,6 @@ One creative choice I want to make to differentiate my project from HackMD is th
 
 another minor creative change is, after inserting table or line break (---), I'm moving the cursor position after their insertion (this is not the case
 in HackMD -- the cursor position does not change at all -- but I don't think that really makes sense).
+
+
+        // NOTE: Should probably make it so that Table Tools are only made active when selection = non-highlighted text... (creative choice).

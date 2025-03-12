@@ -109,6 +109,7 @@ function Toolbar() {
         console.log("~~~Code Button Clicked (CBC) console.log statements END~~~");
         return absolutePosition;
     }
+    
 
     // Function for finding substring (start and end) indices in a string given an "anchor" value:
     function subStrIndices(anchorVal, stringVal, subStrVal) {
