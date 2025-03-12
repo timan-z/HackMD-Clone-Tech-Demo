@@ -185,6 +185,20 @@ function EditorContent() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // DEBUG: Function below is for adding the additional Table configurations:
   const checkWithinTable = (selection) => {
 
@@ -200,11 +214,42 @@ function EditorContent() {
           if($isTextNode(selectionNode)) {
             let selectionNodeText = selectionNode.getTextContent(); // Getting the line of text that the cursor is on.
             console.log("TABLE-DEBUG: The value of selectionNodeText is: [", selectionNodeText, "]");
-            console.log("2. table-debug: The value of selectionNode.getKey() is: [", selectionNode.getKey(), "]");
-                    
-            // I want to check if this line is of format | [some string] | ... 
-            /* So if the current line is of some valid regex, I want to iterate backwards to see if each preceding row
+            
+            /* Now I want to check to see if the current line has a "|" count >= 2 (if so, there's a possibility
+            that this line is part of a Table structure). 
+            NOTE: It may not actually be a *line* that I'm retrieving here, if the Table was pasted as a multi-line
+            text statement, what I'm "getting" here won't just be a line -- so my logic here might just not work...
+          
             */
+
+            // NOTE: AS OF 3/12/2025 -- I HAVE MOMENTARILY DECIDED TO DROP WORKING ON THE TABLE CONFIGURATIONS IMPLEMENTATION
+            // ^ MAYBE I RETURN TO IT AFTERWARDS, BUT IT'S JUST NOT WORTH SPENDING THIS MUCH TIME ON, BETTER TO MOVE ON! (FOR NOW)
+
+            /*const vertLineCount = (selectionNodeText.match(/\|/g) || []).length; // Count `|`
+            if(vertLineCount < 2) {
+              setTableToolsActive(false);
+              return false;
+            }*/ 
+            // DEBUG: ^ Have this commented out temporarily...
+
+            // okay so I can use ".getNextSibling()" and ".getPreviousSibling()" from selectionNode...
+            // ^ play around with that and see where it can take me.
+            let prevSibling = selectionNode.getPreviousSibling();
+            console.log("TABLE-DEBUG: Test prevSibling = [", prevSibling, "]");
+            let nextSibling = selectionNode.getNextSibling();
+            console.log("TABLE-DEBUG: Test nextSibling = [", nextSibling, "]");
+
+            /* 
+            Seems that the next or previous sibling will always be newline?
+            */
+
+            // Find current cursor position:
+            /*const paraNodes = $getRoot().getChildren();
+            let {anchor} = selection;
+            let anchorNode = anchor.getNode();
+            let anchorOffset = anchor.offset;
+            let absoluteCursorPos = findCursorPos(paraNodes, anchorNode, anchorOffset);
+            console.log("TABLE-DEBUG: The value of absoluteCursorPos is: [", absoluteCursorPos, "]");*/
 
           } else {
             setTableToolsActive(false);
@@ -216,10 +261,6 @@ function EditorContent() {
         }
   };
   // DEBUG: Function above is for adding the additional Table configurations...
-
-
-
-
 
 
 
@@ -253,11 +294,11 @@ function EditorContent() {
         setEditorContent(textContent);
         setParsedContent(parseMarkdown(textContent));
 
-
         // TABLE-DEBUG: ALL OF THE STUFF BELOW IS FOR CHECKING TO SEE IF CURRENT CURSOR IS WITHIN APPROPRIATE TABLE BOUNDS!!!
         // NOTE: Should probably make it so that Table Tools are only made active when selection = non-highlighted text... (creative choice).
-        const selection = $getSelection();
-        let cursorInTable = checkWithinTable(selection);
+        /*const selection = $getSelection();
+        let cursorInTable = checkWithinTable(selection);*/
+        // NOTE-DEBUG: Decided to drop the Table configurations for now... way too much time being spent on this, best to move on.
 
       });
     });
@@ -267,6 +308,41 @@ function EditorContent() {
       unregister();
     };
   }, [editor]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // DEBUG: The const functions below are for the "draggable" space between the Text Editor and Preview Panel.
   const handleMouseDown = (event) => {
