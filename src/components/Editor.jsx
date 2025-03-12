@@ -190,7 +190,7 @@ function EditorContent() {
             let selectionNodeText = selectionNode.getTextContent(); // Getting the line of text that the cursor is on.
             console.log("TABLE-DEBUG: The value of selectionNodeText is: [", selectionNodeText, "]");
             console.log("2. table-debug: The value of selectionNode.getKey() is: [", selectionNode.getKey(), "]");
-            
+                    
 
 
 
