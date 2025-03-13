@@ -201,24 +201,16 @@ function EditorContent() {
 
 
 
-  
+
 
 
 
   // DEBUG: Functions below are for the "Download File" and "Upload File" (both .md) functionality:
-  const handleFileUploadMD = (event) => {
-    if(!(event.target.files && event.target.files.length > 0)) {
-      alert("debug: something went wrong with the .md file upload.");
-      fileInput.value="";
-      return;
-    }
-
-    const fileInput = event.target;
-    const file = fileInput.files[0];
+  // 1. This function is for the actual .md file reading (opening it up, reading it, pasting to the Text Editor):
+  const handleFileUploadMD = (file) => {
     // If invalid file:
     if(file.type !== "text/markdown" && !file.name.endsWith(".md")) {
       alert("Please upload a valid Markdown (.md) file."); // NOTE:+DEBUG: Just have an Alert for now..., but I want to change this to something more professional later on. (Pop-up -> click anywhere on screen to nullify).
-      fileInput.value="";
       return;
     }
     
@@ -243,14 +235,28 @@ function EditorContent() {
       }
       // Invocation:
       reader.readAsText(file);
-
     }
+  }
+  // 2. This function is for uploading the .md file via button:
+  const handleFileUploadBtn = (event) => {
+    if(!(event.target.files && event.target.files.length > 0)) {
+      alert("debug: something went wrong with the .md file upload.");
+      return;
+    }
+
+    const fileInput = event.target;
+    const file = fileInput.files[0];
+    handleFileUploadMD(file);
     fileInput.value="";
   }
+  // 3. This function is for uploading the .md file via drag-and-drop into the Text Editor:
+  const handleFileUploadDD = (event) => {
+    event.preventDefault();
+    setIsDraggingMD(false);
+    const file = event.dataTransfer.files?.[0];
+    if(file) handleFileUploadMD(file);
+  }
   // DEBUG: Functions above are for the "Download File" and "Upload File" (both .md) functionality...
-
-
-
 
 
 
@@ -341,9 +347,6 @@ function EditorContent() {
         // NOTE: The stuff below is for the Markdown renderer... 
         setEditorContent(textContent);
         setParsedContent(parseMarkdown(textContent));
-
-
-
 
         // TABLE-DEBUG: ALL OF THE STUFF BELOW IS FOR CHECKING TO SEE IF CURRENT CURSOR IS WITHIN APPROPRIATE TABLE BOUNDS!!!
         // NOTE: Should probably make it so that Table Tools are only made active when selection = non-highlighted text... (creative choice).
@@ -548,16 +551,13 @@ function EditorContent() {
           <button onClick={()=> handleViewChange("preview-only")} disabled={viewMode==="preview-only"}>Preview Panel</button>
         </div>
 
-
-
         {/* DEBUG: Below is for implementing an "Upload File" (.md) and "Download File" (.md): */}
         <div className="editor-upload-download">
-          <input type="file" accept=".md" onChange={handleFileUploadMD} style={{display:"none"}} id="fileInput"/>
+          <input type="file" accept=".md" onChange={handleFileUploadBtn} style={{display:"none"}} id="fileInput"/>
           <label htmlFor="fileInput" className="upload-md-button">
             Upload Markdown File
           </label>
         </div>
-
 
       </div>
 
