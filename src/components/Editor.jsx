@@ -632,8 +632,11 @@ function EditorContent() {
               ))}
             </div>
 
-            <div className="editor-container">
-                <ContentEditable className="content-editable black-outline" onKeyDown={handleKeyInput} style={{backgroundColor:editorBColour, color:editorTColour}} />
+            <div className={`editor-container ${isDraggingMD ? "dragging" : ""}`} 
+            onDragOver={(e) => {e.preventDefault(); setIsDraggingMD(true);}} 
+            onDragLeave={()=>setIsDraggingMD(false)}
+            onDrop={handleFileUploadDD}>
+                <ContentEditable className={`content-editable black-outline ${isDraggingMD ? "dragging" : ""}`} onKeyDown={handleKeyInput} style={{backgroundColor:editorBColour, color:editorTColour}} />
                 <HistoryPlugin/> {/* <-- Needed for Undo/Redo functionality in the Toolbar... (enables tracking or smth) */}
                 <PlainTextPlugin
                   placeholder={<div>Write here...</div>}
