@@ -107,7 +107,6 @@ const initialConfig = {
 
 // Porting somethings into a child element of the LexicalComposer component...
 function EditorContent() {
-
   const [editor] = useLexicalComposerContext();
   const [lineCount, setLineCount] = useState(1); // 1 line is the default.
 
@@ -137,7 +136,36 @@ function EditorContent() {
   const [previewTColour, setPreviewTColour] = useState("#000000");
   // DEBUG: Above is for the Text Editor and Preview Panel customization (font, zoom, and background colour)...
 
+
+
+
+
+
+
+
+
+  // DEBUG: Below is for the "Drag-and-Drop .md Files" functionality:
+  const [isDraggingMD, setIsDraggingMD] = useState(false);
+  // DEBUG: Above is for the "Drag-and-Drop .md Files" functionality...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // DEBUG: Below is for the enabling of the Table configuration tools:
+  // NOTE: Decided to drop this feature as of 3/12/2025 -- might come back to it later if I can think of a better approach.
   const [tableToolsActive, setTableToolsActive] = useState(false);
   const [currentTableRow, setCurrentTableRow] = useState(null);
   const [currentTableCol, setCurrentTableCol] = useState(null);
@@ -173,20 +201,53 @@ function EditorContent() {
 
 
 
+  
 
 
 
+  // DEBUG: Functions below are for the "Download File" and "Upload File" (both .md) functionality:
+  const handleFileUploadMD = (event) => {
+    if(!(event.target.files && event.target.files.length > 0)) {
+      alert("debug: something went wrong with the .md file upload.");
+      fileInput.value="";
+      return;
+    }
 
+    const fileInput = event.target;
+    const file = fileInput.files[0];
+    // If invalid file:
+    if(file.type !== "text/markdown" && !file.name.endsWith(".md")) {
+      alert("Please upload a valid Markdown (.md) file."); // NOTE:+DEBUG: Just have an Alert for now..., but I want to change this to something more professional later on. (Pop-up -> click anywhere on screen to nullify).
+      fileInput.value="";
+      return;
+    }
+    
+    // If there's existing text in the Text Editor, prompt asking if it should be replaced (Again, default "window.confirm" for now...)
+    if(editorContent.trim() === "" || (editorContent.trim() !== "" && window.confirm("Replace existing content?"))) {
+      /* Now I want to read the contents of file and replace the actual Text Editor content with the file contents
+      (so I'm going to need to do an update() function or something like that here). */
 
+      // Reading file contents:
+      const reader = new FileReader();
+      // Need to define the process here and then invoke it afterwards...
+      reader.onload = () => {
+        // This will get it.
+        const text = reader.result;
+        // Inserting it into the Lexical Text Editor:
+        editor.update(() => {
+          const root = $getRoot();
+          root.clear(); // gets rid of current existing text.
+          const selection = $getSelection();
+          selection.insertText(text);
+        });
+      }
+      // Invocation:
+      reader.readAsText(file);
 
-
-
-
-
-
-
-
-
+    }
+    fileInput.value="";
+  }
+  // DEBUG: Functions above are for the "Download File" and "Upload File" (both .md) functionality...
 
 
 
@@ -200,6 +261,7 @@ function EditorContent() {
 
 
   // DEBUG: Function below is for adding the additional Table configurations:
+  // NOTE: Decided to drop this feature as of 3/12/2025 -- might come back to it later if I can think of a better approach.
   const checkWithinTable = (selection) => {
 
     const selectionText = selection.getTextContent();
@@ -262,20 +324,6 @@ function EditorContent() {
   };
   // DEBUG: Function above is for adding the additional Table configurations...
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   useEffect(() => {
     const unregister = editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
@@ -294,12 +342,14 @@ function EditorContent() {
         setEditorContent(textContent);
         setParsedContent(parseMarkdown(textContent));
 
+
+
+
         // TABLE-DEBUG: ALL OF THE STUFF BELOW IS FOR CHECKING TO SEE IF CURRENT CURSOR IS WITHIN APPROPRIATE TABLE BOUNDS!!!
         // NOTE: Should probably make it so that Table Tools are only made active when selection = non-highlighted text... (creative choice).
         /*const selection = $getSelection();
         let cursorInTable = checkWithinTable(selection);*/
         // NOTE-DEBUG: Decided to drop the Table configurations for now... way too much time being spent on this, best to move on.
-
       });
     });
 
@@ -497,6 +547,18 @@ function EditorContent() {
           <button onClick={()=> handleViewChange("split")} disabled={viewMode==="split"}>Split-View</button>
           <button onClick={()=> handleViewChange("preview-only")} disabled={viewMode==="preview-only"}>Preview Panel</button>
         </div>
+
+
+
+        {/* DEBUG: Below is for implementing an "Upload File" (.md) and "Download File" (.md): */}
+        <div className="editor-upload-download">
+          <input type="file" accept=".md" onChange={handleFileUploadMD} style={{display:"none"}} id="fileInput"/>
+          <label htmlFor="fileInput" className="upload-md-button">
+            Upload Markdown File
+          </label>
+        </div>
+
+
       </div>
 
       {/* Main Layout: It's going to be split view (lhs = editable text space; rhs = "preview panel"): */}

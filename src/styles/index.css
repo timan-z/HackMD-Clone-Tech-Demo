@@ -58,6 +58,14 @@
   background-color:darkgray;
 }
 
+.editor-upload-download {
+  margin:auto;
+  background-color:darkgray;
+  padding:3px;
+}
+
+
+
 /* DEBUG: Everything BELOW is for making the LHS/RHS, Text Editor, Preview Panel 50/50 thing work: */
 .editor-layout {
   width: 100%;
