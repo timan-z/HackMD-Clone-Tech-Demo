@@ -136,26 +136,9 @@ function EditorContent() {
   const [previewTColour, setPreviewTColour] = useState("#000000");
   // DEBUG: Above is for the Text Editor and Preview Panel customization (font, zoom, and background colour)...
 
-
-
-
-
-
-
-
-
   // DEBUG: Below is for the "Drag-and-Drop .md Files" functionality:
   const [isDraggingMD, setIsDraggingMD] = useState(false);
   // DEBUG: Above is for the "Drag-and-Drop .md Files" functionality...
-
-
-
-
-
-
-
-
-
 
 
 
@@ -281,9 +264,6 @@ function EditorContent() {
       URL.revokeObjectURL(url);
     });
   };
-
-
-
   // DEBUG: Functions above are for the "Download File" and "Upload File" (both .md) functionality...
 
 
@@ -589,7 +569,6 @@ function EditorContent() {
 
           {/* The Download Text Editor Content -> .md File Button: */}
           <button onClick={handleDownloadMD} className="download-md-button">Download as .md</button>
-
         </div>
 
       </div>

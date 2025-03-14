@@ -72,15 +72,29 @@
 .editor-upload-download {
   margin: auto;
   background-color:darkgray;
-  padding:5px;
+  padding:10px;
   display:flex;
   align-items:center;
   gap:10px;
+  border-radius:5px;
 }
 .upload-md-button {
   background-color:white;
-  outline-width:2px;
-  outline:black;
+  outline: 2px solid black;
+  padding: 1px;
+  padding-left:5px;
+  padding-right:5px;
+  border-radius:8px;
+  cursor:pointer;
+}
+.download-md-button {
+  font-size:16px;
+  font-family:'Times New Roman', Times, serif;
+  background-color:white;
+  border:none;
+  border-radius:8px;
+  outline: 2.5px solid black;
+  cursor:pointer;
 }
 
 
