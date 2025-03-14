@@ -266,8 +266,10 @@ function EditorContent() {
         return;
       }
 
+      console.log("download-debug: The value of textEditorContent = [", textEditorContent, "]");
+
       // Create a blob and use that to download:
-      const blob = new Blob([textEditorContent, {type:"text/markdown"}]);
+      const blob = new Blob([textEditorContent]);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
