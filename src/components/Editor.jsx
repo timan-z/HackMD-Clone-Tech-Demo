@@ -205,8 +205,8 @@ function EditorContent() {
 
 
 
-  // DEBUG: Functions below are for the "Download File" and "Upload File" (both .md) functionality:
-  // 1. This function is for the actual .md file reading (opening it up, reading it, pasting to the Text Editor):
+  // DEBUG: Functions below are for the [1] "Upload File" and [2] "Download File" (both .md) functionality:
+  // 1a. This function is for the actual .md file reading (opening it up, reading it, pasting to the Text Editor):
   const handleFileUploadMD = (file) => {
     // If invalid file:
     if(file.type !== "text/markdown" && !file.name.endsWith(".md")) {
@@ -237,7 +237,7 @@ function EditorContent() {
       reader.readAsText(file);
     }
   }
-  // 2. This function is for uploading the .md file via button:
+  // 1b. This function is for uploading the .md file via button:
   const handleFileUploadBtn = (event) => {
     if(!(event.target.files && event.target.files.length > 0)) {
       alert("debug: something went wrong with the .md file upload.");
@@ -249,13 +249,39 @@ function EditorContent() {
     handleFileUploadMD(file);
     fileInput.value="";
   }
-  // 3. This function is for uploading the .md file via drag-and-drop into the Text Editor:
+  // 1c. This function is for uploading the .md file via drag-and-drop into the Text Editor:
   const handleFileUploadDD = (event) => {
     event.preventDefault();
     setIsDraggingMD(false);
     const file = event.dataTransfer.files?.[0];
     if(file) handleFileUploadMD(file);
   }
+  // 2. This function is for handling the download Text Editor content as .md file:
+  const handleDownloadMD = () => {
+    editor.update(() => {
+      const root = $getRoot();
+      const textEditorContent = root.getTextContent();
+      if(!textEditorContent.trim()) {
+        alert("The Text Editor is empty. Nothing to download at this moment!"); // NOTE:+DEBUG: I've a generic alert right now, but change this to something more formal later.
+        return;
+      }
+
+      // Create a blob and use that to download:
+      const blob = new Blob([textEditorContent, {type:"text/markdown"}]);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "my_markdown.md";  // DEBUG: Maybe give the option to name it? Or maybe I can add something later where you can *name* this session and that'll be the file name. (not high priority).
+      document.body.appendChild(a);
+      a.click();
+      // Get rid of the stuff after:
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  };
+
+
+
   // DEBUG: Functions above are for the "Download File" and "Upload File" (both .md) functionality...
 
 
@@ -553,10 +579,15 @@ function EditorContent() {
 
         {/* DEBUG: Below is for implementing an "Upload File" (.md) and "Download File" (.md): */}
         <div className="editor-upload-download">
+          {/* The Upload .md File Button: */}
           <input type="file" accept=".md" onChange={handleFileUploadBtn} style={{display:"none"}} id="fileInput"/>
           <label htmlFor="fileInput" className="upload-md-button">
             Upload Markdown File
           </label>
+
+          {/* The Download Text Editor Content -> .md File Button: */}
+          <button onClick={handleDownloadMD} className="download-md-button">Download as .md</button>
+
         </div>
 
       </div>

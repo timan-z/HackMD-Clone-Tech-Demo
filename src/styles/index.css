@@ -70,12 +70,17 @@
 }
 
 .editor-upload-download {
-  margin:auto;
+  margin: auto;
   background-color:darkgray;
   padding:5px;
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 .upload-md-button {
   background-color:white;
+  outline-width:2px;
+  outline:black;
 }
 
 
