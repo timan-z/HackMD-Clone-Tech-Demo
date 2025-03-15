@@ -1,19 +1,15 @@
 To do list:
 - *Maybe* I should get rid of the line numbers things if it's too complex to make it work with the super lengthy single-line text that goes to a new line (and instead just add a "line counters" thing to the bottom of the Text Editor panel).
 
-Adding the additioanl Table configuration adjustments (will be tricky):
-[ROW]
-- Add row (where cursor is / if appropriate)
-- Remove row (where cursor is / if appropriate)
-- Move row up/down (where cursor is / if appropriate)
-[COLUMN]
-- Insert column (doesnt rlly matter with the cursor here long as its in the table space)
-- Remove column (where cursor is)
-- Move column right/left (where cursor is)
-[ALIGNMENT]
-- Align left/center/right/align none (where cursor is)
+Maybe do whole-site theme toggling tonight too since the stuff i targeted to get done has been pretty easy so far... (and if that's easy, I guess I can clean up my code a little bit).
+^ eh maybe not
 
- ^ the render format that hackmd uses might auto do this stuff for me... (yup, it do)
-- *also* the HackMD seems to have an additional styling that adds boxes to what appears in the render panel...
+Things I can do at night now:
+- Remove the Line numbers effect from the Text Editor (I now want to transition that more to a "line counter" type of thing at the bottom of the Text Editor space (like a bottom horizontal bar at the bottom line of the Text Editor).
+- Remove the "Write here" text that appears at the bottom of the Text Editor; it's not supposed to be there, it's supposed to be visible within the Text Editor itself!
 
-Perhaps I tweak the "Add Table" function of my program to also add a set of coordinates to a dictionary which denote the "Table Space" (and store them in an array since there may be multiple tabels -- though whenever that space is interfered with, i need to recheck if the table is still a valid table and if not i remove them from the space... this may be way too complicated though)
+- Make it so that the draggable black line inbetween the Text Editor and the Preview Panel "looks nicer" and make it so that -- and this should be done *after* aligning the Text Editor and Preview Panel properly -- the black line only goes from the bottom of the Text Editor/Preview Panel up to the top of it.
+
+- Okay wait, no, I've changed my mind: Reverse the Editor Font bar / Toolbar positions, I want to encase the Toolbar as part of hte Text Editor now (it'll look attached) <-- just like the bar at the bottom of it which I'm planning...
+- ^ Look to make the Toolbar *part* of the Text Editor (wrap it up in a <div> with background = transparent)...
+^ Like it should be placed inside the editor-container? 

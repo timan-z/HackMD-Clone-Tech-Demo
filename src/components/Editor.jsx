@@ -586,8 +586,6 @@ function EditorContent() {
 
           {/* "editor-overhead" ofc means the overhead bar above the Text Editor (where the Toolbar is): */}
           <div className="editor-overhead">
-            <Toolbar />
-
             {/* This is where I'll have the dropbox boxes for letting the user choose font, font-size, and background color: */}
             {/* 1. Font: */}
             <label>Editor Font:
@@ -632,6 +630,7 @@ function EditorContent() {
               </select>
             </label>
           </div>
+          {/*<Toolbar />*}
           {/* DEBUG: At this moment, the Toolbar is above the <h3>Text Editor</h3> -- I want it below it... which might be tricky given
           that Toolbar isn't inserted here -- but figure out how I can rearrange things later... */}
           
@@ -643,12 +642,12 @@ function EditorContent() {
                 <div key={i+1}>{i + 1}</div>
               ))}
             </div>
-
             <div className={`editor-container ${isDraggingMD ? "dragging" : ""}`} 
             onDragOver={(e) => {e.preventDefault(); setIsDraggingMD(true);}} 
             onDragLeave={()=>setIsDraggingMD(false)}
             onDrop={handleFileUploadDD}>
-                <ContentEditable className={`content-editable black-outline ${isDraggingMD ? "dragging" : ""}`} onKeyDown={handleKeyInput} style={{backgroundColor:editorBColour, color:editorTColour}} />
+                <Toolbar />
+                <ContentEditable className={`content-editable black-outline ${isDraggingMD ? "dragging" : ""}`} onKeyDown={handleKeyInput} style={{backgroundColor:editorBColour, color:editorTColour}} data-placeholder="Write your Markdown here..."/>
                 <HistoryPlugin/> {/* <-- Needed for Undo/Redo functionality in the Toolbar... (enables tracking or smth) */}
                 <PlainTextPlugin
                   placeholder={<div>Write here...</div>}
