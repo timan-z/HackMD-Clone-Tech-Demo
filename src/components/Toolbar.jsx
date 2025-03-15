@@ -534,9 +534,8 @@ function Toolbar() {
                 }
             }
         );
-        
         // Triggering the file input click event that starts everything above:
-        inputFile.click();
+        //inputFile.click();
     };
 
     // Sep Function for applying the UNDO functionality:

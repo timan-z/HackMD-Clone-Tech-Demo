@@ -5,9 +5,7 @@
 
 .content-editable {
   outline: none;
-
   background-color:#d3d3d3; /* DEBUG: Tentative setting -- just so I can see the space I'm working with. */
-
   /* NOTE-TO-SELF: The styling below is necessary to incorporate typed text wraparound:
   - "word-wrap" and "overflow-wrap" make sure typed text wraps around.
   - "width", "max-width", and "box-sizing" are for ensuring text doesn't flow beyond the container. */
@@ -20,14 +18,13 @@
   box-sizing: border-box;
 }
 
-
-
-
-
-
-
-
-
+/* This is for when the user drags a ".md" file over the Text Editor space. There will be an
+inset shadow cast on the interior of the Text Editor to indicate drag-and-drop target (for now,
+I have set that shadow's colour to be a dark-bright yellow (NOTE: subject to change with future design choices). */
+.content-editable.dragging {
+  box-shadow: inset 0 0 75px rgb(241, 207, 12); /* Inner shadow effect */
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
 
 
 
@@ -201,6 +198,15 @@
   display:flex;
   flex-direction:column;
 }
+
+
+
+
+
+
+
+
+
 
 .md-preview-panel {
   outline: black;
