@@ -1,22 +1,15 @@
 import React from 'react';
-
-/* NOTE-TO-SELF: It is probably best practice to do all of these Lexical imports below individually
-(specifying /react/...) -- wasted too much time figuring out why nothing was appearing
-on screen when I tried to group import them all from @lexical/react smh. */
-
 import { LexicalComposer } from '@lexical/react/LexicalComposer'; 
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-
-// 1. DEBUG: [1/2] Two lines below were added for the line numbering feature...
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useEffect, useState, useRef } from 'react';
-import Toolbar from "./Toolbar.jsx";
 import { $getRoot, $getSelection, $isRangeSelection, $isTextNode, $isLineBreakNode, RootNode } from 'lexical';
 import { parseMarkdown } from "./MDParser.jsx";
-import { findCursorPos } from './UtilityFuncs.js'; // DEBUG: After removing findCursorPos() from here and moving it to UtilityFuncs.js
+import { findCursorPos } from './UtilityFuncs.js';
+import Toolbar from "./Toolbar.jsx";
 
 /* NOTE-TO-SELF:
   - LexicalComposer initializes the editor with the [theme], [namespace], and [onError] configs. (Additional plug-ins go within its tags).
@@ -25,7 +18,7 @@ import { findCursorPos } from './UtilityFuncs.js'; // DEBUG: After removing find
   - LexicalErrorBoundary, embedded within PlainTextPlugin, will be for catching errors and preventing LexicalComposer from exploding basically.
 */
 
-// NOTE: This is one of the sample themes offered in the Lexical documentation: https://lexical.dev/docs/getting-started/theming
+// NOTE: This is just one of the sample themes offered in the Lexical documentation: https://lexical.dev/docs/getting-started/theming
 const sampleTheme = {
   ltr: 'ltr',
   rtl: 'rtl',
@@ -105,27 +98,20 @@ const initialConfig = {
   },
 };
 
-// Porting somethings into a child element of the LexicalComposer component...
+// Most of the "content" of the LexicalComposer component (Text Editor) will be in this child element here:
 function EditorContent() {
   const [editor] = useLexicalComposerContext();
   const [lineCount, setLineCount] = useState(1); // 1 line is the default.
 
-  // DEBUG: Below is for the Markdown rendering stuff:
+  // The following two const are (mainly) for the Markdown rendering effect:
   const [editorContent, setEditorContent] = useState(""); // Stores raw markdown.
   const [parsedContent, setParsedContent] = useState(""); // Stores parsed HTML.
-  const [showPreview, setShowPreview] = useState(true); // For the Preview Panel toggling...
-  // DEBUG: Above is for the Markdown rendering stuff...
-
-  // DEBUG: Below is for the "draggable space" I've added for the Text Editor and Preview Panel...
-  const [editorWidth, setEditorWidth] = useState(50); // debug: Initial width percentage
-  const isResizing = useRef(false);
-  // DEBUG: Above is for the "draggable space" I've added for the Text Editor and Preview Panel...
-
-  // DEBUG: Below is for the Text Editor and Preview Panel toggle view thing:
+  // The following const is for the "view mode" toggling of the webpage (regarding Text Editor and Preview Panel):
   const [viewMode, setViewMode] = useState("split"); // default state.
-  // DEBUG: Above is for the Text Editor and Preview Panel toggle view thing...
-
-  // DEBUG: Below is for the Text Editor and Preview Panel customization (font, zoom, and background colour):
+  // The following two const are for the "draggable" divider line I have between the Text Editor and Preview Panel in split view:
+  const [editorWidth, setEditorWidth] = useState(50); // 50 is the initial width percentage...
+  const isResizing = useRef(false);
+  // The following consts are for Text Editor and Preview Panel customization (text zoom percentage, font and background colour):
   const [editorFont, setEditorFont] = useState("Arial"); // default font for text editor.
   const [previewFont, setPreviewFont] = useState("Arial"); // default font for preview panel.
   const [edFontSize, setEdFontSize] = useState(16); // default font size.
@@ -134,27 +120,22 @@ function EditorContent() {
   const [previewBColour, setPreviewBColour] = useState("#b0c4de");
   const [editorTColour, setEditorTColour] = useState("#000000");
   const [previewTColour, setPreviewTColour] = useState("#000000");
-  // DEBUG: Above is for the Text Editor and Preview Panel customization (font, zoom, and background colour)...
-
-  // DEBUG: Below is for the "Drag-and-Drop .md Files" functionality:
+  // The following const is for the "drag-and-drop .md files" feature for the Text Editor: 
   const [isDraggingMD, setIsDraggingMD] = useState(false);
-  // DEBUG: Above is for the "Drag-and-Drop .md Files" functionality...
 
 
-
-
-
-
-
-
+  // -------------------------------------------------------------------------------------------------------------------------------
+  // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach...
   // DEBUG: Below is for the enabling of the Table configuration tools:
-  // NOTE: Decided to drop this feature as of 3/12/2025 -- might come back to it later if I can think of a better approach.
   const [tableToolsActive, setTableToolsActive] = useState(false);
   const [currentTableRow, setCurrentTableRow] = useState(null);
   const [currentTableCol, setCurrentTableCol] = useState(null);
   // DEBUG: Above is for the enabling of the Table configuration tools...
+  // NOTE: Decided to drop this feature above as of 3/12/2025 -- might come back to it later if I can think of a better approach...
+  // -------------------------------------------------------------------------------------------------------------------------------
 
-  // DEBUG: Functions below are for the Text Editor and Preview Panel toggle view thing:
+
+  // Function for handling the webpage view toggle between the Text Editor and Preview Panel (Split, Editor, Preview):
   const handleViewChange = (mode) => {
     setViewMode(mode);
     let textEdSpace = document.getElementById("text-editor-space");
@@ -162,7 +143,7 @@ function EditorContent() {
 
     if(mode === "split") {
       setEditorWidth(50); // Needed for resetting the Text Editor and Preview Panel dimensions after potential adjustments with the slider. 
-      prevPanSpace.classList.remove("preview-panel-space-full"); // DEBUG: Maybe cast this in a JS try-block or whatever (i get console errors for doesnt exist)
+      prevPanSpace.classList.remove("preview-panel-space-full"); // NOTE:+DEBUG: Maybe cast this in a JS try-block or whatever (i get console errors for doesnt exist)
       prevPanSpace.classList.add("preview-panel-space-split");
       textEdSpace.classList.remove("text-editor-space-full");
       textEdSpace.classList.add("text-editor-space-split");
@@ -176,19 +157,8 @@ function EditorContent() {
       prevPanSpace.classList.add("preview-panel-space-full");
     }
   };
-  // DEBUG: Functions above are for the Text Editor and Preview Panel toggle view thing...
 
-
-
-
-
-
-
-
-
-
-
-  // DEBUG: Functions below are for the [1] "Upload File" and [2] "Download File" (both .md) functionality:
+  // Function for handling the [1] "Upload File" and [2] "Download File" (both .md) functionality:
   // 1a. This function is for the actual .md file reading (opening it up, reading it, pasting to the Text Editor):
   const handleFileUploadMD = (file) => {
     // If invalid file:
@@ -223,7 +193,7 @@ function EditorContent() {
   // 1b. This function is for uploading the .md file via button:
   const handleFileUploadBtn = (event) => {
     if(!(event.target.files && event.target.files.length > 0)) {
-      alert("debug: something went wrong with the .md file upload.");
+      alert("NOTE: Something went wrong with the .md file upload.");
       return;
     }
 
@@ -249,8 +219,6 @@ function EditorContent() {
         return;
       }
 
-      console.log("download-debug: The value of textEditorContent = [", textEditorContent, "]");
-
       // Create a blob and use that to download:
       const blob = new Blob([textEditorContent]);
       const url = URL.createObjectURL(blob);
@@ -264,18 +232,11 @@ function EditorContent() {
       URL.revokeObjectURL(url);
     });
   };
-  // DEBUG: Functions above are for the "Download File" and "Upload File" (both .md) functionality...
 
 
-
-
-
-
-
-
-
+  // -------------------------------------------------------------------------------------------------------------------------------
+  // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach.
   // DEBUG: Function below is for adding the additional Table configurations:
-  // NOTE: Decided to drop this feature as of 3/12/2025 -- might come back to it later if I can think of a better approach.
   const checkWithinTable = (selection) => {
 
     const selectionText = selection.getTextContent();
@@ -337,8 +298,12 @@ function EditorContent() {
         }
   };
   // DEBUG: Function above is for adding the additional Table configurations...
+  // NOTE: Decided to drop this feature above as of 3/12/2025 -- might come back to it later if I can think of a better approach.
+  // -------------------------------------------------------------------------------------------------------------------------------
+
 
   useEffect(() => {
+
     const unregister = editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
         // NOTE: The stuff below is for the text editor line counter...
@@ -356,11 +321,14 @@ function EditorContent() {
         setEditorContent(textContent);
         setParsedContent(parseMarkdown(textContent));
 
+        // -------------------------------------------------------------------------------------------------------------------------------
+        // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach.
         // TABLE-DEBUG: ALL OF THE STUFF BELOW IS FOR CHECKING TO SEE IF CURRENT CURSOR IS WITHIN APPROPRIATE TABLE BOUNDS!!!
-        // NOTE: Should probably make it so that Table Tools are only made active when selection = non-highlighted text... (creative choice).
+        // Should probably make it so that Table Tools are only made active when selection = non-highlighted text... (creative choice).
         /*const selection = $getSelection();
         let cursorInTable = checkWithinTable(selection);*/
-        // NOTE-DEBUG: Decided to drop the Table configurations for now... way too much time being spent on this, best to move on.
+        // NOTE: Decided to drop this feature above as of 3/12/2025 -- might come back to it later if I can think of a better approach.
+        // -------------------------------------------------------------------------------------------------------------------------------
       });
     });
 
@@ -370,73 +338,24 @@ function EditorContent() {
     };
   }, [editor]);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // DEBUG: The const functions below are for the "draggable" space between the Text Editor and Preview Panel.
-  const handleMouseDown = (event) => {
-    // "handleMouseDown" as in you begin to click *down* on the "draggable" space and it's now "draggable"
-
-    console.log("DEBUG: Mouse Down...");
-
+  // The three following const functions are for the "draggable" divider line between the Text Editor and Preview Panel:
+  const handleMouseDown = () => {
     isResizing.current = true;
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
   };
   const handleMouseMove = (event) => {
     if (isResizing.current) {
-
-      console.log("DEBUG: Mouse Moving... ");
-
       const newWidth = (event.clientX / window.innerWidth) * 100; // debug: Convert px to %
       const clampedWidth = Math.max(30, Math.min(70, newWidth));
-
-      console.log("DEBUG: ", clampedWidth);
-
       setEditorWidth(clampedWidth); // debug: Clamp width between 30% - 70%
     }
   };
   const handleMouseUp = () => {
-
-    console.log("DEBUG: Mouse up...");
-
     isResizing.current = false;
     document.removeEventListener("mousemove", handleMouseMove);
     document.removeEventListener("mouseup", handleMouseUp);
   };
-  // DEBUG: The const functions above are for the "draggable" space between the Text Editor and Preview Panel.
 
   // Configuring event listeners for certain keys:
   const handleKeyInput = (event) => {
@@ -457,15 +376,10 @@ function EditorContent() {
     }
     
     /* Special handling needed for "Enter" relating to Quote, Generic List, Numbered List, 
-    and Check List formatting (keeping ) */
-    /* EDIT:
-    Okay this is going to be a little tricky, event.preventdDefault() don't do nothing 
-    so I'm going to need to get crafty here and inspect the previous line.
-    */
+    and Check List formatting (i.e., Making sure if I click enter after line "1. something", the next line begins with "2. "): */
     if (event.key === "Enter") {
       event.preventDefault(); // DEBUG: <-- does not seem to do anything lol 
       editor.update(() => {
-
         const selection = $getSelection();
         const {anchor} = selection;
         const selectedText = selection.getTextContent();
@@ -474,25 +388,20 @@ function EditorContent() {
         let symbolToPrepend = null;
         let numberToPrepend = null;
 
-        /* GAMEPLAN:
-        So I know that when the cursor is on an empty-line post-newline insertion, anchorNode.getKey() will always have value of 2
+        /* Logic here: I know that when the cursor is on an empty-line post-newline insertion, anchorNode.getKey() will always have value of 2
         and anchor.offset will basically correspond to all of the combined lineBreakNodes and textNodes preceding this empty line that
         the cursor currently rests on. 
         - So I can get the children of the parent node, iterate through all of them and have a counter record up to (anchor.offset - 1)
-        so I know when I reach the textNode that I want to inspect...
-        - Inspect the text content of said node ^ ...
-        */
-
+        so I know when I reach the textNode that I want to inspect (and determine if this current line should have #. prepended to it etc). */
         let prevTextNodePos = anchor.offset - 2;
         if(prevTextNodePos >= 0) {
 
           for(const paragraph of paraNodes) {
             if(paragraph.getChildren()) {
               const paraChildren = paragraph.getChildren();
-              const paraChild = paraChildren[anchor.offset - 2];  // TAKEAWAY: the prior text node will always be anchor.offset - 2 away. (post newline).
+              const paraChild = paraChildren[anchor.offset - 2];  // The prior text node will always be anchor.offset - 2 away. (post newline).
 
               if($isTextNode(paraChild)) {
-
                 /* paraChild.getTextContent() will contain the text content of the previous text node.
                 I want to now inspect its content to see if it's a string that begins with "> ", "* ", "{any number} ", or "- [ ] "
                 (and from there it will be seen if there's any additional string following this starting substring, from which
@@ -549,6 +458,18 @@ function EditorContent() {
     }
   }
 
+
+
+
+
+
+
+  {/* DEBUG: Come back and clean up everything below here on another night (sunday probably): */}
+
+
+
+
+
   return(
     <div className="editor-wrapper">
       <div className="editor-preview-overhead">
@@ -559,7 +480,7 @@ function EditorContent() {
           <button onClick={()=> handleViewChange("preview-only")} disabled={viewMode==="preview-only"}>Preview Panel</button>
         </div>
 
-        {/* DEBUG: Below is for implementing an "Upload File" (.md) and "Download File" (.md): */}
+        {/* The <div> below pertains to the "Upload File" (.md) and "Download File" (.md) site functionality: */}
         <div className="editor-upload-download">
           {/* The Upload .md File Button: */}
           <input type="file" accept=".md" onChange={handleFileUploadBtn} style={{display:"none"}} id="fileInput"/>
@@ -572,6 +493,9 @@ function EditorContent() {
         </div>
 
       </div>
+
+
+
 
       {/* Main Layout: It's going to be split view (lhs = editable text space; rhs = "preview panel"): */}
       <div className={`editor-layout ${viewMode === "split" ? "split-view" : "full-view"}`}>
