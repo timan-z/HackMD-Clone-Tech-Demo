@@ -458,29 +458,20 @@ function EditorContent() {
     }
   }
 
-
-
-
-
-
-
-  {/* DEBUG: Come back and clean up everything below here on another night (sunday probably): */}
-
-
-
-
-
   return(
     <div className="editor-wrapper">
+
+      {/* The horizontal bar at the top of the webpage (where the site title is, "Text Editor|Split|Preview Panel" toggles are, etc): */}
       <div className="editor-preview-overhead">
-        <h1>HACKMD CLONE!!!</h1>
+        <h1>HACKMD CLONE!!!</h1>  {/* DEBUG:+NOTE: Change this to something proper eventually... */}
+
+        {/* The "Text Editor|Split|Preview Panel" toggles: */}
         <div className="editor-preview-toggle">
           <button onClick={()=> handleViewChange("editor-only")} disabled={viewMode==="editor-only"}>Text Editor</button>
           <button onClick={()=> handleViewChange("split")} disabled={viewMode==="split"}>Split-View</button>
           <button onClick={()=> handleViewChange("preview-only")} disabled={viewMode==="preview-only"}>Preview Panel</button>
         </div>
-
-        {/* The <div> below pertains to the "Upload File" (.md) and "Download File" (.md) site functionality: */}
+        {/* The "Upload File" (.md) and "Download File" (.md) buttons: */}
         <div className="editor-upload-download">
           {/* The Upload .md File Button: */}
           <input type="file" accept=".md" onChange={handleFileUploadBtn} style={{display:"none"}} id="fileInput"/>
@@ -491,26 +482,20 @@ function EditorContent() {
           {/* The Download Text Editor Content -> .md File Button: */}
           <button onClick={handleDownloadMD} className="download-md-button">Download as .md</button>
         </div>
-
       </div>
 
-
-
-
-      {/* Main Layout: It's going to be split view (lhs = editable text space; rhs = "preview panel"): */}
+      {/* The <div> below will encase the "main body" of the webpage (the Text Editor and Preview Panel, or just one of them isolated).
+      The default view will be "Split View" (both Text Editor and Preview Panel present): */}
       <div className={`editor-layout ${viewMode === "split" ? "split-view" : "full-view"}`}>
 
-        {/* "text-editor-space" will be the wrapping for the, well, text editor space: The "Text Editor" header, toolbar, and editor space
-        where the user can type their markdown text. By default, this is the left-hand side of the webpage. I want it to be organized top to bottom.
-        That is, the "Text Editor" header is at the top, followed by the toolbar, and then the editor space at the bottom... (style=relative )
-        DEBUG: Don't forget to tweak the CSS so it's centered as I want it, and that the editor space spans the full height of the page. */}
+        {/* This is the wrapping for the Text Editor space: */}
         {(viewMode === "split" || viewMode === "editor-only") && (<div id="text-editor-space" className="text-editor-space-split" style={{ width: `${editorWidth}%`}}>
 
           <h3>Text Editor</h3>
 
-          {/* "editor-overhead" ofc means the overhead bar above the Text Editor (where the Toolbar is): */}
+          {/* "editor-overhead" <div> is for the horizontal bar above the Text Editor (and Toolbar) where customization options
+          will be (mainly dropboxes for letting the user choose font, font-size, background-color etc): */}
           <div className="editor-overhead">
-            {/* This is where I'll have the dropbox boxes for letting the user choose font, font-size, and background color: */}
             {/* 1. Font: */}
             <label>Editor Font:
               <select onChange={(e) => setEditorFont(e.target.value)} value={editorFont}>
@@ -554,18 +539,18 @@ function EditorContent() {
               </select>
             </label>
           </div>
-          {/*<Toolbar />*}
-          {/* DEBUG: At this moment, the Toolbar is above the <h3>Text Editor</h3> -- I want it below it... which might be tricky given
-          that Toolbar isn't inserted here -- but figure out how I can rearrange things later... */}
           
-          {/* "main-text-editor" is basically the wrapping for the editable text editor space -- it exists mostly so that the line numbers 
-          can align with the rows of the text editor (style=flex): */}
+          {/* "main-text-editor" is basically the wrapping for the actual editable text editor -- it exists mostly so that the line numbers 
+          can align with the rows of the text editor (style=flex). 
+          NOTE:+DEBUG: ^ Make note of this when determining if I keep or get rid of the horizontal line numbers (might be too difficult
+          to incorporate the what happens when you type one continous line of text thing)... */}
           <div className="main-text-editor" style={{fontFamily: editorFont, fontSize:`${edFontSize}px`}}>
             <div className="line-numbers">
               {Array.from({length: lineCount}, (_,i) => (
                 <div key={i+1}>{i + 1}</div>
               ))}
             </div>
+            {/* The actual Text Editor + configurations so I can drag and drop .md files... */}
             <div className={`editor-container ${isDraggingMD ? "dragging" : ""}`} 
             onDragOver={(e) => {e.preventDefault(); setIsDraggingMD(true);}} 
             onDragLeave={()=>setIsDraggingMD(false)}
@@ -581,13 +566,13 @@ function EditorContent() {
           </div>
         </div>)}
 
-        {/* Adding a "resizable divider" between the Text Editor and the Preview Panel such that I can drag it left or right
-        to increase the Text Editor width/decrease the Preview Panel width or vice versa (just like HackMD does it). */}
+        {/* This is the "resizable divider" between the Text Editor and the Preview Panel that can be dragged left and right
+        to increase the Text Editor width/decrease the Preview Panel width and vice versa (pretty much exactly like how HackMD does it): */}
         {viewMode === "split" && <div className="resizeTEPP" onMouseDown={handleMouseDown}></div>}
 
         {(viewMode === "split" || viewMode === "preview-only") && (<div id="preview-panel-space" className="preview-panel-space-split" style={{ width: `${100 - editorWidth}%`}}>
           <h3>Preview</h3>
-
+          {/* Customization bar for the Preview Panel (same as what's offered with the Text Editor): */}
           <div className="preview-overhead">
             {/* 1. For the user to toggle font selection for the Preview Panel: */}
             <label>Preview Font:
@@ -631,6 +616,7 @@ function EditorContent() {
             </label>
           </div>
 
+          {/* The actual Preview Panel itself: */}
           <div className="markdown-preview">
             <div className="md-preview-panel black-outline" dangerouslySetInnerHTML={{ __html: parsedContent }} style={{fontFamily: previewFont, fontSize:`${prevFontSize}px`, backgroundColor:previewBColour, color:previewTColour}}/>
           </div>
@@ -644,13 +630,7 @@ function EditorContent() {
 function Editor() {
   return (
     <LexicalComposer initialConfig={initialConfig}>
-
-      {/* NOTE-TO-SELF:
-      The structure below is a little weird but the way I'm understanding it is that "<ContentEditable/>" is the main
-      text-entry area and the <PlainTextPlugin> beneath basically scaffolds this area (hence "contentEditable={<ContentEditable/>")
-      where "placeholder=..." is the text that appears over the text-entry area prompting input and "ErrorBoundary=..." is just
-      an error-catcher that makes sure any issues with the rendering or whatnot don't crash the text editor in its entirety. 
-      EDIT: Nevermind -- don't need the "contentEditable={<ContentEditable/>" (that's wrong, just adds another text space). */}
+      {/* Everything's pretty much just in EditorContent(...) */}
       <EditorContent />
     </LexicalComposer>
   );
