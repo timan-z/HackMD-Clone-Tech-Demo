@@ -123,7 +123,6 @@ function EditorContent() {
   // The following const is for the "drag-and-drop .md files" feature for the Text Editor: 
   const [isDraggingMD, setIsDraggingMD] = useState(false);
 
-
   // -------------------------------------------------------------------------------------------------------------------------------
   // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach...
   // DEBUG: Below is for the enabling of the Table configuration tools:
@@ -133,7 +132,6 @@ function EditorContent() {
   // DEBUG: Above is for the enabling of the Table configuration tools...
   // NOTE: Decided to drop this feature above as of 3/12/2025 -- might come back to it later if I can think of a better approach...
   // -------------------------------------------------------------------------------------------------------------------------------
-
 
   // Function for handling the webpage view toggle between the Text Editor and Preview Panel (Split, Editor, Preview):
   const handleViewChange = (mode) => {
