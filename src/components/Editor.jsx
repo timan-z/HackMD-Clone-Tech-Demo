@@ -102,6 +102,7 @@ const initialConfig = {
 function EditorContent() {
   const [editor] = useLexicalComposerContext();
   const [lineCount, setLineCount] = useState(1); // 1 line is the default.
+  const [currentLine, setCurrentLine] = useState(1);
 
   // The following two const are (mainly) for the Markdown rendering effect:
   const [editorContent, setEditorContent] = useState(""); // Stores raw markdown.
@@ -310,8 +311,22 @@ function EditorContent() {
         const textContent = $getRoot().getTextContent();
         const lines = textContent.split("\n").length;
         setLineCount(lines);
-
         console.log("Current line count in text editor: ", lines);
+
+        // Okay and now I'm going to write some code to detect the current line of the Text Editor!
+        const paraNodes = $getRoot().getChildren();
+        const selection = $getSelection();
+        let {anchor} = selection;
+        let anchorNode = anchor.getNode();
+        let anchorOffset = anchor.offset;
+        let absoluteCursorPos = findCursorPos(paraNodes, anchorNode, anchorOffset); // let's see!
+        let textContentTrunc = textContent.slice(0, absoluteCursorPos);
+        let currentLine = textContentTrunc.split("\n").length;
+        console.log("The current line is: ", currentLine);
+        setCurrentLine(currentLine);
+
+
+
 
         // NOTE: The stuff below is for the Markdown renderer... 
         setEditorContent(textContent);
@@ -569,7 +584,7 @@ function EditorContent() {
                 />                
                 <HistoryPlugin/> {/* <-- Needed for Undo/Redo functionality in the Toolbar... (enables tracking or smth) */}
             
-                <div>Line Count: {lineCount} | Current Line: DON'T FORGET TO COME BACK AND IMPLEMENT THIS!</div>
+                <div>Line Count: {lineCount} | Current Line: {currentLine}</div>
             </div>
 
 
