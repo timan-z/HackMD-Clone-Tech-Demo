@@ -231,7 +231,6 @@ function EditorContent() {
     });
   };
 
-
   // -------------------------------------------------------------------------------------------------------------------------------
   // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach.
   // DEBUG: Function below is for adding the additional Table configurations:
@@ -298,7 +297,6 @@ function EditorContent() {
   // DEBUG: Function above is for adding the additional Table configurations...
   // NOTE: Decided to drop this feature above as of 3/12/2025 -- might come back to it later if I can think of a better approach.
   // -------------------------------------------------------------------------------------------------------------------------------
-
 
   useEffect(() => {
 
@@ -543,11 +541,16 @@ function EditorContent() {
           NOTE:+DEBUG: ^ Make note of this when determining if I keep or get rid of the horizontal line numbers (might be too difficult
           to incorporate the what happens when you type one continous line of text thing)... */}
           <div className="main-text-editor" style={{fontFamily: editorFont, fontSize:`${edFontSize}px`}}>
-            <div className="line-numbers">
+
+
+            {/* The block of code below was for the "Line Numbers" column to the left of the Text Editor: */}
+            {/*<div className="line-numbers">
               {Array.from({length: lineCount}, (_,i) => (
                 <div key={i+1}>{i + 1}</div>
               ))}
-            </div>
+            </div>*/}
+
+
             {/* The actual Text Editor + configurations so I can drag and drop .md files... */}
             <div className={`editor-container ${isDraggingMD ? "dragging" : ""}`} 
             onDragOver={(e) => {e.preventDefault(); setIsDraggingMD(true);}} 
@@ -560,6 +563,8 @@ function EditorContent() {
                   placeholder={<div>Write here...</div>}
                   ErrorBoundary={LexicalErrorBoundary}
                 />
+
+                <div>Line Count: {lineCount} | Current Line: DON'T FORGET TO COME BACK AND IMPLEMENT THIS!</div>
             </div>
           </div>
         </div>)}
