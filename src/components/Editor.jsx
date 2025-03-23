@@ -551,21 +551,31 @@ function EditorContent() {
             </div>*/}
 
 
+
             {/* The actual Text Editor + configurations so I can drag and drop .md files... */}
             <div className={`editor-container ${isDraggingMD ? "dragging" : ""}`} 
             onDragOver={(e) => {e.preventDefault(); setIsDraggingMD(true);}} 
             onDragLeave={()=>setIsDraggingMD(false)}
             onDrop={handleFileUploadDD}>
                 <Toolbar />
-                <ContentEditable className={`content-editable black-outline ${isDraggingMD ? "dragging" : ""}`} onKeyDown={handleKeyInput} style={{backgroundColor:editorBColour, color:editorTColour}} data-placeholder="Write your Markdown here..."/>
-                <HistoryPlugin/> {/* <-- Needed for Undo/Redo functionality in the Toolbar... (enables tracking or smth) */}
-                <PlainTextPlugin
-                  placeholder={<div>Write here...</div>}
-                  ErrorBoundary={LexicalErrorBoundary}
-                />
 
+                {/* Need to wrap the ContentEditable inside the PlainTextPlugin (I didn't do this originally, that's why the Placeholder wasn't working). */}
+                <PlainTextPlugin
+                  contentEditable={
+                    <ContentEditable className={`content-editable black-outline ${isDraggingMD ? "dragging" : ""}`} onKeyDown={handleKeyInput} style={{backgroundColor:editorBColour, color:editorTColour}} data-placeholder="Write your Markdown here..."/>
+                  }
+                  placeholder={<div className="placeholder">Write your Markdown here...</div>}
+                  ErrorBoundary={LexicalErrorBoundary}
+                />                
+                <HistoryPlugin/> {/* <-- Needed for Undo/Redo functionality in the Toolbar... (enables tracking or smth) */}
+            
                 <div>Line Count: {lineCount} | Current Line: DON'T FORGET TO COME BACK AND IMPLEMENT THIS!</div>
             </div>
+
+
+
+
+
           </div>
         </div>)}
 

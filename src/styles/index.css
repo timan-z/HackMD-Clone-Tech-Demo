@@ -1,5 +1,12 @@
 
-
+.placeholder {
+  position:absolute;
+  color:gray;
+  font-style:italic;
+  pointer-events:none;
+  padding:8px;
+  top:1.8em;
+}
 
 .black-outline {
   border: 1px solid black;
@@ -200,6 +207,7 @@ I have set that shadow's colour to be a dark-bright yellow (NOTE: subject to cha
   height:100%;
   display:flex;
   flex-direction:column;
+  position:relative;
 }
 
 
