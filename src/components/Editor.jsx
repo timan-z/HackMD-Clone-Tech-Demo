@@ -557,15 +557,12 @@ function EditorContent() {
           to incorporate the what happens when you type one continous line of text thing)... */}
           <div className="main-text-editor" style={{fontFamily: editorFont, fontSize:`${edFontSize}px`}}>
 
-
             {/* The block of code below was for the "Line Numbers" column to the left of the Text Editor: */}
             {/*<div className="line-numbers">
               {Array.from({length: lineCount}, (_,i) => (
                 <div key={i+1}>{i + 1}</div>
               ))}
             </div>*/}
-
-
 
             {/* The actual Text Editor + configurations so I can drag and drop .md files... */}
             <div className={`editor-container ${isDraggingMD ? "dragging" : ""}`} 
