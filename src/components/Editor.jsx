@@ -11,6 +11,11 @@ import { parseMarkdown } from "./MDParser.jsx";
 import { findCursorPos } from './UtilityFuncs.js';
 import Toolbar from "./Toolbar.jsx";
 
+// NOTE: Following two lines are for Phase 3 (Introducing Real-Time Collaboration).
+import { io } from "socket.io-client";  
+const socket = io("https://localhost:4000"); // This is what I'm picking for server port location in Server.js
+
+
 /* NOTE-TO-SELF:
   - LexicalComposer initializes the editor with the [theme], [namespace], and [onError] configs. (Additional plug-ins go within its tags).
   - ContentEditable is the area where the user types.
