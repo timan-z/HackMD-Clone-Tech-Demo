@@ -26,6 +26,7 @@
   height:100%;
   max-height:100%;
   box-sizing: border-box;
+  overflow-y:auto;  /* To add the vertical scroll bar when there's overflow. */
 }
 
 /* This is for when the user drags a ".md" file over the Text Editor space. There will be an
@@ -229,6 +230,7 @@ I have set that shadow's colour to be a dark-bright yellow (NOTE: subject to cha
 
   word-wrap: break-word;
   overflow-wrap: break-word;
+  overflow-y:auto;
   height:100%;
   width:100%;
   max-width: 100%;

@@ -527,7 +527,7 @@ function EditorContent() {
             <button onClick={() => setEdFontSize((prev) => Math.max(prev - 2, 12))}>Zoom Out</button>
 
             {/* 3. Adding controls for changing Background Colour: */}
-            <label>Background Colour:
+            <label>Background:
               <select onChange={(e) => setEditorBColour(e.target.value)} value={editorBColour}>
                 <option value="#d3d3d3">Light Gray</option>
                 <option value="#FFFFFF">White</option>
@@ -539,7 +539,7 @@ function EditorContent() {
             </label>
 
             {/* 4. Adding controls for changing Text Colour: */}
-            <label>Text Colour:
+            <label>Text:
               <select onChange={(e) => setEditorTColour(e.target.value)} value={editorTColour}>
                 <option value="#000000">Black</option>
                 <option value="#D4D4D4">Light Gray</option>
@@ -580,13 +580,9 @@ function EditorContent() {
                   ErrorBoundary={LexicalErrorBoundary}
                 />                
                 <HistoryPlugin/> {/* <-- Needed for Undo/Redo functionality in the Toolbar... (enables tracking or smth) */}
-            
+                
                 <div>Line Count: {lineCount} | Current Line: {currentLine}</div>
             </div>
-
-
-
-
 
           </div>
         </div>)}
@@ -618,7 +614,7 @@ function EditorContent() {
             <button onClick={() => setPrevFontSize((prev) => prev + 2)}>Zoom In</button>
             <button onClick={() => setPrevFontSize((prev) => Math.max(prev - 2, 12))}>Zoom Out</button>
             {/* 3. Background Colour:*/}
-            <label>Background Colour:
+            <label>Background:
               <select onChange={(e) => setPreviewBColour(e.target.value)} value={previewBColour}>
                 <option value="#d3d3d3">Light Gray</option>
                 <option value="#FFFFFF">White</option>
@@ -629,7 +625,7 @@ function EditorContent() {
               </select>
             </label>
             {/* 4. Text Colour: */}
-            <label>Text Colour:
+            <label>Text:
               <select onChange={(e) => setPreviewTColour(e.target.value)} value={previewTColour}>
                 <option value="#000000">Black</option>
                 <option value="#D4D4D4">Light Gray</option>
