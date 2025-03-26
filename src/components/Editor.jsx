@@ -13,7 +13,7 @@ import Toolbar from "./Toolbar.jsx";
 
 // NOTE: Following two lines are for Phase 3 (Introducing Real-Time Collaboration).
 import { io } from "socket.io-client";  
-const socket = io("https://localhost:4000"); // This is what I'm picking for server port location in Server.js
+const socket = io("http://localhost:4000"); // NOTE: This is what I'm picking for server port location in Server.js (maybe change it, doesn't matter, who cares).
 
 
 /* NOTE-TO-SELF:
@@ -128,6 +128,9 @@ function EditorContent() {
   const [previewTColour, setPreviewTColour] = useState("#000000");
   // The following const is for the "drag-and-drop .md files" feature for the Text Editor: 
   const [isDraggingMD, setIsDraggingMD] = useState(false);
+
+  // PHASE-3: The following const is for the real-time multiple-client collaboration feature of the site:
+  const editorRef = useRef(null);
 
   // -------------------------------------------------------------------------------------------------------------------------------
   // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach...
@@ -304,8 +307,28 @@ function EditorContent() {
   // NOTE: Decided to drop this feature above as of 3/12/2025 -- might come back to it later if I can think of a better approach.
   // -------------------------------------------------------------------------------------------------------------------------------
 
-  useEffect(() => {
+  // PHASE-3 UPDATE: Introducing two new "useEffect(()=>{...})" hooks for clarity as per how the Socket.IO Client-Server logic will work:
 
+  // "useEffect(()=>{...})" Hook #1 - "start-up hook", for loading initial content from the server (after connecting to it for the first time).
+  useEffect(() => {
+    socket.on("load-document", (serverData) => {
+      setEditorContent(serverData);
+      // setting the text editor content to whatever was on the server:
+      editor.update(() => {
+        const root = $getRoot();
+        root.clear(); // gets rid of current existing text.
+        const selection = $getSelection();
+        selection.insertText(serverData);
+      });
+    });
+
+    return () => {
+      socket.off("load-document");
+    };
+  }, [editor]);
+
+  // "useEffect(()=>{...})" Hook #2 - "The original one", for client-instance text editor/state changes/emitting changes to server etc.
+  useEffect(() => {
     const unregister = editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
         // NOTE: The stuff below is for the text editor line counter...

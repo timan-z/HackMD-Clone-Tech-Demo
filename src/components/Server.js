@@ -1,22 +1,23 @@
 /* For implementing real-time Text Editor collaboration between multiple users, I'll
 be using Socket.IO with Express as my backend for real-time synchronization. */
-const express = require("express");
-const http = require("http"); // Express runs on HTTP.
-const { Server } = require("socket-io");
-const cors = require("cors");
+import express from "express";
+import http from "http"; // Express runs on HTTP.
+import { Server } from "socket.io";
+import cors from "cors";
 
 // setup:
 const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
+    // You need this stuff below to bypass issues with cors.
     cors: {
         origin: "http://localhost:5173", // This is **my** frontend URL; NOTE: I should have a variable for this in .env I think.
         methods: ["GET", "POST"],
     },
 });
 
-let documentData = ""; // shared Markdown content.
+let documentData = "SOME TEST VALUES"; // shared Markdown content.
 
 io.on("connection", (socket) => {
     // connection notice:
