@@ -309,6 +309,7 @@ function EditorContent() {
 
   // PHASE-3 UPDATE: Introducing two new "useEffect(()=>{...})" hooks for clarity as per how the Socket.IO Client-Server logic will work:
 
+  // NOTE: Hook #1 is only supposed to run ONCE I'm pretty sure...
   // "useEffect(()=>{...})" Hook #1 - "start-up hook", for loading initial content from the server (after connecting to it for the first time).
   useEffect(() => {
     socket.on("load-document", (serverData) => {
@@ -376,6 +377,36 @@ function EditorContent() {
       unregister();
     };
   }, [editor]);
+
+  // "useEffect(()=>{...})" Hook #3 - For listening for incoming Text Editor updates from other clients collaborating in real-time:
+  useEffect(() => {
+    socket.on("receive-text", (serverData) => {
+      // So updates will come in the form of the Text Editor content in its entirety (replacing the existing one):
+      setEditorContent((editorContent) => {
+        if(editorContent !== serverData) {
+          // hmm...
+          // applying update:
+          editor.update(() => {
+            const root = $getRoot();
+            root.clear(); // gets rid of current existing text.
+            const selection = $getSelection();
+            selection.insertText(serverData);
+          });
+          // hmm...
+          return serverData;
+        }
+        return editorContent;
+      }); 
+    
+    });
+
+    return () => {
+      socket.off("receive-text");
+    };
+  }, [editor]);
+
+
+
 
   // The three following const functions are for the "draggable" divider line between the Text Editor and Preview Panel:
   const handleMouseDown = () => {
