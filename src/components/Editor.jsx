@@ -307,10 +307,15 @@ function EditorContent() {
   // NOTE: Decided to drop this feature above as of 3/12/2025 -- might come back to it later if I can think of a better approach.
   // -------------------------------------------------------------------------------------------------------------------------------
 
-  // PHASE-3: Const below is basically for wrapping an emit from useEffect Hook #2 with Throttling:
+  // PHASE-3: Const below is for wrapping an emit from useEffect Hook #2 with Throttling:
   const sendTextToServer = throttle((text) => {
     socket.emit("send-text", text);
-  }, 150);  // only execute every 300ms (subsequent calls are ignored until each interval elapses).
+  }, 150);  // only execute every 150ms (subsequent calls are ignored until each interval elapses).
+
+  // PHASE-3: Const below is for wrapping an emit from useEffect Hook #2 with Throttling (once again):
+  const sendCursorToServer = throttle((cursorPos) => {
+    socket.emit("send-cursor-pos", cursorPos, socket.id);
+  }, 100);
 
   // PHASE-3 UPDATE: Introducing two new "useEffect(()=>{...})" hooks for clarity as per how the Socket.IO Client-Server logic will work:
   // NOTE: Hook #1 is only supposed to run ONCE I'm pretty sure...
@@ -359,11 +364,11 @@ function EditorContent() {
         setCurrentLine(currentLine);
 
 
-        
+
         // PHASE-3 ADDITIONS:
         sendTextToServer(textContent); // emit current Text Editor content to the server. (in external function due to throttle integration).
-        socket.emit("send-cursor-pos", absoluteCursorPos, socket.id); // sending the absolute cursor position of this specific client (and its ID).
-
+        sendCursorToServer(absoluteCursorPos); // emit current Text Editor cursor pos to the server. ^ again, same.
+        
 
 
 

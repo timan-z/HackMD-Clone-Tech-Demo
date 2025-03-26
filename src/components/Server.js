@@ -35,6 +35,12 @@ io.on("connection", (socket) => {
         socket.broadcast.emit("receive-text", data);    // send updates to all other clients.
     });
 
+
+    // Wrapping an emit.broadcast of clientCursors with a throttle to (try to) prevent race conditions:
+    const broadcastCursors = throttle(() => {
+        socket.broadcast.emit("update-cursors", clientCursors);
+    }, 100); // 100ms seems like a reasonable interval.
+
     // Handle client sending their cursor position within the Text Editor (*will happen frequently*): 
     socket.on("send-cursor-pos", (absCursorPos, clientId) => {
         console.log("DEBUG: The client sending their cursor position: [", clientId, "]");
@@ -49,8 +55,16 @@ io.on("connection", (socket) => {
             // Not present, so we can push it in:
             clientCursors.push(clientCursor);
         }
-
         console.log("DEBUG: Current state of clientCursors: ", clientCursors);
+
+        /* DEBUG: My next step should be to broadcast the state of clientCursors to each connected client
+        barring the one that sent the initial emit (so I want to use .broadcast ofc).
+
+        - There's definitely going to be an issue of race conditions here as well, so I probably need to 
+        use a similar tactic I did with Text Editor updates using throttle (?).
+        */
+        // Broadcasting the state of clientCursors:
+        broadcastCursors();
     });
 
     // disconnection notice:
@@ -67,6 +81,14 @@ io.on("connection", (socket) => {
             targetIndex += 1; 
         });
         console.log("DEBUG: [clientCursors Post-Splice] => ", clientCursors);
+
+        // DEBUG: After removing a clientCursor from clientCursors, I'll need to broadcast this update too! (so the render can be removed):
+        io.emit("update-cursors", clientCursors);
+        /* NOTE-TO-SELF:
+        - io.emit will send this event to *all* clients (including the server, which here will be irrelevant).
+        - socket.emit will send the event *only* to the specific client that triggered it.
+        - socket.broadcast.emit will send the even to all *other* clients except the sender.
+        */
     });
 
 });
