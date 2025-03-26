@@ -20,3 +20,11 @@ in HackMD -- the cursor position does not change at all -- but I don't think tha
 
 
         // NOTE: Should probably make it so that Table Tools are only made active when selection = non-highlighted text... (creative choice).
+
+
+
+
+Now, in editors like Google Docs, when there are several different clients editing a document, there is often a sort of pop-up next to their active cursor -- which is typically visible in the screen -- that indicates their name. I want to incorporate this into my site. I want to make it so that I can see the other client's cursor and a mini pop-up that shows their username (which can maybe just be their socket.id **for now**)
+
+
+

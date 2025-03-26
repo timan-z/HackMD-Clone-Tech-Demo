@@ -31,7 +31,13 @@ io.on("connection", (socket) => {
     
     // Handle text editor changes:
     socket.on("send-text", (data) => {
+
+        console.log("RECEIVED FROM CLIENT: [", data, "]");
+
         documentData = data;    // update document state.
+
+        console.log("BROADCASTING TO OTHER CLIENTS!!!");
+
         socket.broadcast.emit("receive-text", data);    // send updates to all other clients.
     });
     

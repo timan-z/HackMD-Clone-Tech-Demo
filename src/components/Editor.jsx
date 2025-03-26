@@ -11,9 +11,12 @@ import { parseMarkdown } from "./MDParser.jsx";
 import { findCursorPos } from './UtilityFuncs.js';
 import Toolbar from "./Toolbar.jsx";
 
-// NOTE: Following two lines are for Phase 3 (Introducing Real-Time Collaboration).
-import { io } from "socket.io-client";  
+// NOTE: Following lines are for Phase 3 (Introducing Real-Time Collaboration).
+import { io } from "socket.io-client";
+import { throttle } from "lodash"; // Throttling needed to limit rate of function calls (specifically emits to the server).
+import DiffMatchPatch from "diff-match-patch";
 const socket = io("http://localhost:4000"); // NOTE: This is what I'm picking for server port location in Server.js (maybe change it, doesn't matter, who cares).
+const dmp = new DiffMatchPatch();
 
 
 /* NOTE-TO-SELF:
@@ -307,8 +310,14 @@ function EditorContent() {
   // NOTE: Decided to drop this feature above as of 3/12/2025 -- might come back to it later if I can think of a better approach.
   // -------------------------------------------------------------------------------------------------------------------------------
 
-  // PHASE-3 UPDATE: Introducing two new "useEffect(()=>{...})" hooks for clarity as per how the Socket.IO Client-Server logic will work:
+  // PHASE-3: Const below is basically for wrapping an emit from useEffect Hook #2 with Throttling:
+  const sendTextToServer = throttle((text) => {
+    console.log("PHASE-3: IS ANYTHING BEING SENT TO THE SERVER??? HELLO???");
+    console.log("PHASE-3: Ah yes, this is being sent to the server --> [", text, "]");
+    socket.emit("send-text", text);
+  }, 300);  // only execute every 300ms (subsequent calls are ignored until each interval elapses).
 
+  // PHASE-3 UPDATE: Introducing two new "useEffect(()=>{...})" hooks for clarity as per how the Socket.IO Client-Server logic will work:
   // NOTE: Hook #1 is only supposed to run ONCE I'm pretty sure...
   // "useEffect(()=>{...})" Hook #1 - "start-up hook", for loading initial content from the server (after connecting to it for the first time).
   useEffect(() => {
@@ -343,7 +352,7 @@ function EditorContent() {
         console.log("Current line count in text editor: ", lines);
 
         // PHASE-3 ADDITION (emit current Text Editor content to the server):
-        socket.emit("send-text", textContent);
+        sendTextToServer(textContent);
 
         // Okay and now I'm going to write some code to detect the current line of the Text Editor!
         const paraNodes = $getRoot().getChildren();
@@ -381,32 +390,42 @@ function EditorContent() {
   // "useEffect(()=>{...})" Hook #3 - For listening for incoming Text Editor updates from other clients collaborating in real-time:
   useEffect(() => {
     socket.on("receive-text", (serverData) => {
+
+      console.log("Received update from server --> [", serverData, "]");
+
       // So updates will come in the form of the Text Editor content in its entirety (replacing the existing one):
       setEditorContent((editorContent) => {
-        if(editorContent !== serverData) {
-          // hmm...
-          // applying update:
-          editor.update(() => {
-            const root = $getRoot();
-            root.clear(); // gets rid of current existing text.
-            const selection = $getSelection();
-            selection.insertText(serverData);
-          });
-          // hmm...
-          return serverData;
+
+        console.log("PHASE-3-DEBUG: The value of editorContent is: ", editorContent);
+        console.log("PHASE-3-DEBUG: The value of serverData is: ", serverData);
+
+        if(editorContent === serverData) {
+          
+          console.log("PHASE-3-DEBUG: NO UPDATE NEEDED!!! TEXT IS THE SAME!");
+
+          return editorContent; // No update needed.
         }
-        return editorContent;
+        // Using diff-match-patch to check for differences:
+        const diffs = dmp.diff_main(editorContent, serverData);
+        const [patchedText] = dmp.patch_apply(dmp.patch_make(editorContent, diffs), editorContent);
+
+
+        // DEBUG: Oh I'm so stupid dude I forgot to update the Text Editor content.
+        editor.update(() => {
+          const root = $getRoot();
+          root.clear(); // gets rid of current existing text.
+          const selection = $getSelection();
+          selection.insertText(patchedText);
+        });
+
+        return patchedText;
       }); 
-    
     });
 
     return () => {
       socket.off("receive-text");
     };
   }, [editor]);
-
-
-
 
   // The three following const functions are for the "draggable" divider line between the Text Editor and Preview Panel:
   const handleMouseDown = () => {
