@@ -1,3 +1,5 @@
+// NOTE: My command for starting this server is "node src/components/Server.js"
+
 /* For implementing real-time Text Editor collaboration between multiple users, I'll
 be using Socket.IO with Express as my backend for real-time synchronization. */
 import express from "express";
@@ -17,7 +19,8 @@ const io = new Server(server, {
     },
 });
 
-let documentData = "SOME TEST VALUES"; // shared Markdown content.
+//let documentData = "SOME TEST VALUES"; // shared Markdown content.
+let documentData = "";
 
 io.on("connection", (socket) => {
     // connection notice:

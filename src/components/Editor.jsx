@@ -313,7 +313,7 @@ function EditorContent() {
   useEffect(() => {
     socket.on("load-document", (serverData) => {
       setEditorContent(serverData);
-      // setting the text editor content to whatever was on the server:
+      // setting the text editor content to whatever was on the server (NOTE: Not exactly really relevant to me yet (?) but might be very soon):
       editor.update(() => {
         const root = $getRoot();
         root.clear(); // gets rid of current existing text.
@@ -341,6 +341,9 @@ function EditorContent() {
         setLineCount(lines);
         console.log("Current line count in text editor: ", lines);
 
+        // PHASE-3 ADDITION (emit current Text Editor content to the server):
+        socket.emit("send-text", textContent);
+
         // Okay and now I'm going to write some code to detect the current line of the Text Editor!
         const paraNodes = $getRoot().getChildren();
         const selection = $getSelection();
@@ -352,9 +355,6 @@ function EditorContent() {
         let currentLine = textContentTrunc.split("\n").length;
         console.log("The current line is: ", currentLine);
         setCurrentLine(currentLine);
-
-
-
 
         // NOTE: The stuff below is for the Markdown renderer... 
         setEditorContent(textContent);
