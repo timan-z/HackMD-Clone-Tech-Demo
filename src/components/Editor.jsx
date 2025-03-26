@@ -132,9 +132,6 @@ function EditorContent() {
   // The following const is for the "drag-and-drop .md files" feature for the Text Editor: 
   const [isDraggingMD, setIsDraggingMD] = useState(false);
 
-  // PHASE-3: The following const is for the real-time multiple-client collaboration feature of the site:
-  const editorRef = useRef(null);
-
   // -------------------------------------------------------------------------------------------------------------------------------
   // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach...
   // DEBUG: Below is for the enabling of the Table configuration tools:
@@ -312,10 +309,8 @@ function EditorContent() {
 
   // PHASE-3: Const below is basically for wrapping an emit from useEffect Hook #2 with Throttling:
   const sendTextToServer = throttle((text) => {
-    console.log("PHASE-3: IS ANYTHING BEING SENT TO THE SERVER??? HELLO???");
-    console.log("PHASE-3: Ah yes, this is being sent to the server --> [", text, "]");
     socket.emit("send-text", text);
-  }, 300);  // only execute every 300ms (subsequent calls are ignored until each interval elapses).
+  }, 150);  // only execute every 300ms (subsequent calls are ignored until each interval elapses).
 
   // PHASE-3 UPDATE: Introducing two new "useEffect(()=>{...})" hooks for clarity as per how the Socket.IO Client-Server logic will work:
   // NOTE: Hook #1 is only supposed to run ONCE I'm pretty sure...
@@ -351,9 +346,6 @@ function EditorContent() {
         setLineCount(lines);
         console.log("Current line count in text editor: ", lines);
 
-        // PHASE-3 ADDITION (emit current Text Editor content to the server):
-        sendTextToServer(textContent);
-
         // Okay and now I'm going to write some code to detect the current line of the Text Editor!
         const paraNodes = $getRoot().getChildren();
         const selection = $getSelection();
@@ -365,6 +357,15 @@ function EditorContent() {
         let currentLine = textContentTrunc.split("\n").length;
         console.log("The current line is: ", currentLine);
         setCurrentLine(currentLine);
+
+
+        
+        // PHASE-3 ADDITIONS:
+        sendTextToServer(textContent); // emit current Text Editor content to the server. (in external function due to throttle integration).
+        socket.emit("send-cursor-pos", absoluteCursorPos, socket.id); // sending the absolute cursor position of this specific client (and its ID).
+
+
+
 
         // NOTE: The stuff below is for the Markdown renderer... 
         setEditorContent(textContent);
@@ -390,26 +391,14 @@ function EditorContent() {
   // "useEffect(()=>{...})" Hook #3 - For listening for incoming Text Editor updates from other clients collaborating in real-time:
   useEffect(() => {
     socket.on("receive-text", (serverData) => {
-
-      console.log("Received update from server --> [", serverData, "]");
-
       // So updates will come in the form of the Text Editor content in its entirety (replacing the existing one):
       setEditorContent((editorContent) => {
-
-        console.log("PHASE-3-DEBUG: The value of editorContent is: ", editorContent);
-        console.log("PHASE-3-DEBUG: The value of serverData is: ", serverData);
-
         if(editorContent === serverData) {
-          
-          console.log("PHASE-3-DEBUG: NO UPDATE NEEDED!!! TEXT IS THE SAME!");
-
           return editorContent; // No update needed.
         }
         // Using diff-match-patch to check for differences:
         const diffs = dmp.diff_main(editorContent, serverData);
         const [patchedText] = dmp.patch_apply(dmp.patch_make(editorContent, diffs), editorContent);
-
-
         // DEBUG: Oh I'm so stupid dude I forgot to update the Text Editor content.
         editor.update(() => {
           const root = $getRoot();
@@ -417,7 +406,6 @@ function EditorContent() {
           const selection = $getSelection();
           selection.insertText(patchedText);
         });
-
         return patchedText;
       }); 
     });

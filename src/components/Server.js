@@ -19,8 +19,8 @@ const io = new Server(server, {
     },
 });
 
-//let documentData = "SOME TEST VALUES"; // shared Markdown content.
 let documentData = "";
+let clientCursors = []; // This will be my array variable holding the client-cursor info objects for rendering in each Text Editor.
 
 io.on("connection", (socket) => {
     // connection notice:
@@ -31,20 +31,44 @@ io.on("connection", (socket) => {
     
     // Handle text editor changes:
     socket.on("send-text", (data) => {
-
-        console.log("RECEIVED FROM CLIENT: [", data, "]");
-
         documentData = data;    // update document state.
-
-        console.log("BROADCASTING TO OTHER CLIENTS!!!");
-
         socket.broadcast.emit("receive-text", data);    // send updates to all other clients.
     });
-    
+
+    // Handle client sending their cursor position within the Text Editor (*will happen frequently*): 
+    socket.on("send-cursor-pos", (absCursorPos, clientId) => {
+        console.log("DEBUG: The client sending their cursor position: [", clientId, "]");
+        console.log("DEBUG: Their cursor position: ", absCursorPos);
+        const clientCursor = {cursorPos: absCursorPos, id:clientId};
+        const isItAlrThere = clientCursors.findIndex(item => item.id === clientId); // Check if there's already an obj in clientCursors rep'ing this socket.        
+
+        if(isItAlrThere !== -1) {
+            // Obj with id===clientId present in clientCursors means that specific element needs to be replaced (isItAlrThere === index):
+            clientCursors[isItAlrThere] = clientCursor;
+        } else {
+            // Not present, so we can push it in:
+            clientCursors.push(clientCursor);
+        }
+
+        console.log("DEBUG: Current state of clientCursors: ", clientCursors);
+    });
+
     // disconnection notice:
     socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id);
+
+        console.log("DEBUG: [clientCursors Pre-Splice] => ", clientCursors);
+        // After disconnection, I need to remove the recently-disconnected socket from array clientCursors too:
+        let targetIndex = 0;
+        clientCursors.forEach(client => {
+            if(client.id === socket.id) {
+                clientCursors.splice(targetIndex, 1);
+            }
+            targetIndex += 1; 
+        });
+        console.log("DEBUG: [clientCursors Post-Splice] => ", clientCursors);
     });
+
 });
 
 server.listen(4000, () => console.log("Server running on port 4000")); // specify port 4000 as the server location.
