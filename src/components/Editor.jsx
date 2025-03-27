@@ -18,7 +18,6 @@ import DiffMatchPatch from "diff-match-patch";
 const socket = io("http://localhost:4000"); // NOTE: This is what I'm picking for server port location in Server.js (maybe change it, doesn't matter, who cares).
 const dmp = new DiffMatchPatch();
 
-
 /* NOTE-TO-SELF:
   - LexicalComposer initializes the editor with the [theme], [namespace], and [onError] configs. (Additional plug-ins go within its tags).
   - ContentEditable is the area where the user types.
@@ -131,6 +130,9 @@ function EditorContent() {
   const [previewTColour, setPreviewTColour] = useState("#000000");
   // The following const is for the "drag-and-drop .md files" feature for the Text Editor: 
   const [isDraggingMD, setIsDraggingMD] = useState(false);
+  // The following const(s) is for rendering the cursors of the *other* clients in the Text Editor during real-time collaboration:
+  const [otherCursors, setOtherCursors] = useState([]);
+  const [cursorPositions, setCursorPositions] = useState([]);
 
   // -------------------------------------------------------------------------------------------------------------------------------
   // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach...
@@ -349,7 +351,7 @@ function EditorContent() {
         const textContent = $getRoot().getTextContent();
         const lines = textContent.split("\n").length;
         setLineCount(lines);
-        console.log("Current line count in text editor: ", lines);
+        //console.log("Current line count in text editor: ", lines);
 
         // Okay and now I'm going to write some code to detect the current line of the Text Editor!
         const paraNodes = $getRoot().getChildren();
@@ -360,18 +362,13 @@ function EditorContent() {
         let absoluteCursorPos = findCursorPos(paraNodes, anchorNode, anchorOffset); // let's see!
         let textContentTrunc = textContent.slice(0, absoluteCursorPos);
         let currentLine = textContentTrunc.split("\n").length;
-        console.log("The current line is: ", currentLine);
+        //console.log("The current line is: ", currentLine);
         setCurrentLine(currentLine);
-
-
 
         // PHASE-3 ADDITIONS:
         sendTextToServer(textContent); // emit current Text Editor content to the server. (in external function due to throttle integration).
         sendCursorToServer(absoluteCursorPos); // emit current Text Editor cursor pos to the server. ^ again, same.
         
-
-
-
         // NOTE: The stuff below is for the Markdown renderer... 
         setEditorContent(textContent);
         setParsedContent(parseMarkdown(textContent));
@@ -393,8 +390,9 @@ function EditorContent() {
     };
   }, [editor]);
 
-  // "useEffect(()=>{...})" Hook #3 - For listening for incoming Text Editor updates from other clients collaborating in real-time:
+  // "useEffect(()=>{...})" Hook #3 - For listening for incoming Text Editor updates from other clients during real-time collaboration:
   useEffect(() => {
+    // Receiving Text Editor updates from real-time clients:
     socket.on("receive-text", (serverData) => {
       // So updates will come in the form of the Text Editor content in its entirety (replacing the existing one):
       setEditorContent((editorContent) => {
@@ -419,6 +417,55 @@ function EditorContent() {
       socket.off("receive-text");
     };
   }, [editor]);
+
+  // "useEffect(()=>{...})" Hook #4 - For clientCursors updates (letting us know how to update the rendering):
+  useEffect(() => {
+    // Receiving clientCursors (the cursor positions and IDs of all *other* clients editing the document):
+    socket.on("update-cursors", (cursors) => {
+      console.log("DEBUG: Received clientCursors update! cursors = [", cursors, "]");
+      console.log("Debug: Also btw the value of socket.id is: ", socket.id);
+      setOtherCursors(cursors);
+      /* otherCursors won't automatically update to "cursors" immediately, will need to wait for the next time
+      the Editor renders (which I can catch with another useEffect hook dedicated to detecting when otherCursors changes). */      
+    });
+    return () => {
+      socket.off("update-cursors");
+    };
+  }, []);
+
+  // "useEffect(()=>{...})" Hook #5 - This one exists in conjunction with Hook #4 (for listening to otherCursors state var changes):
+  // NOTE: ^ This is also the useEffect hook where I will write code for the rendering of foreign cursors!!!
+  useEffect(() => {
+    console.log("DEBUG: The value of otherCursors is => [", otherCursors, "]");
+    
+    editor.update(() => {
+      console.log("DEBUG-WAZOO: TESTING THAT THIS IS ENTERED!!!");
+      
+      const root = $getRoot();
+      console.log(root.getChildAtIndex(2), 0);
+
+
+    });
+
+    /*editorState.read(() => {
+      const root = $getRoot();
+      // Strategy here is to make DOM-based decorations out of the other client cursor coordinates:
+      const newCursors = otherCursors
+        .filter(cursor => cursor.id !== socket.id) // skip the cursor coordinates for *this* client.
+        .map(({cursorPos, id}) => {
+
+
+        })
+    });*/
+
+
+
+  }, [otherCursors, editor]); // So this useEffect hook will run when the otherCursors state is updated (and I can begin re-rendering the webpage).
+
+
+
+
+
 
   // The three following const functions are for the "draggable" divider line between the Text Editor and Preview Panel:
   const handleMouseDown = () => {
