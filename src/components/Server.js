@@ -6,14 +6,6 @@ import express from "express";
 import http from "http"; // Express runs on HTTP.
 import { Server } from "socket.io";
 import cors from "cors";
-import pkg from 'lodash';
-const { throttle } = pkg;
-
-/* NOTE-TO-SELF:
- - io.emit will send this event to *all* clients (including the server, which here will be irrelevant).
- - socket.emit will send the event *only* to the specific client that triggered it.
- - socket.broadcast.emit will send the even to all *other* clients except the sender.
-*/
 
 // setup:
 const app = express();
@@ -43,6 +35,7 @@ io.on("connection", (socket) => {
         socket.broadcast.emit("receive-text", data);    // send updates to all other clients.
     });
 
+
     // Wrapping an emit.broadcast of clientCursors with a throttle to (try to) prevent race conditions:
     const broadcastCursors = throttle(() => {
         socket.broadcast.emit("update-cursors", clientCursors);
@@ -64,6 +57,12 @@ io.on("connection", (socket) => {
         }
         console.log("DEBUG: Current state of clientCursors: ", clientCursors);
 
+        /* DEBUG: My next step should be to broadcast the state of clientCursors to each connected client
+        barring the one that sent the initial emit (so I want to use .broadcast ofc).
+
+        - There's definitely going to be an issue of race conditions here as well, so I probably need to 
+        use a similar tactic I did with Text Editor updates using throttle (?).
+        */
         // Broadcasting the state of clientCursors:
         broadcastCursors();
     });
@@ -82,8 +81,16 @@ io.on("connection", (socket) => {
             targetIndex += 1; 
         });
         console.log("DEBUG: [clientCursors Post-Splice] => ", clientCursors);
-        broadcastCursors();
+
+        // DEBUG: After removing a clientCursor from clientCursors, I'll need to broadcast this update too! (so the render can be removed):
+        io.emit("update-cursors", clientCursors);
+        /* NOTE-TO-SELF:
+        - io.emit will send this event to *all* clients (including the server, which here will be irrelevant).
+        - socket.emit will send the event *only* to the specific client that triggered it.
+        - socket.broadcast.emit will send the even to all *other* clients except the sender.
+        */
     });
+
 });
 
 server.listen(4000, () => console.log("Server running on port 4000")); // specify port 4000 as the server location.

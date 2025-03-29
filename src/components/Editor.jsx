@@ -12,12 +12,10 @@ import { findCursorPos } from './UtilityFuncs.js';
 import Toolbar from "./Toolbar.jsx";
 
 // NOTE: Following lines are for Phase 3 (Introducing Real-Time Collaboration).
-//import { io } from "socket.io-client";
+import { io } from "socket.io-client";
 import { throttle } from "lodash"; // Throttling needed to limit rate of function calls (specifically emits to the server).
 import DiffMatchPatch from "diff-match-patch";
-import RemoteCursor from './RemoteCursor.jsx';
-//const socket = io("http://localhost:4000"); // NOTE: This is what I'm picking for server port location in Server.js (maybe change it, doesn't matter, who cares).
-import socket from "./Socket.js"
+const socket = io("http://localhost:4000"); // NOTE: This is what I'm picking for server port location in Server.js (maybe change it, doesn't matter, who cares).
 const dmp = new DiffMatchPatch();
 
 /* NOTE-TO-SELF:
@@ -134,7 +132,7 @@ function EditorContent() {
   const [isDraggingMD, setIsDraggingMD] = useState(false);
   // The following const(s) is for rendering the cursors of the *other* clients in the Text Editor during real-time collaboration:
   const [otherCursors, setOtherCursors] = useState([]);
-  const [remoteCursors, setRemoteCursors] = useState([]);
+  const [cursorPositions, setCursorPositions] = useState([]);
 
   // -------------------------------------------------------------------------------------------------------------------------------
   // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach...
@@ -426,7 +424,7 @@ function EditorContent() {
     socket.on("update-cursors", (cursors) => {
       console.log("DEBUG: Received clientCursors update! cursors = [", cursors, "]");
       console.log("Debug: Also btw the value of socket.id is: ", socket.id);
-      setRemoteCursors(cursors.filter(c => c.id !== socket.id)); // Ignore the cursor recorded for *this* client here.
+      setOtherCursors(cursors);
       /* otherCursors won't automatically update to "cursors" immediately, will need to wait for the next time
       the Editor renders (which I can catch with another useEffect hook dedicated to detecting when otherCursors changes). */      
     });
@@ -437,7 +435,7 @@ function EditorContent() {
 
   // "useEffect(()=>{...})" Hook #5 - This one exists in conjunction with Hook #4 (for listening to otherCursors state var changes):
   // NOTE: ^ This is also the useEffect hook where I will write code for the rendering of foreign cursors!!!
-  /*useEffect(() => {
+  useEffect(() => {
     console.log("DEBUG: The value of otherCursors is => [", otherCursors, "]");
     
     editor.update(() => {
@@ -445,8 +443,24 @@ function EditorContent() {
       
       const root = $getRoot();
       console.log(root.getChildAtIndex(2), 0);
+
+
     });
-  }, [otherCursors, editor]);*/ // So this useEffect hook will run when the otherCursors state is updated (and I can begin re-rendering the webpage).
+
+    /*editorState.read(() => {
+      const root = $getRoot();
+      // Strategy here is to make DOM-based decorations out of the other client cursor coordinates:
+      const newCursors = otherCursors
+        .filter(cursor => cursor.id !== socket.id) // skip the cursor coordinates for *this* client.
+        .map(({cursorPos, id}) => {
+
+
+        })
+    });*/
+
+
+
+  }, [otherCursors, editor]); // So this useEffect hook will run when the otherCursors state is updated (and I can begin re-rendering the webpage).
 
 
 
