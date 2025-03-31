@@ -677,7 +677,7 @@ function EditorContent() {
           can align with the rows of the text editor (style=flex). 
           NOTE:+DEBUG: ^ Make note of this when determining if I keep or get rid of the horizontal line numbers (might be too difficult
           to incorporate the what happens when you type one continous line of text thing)... */}
-          <div className="main-text-editor" style={{fontFamily: editorFont, fontSize:`${edFontSize}px`}}>
+          <div className="main-text-editor" style={{fontFamily: editorFont}}>
 
             {/* The block of code below was for the "Line Numbers" column to the left of the Text Editor: */}
             {/*<div className="line-numbers">
@@ -696,7 +696,7 @@ function EditorContent() {
                 {/* Need to wrap the ContentEditable inside the PlainTextPlugin (I didn't do this originally, that's why the Placeholder wasn't working). */}
                 <PlainTextPlugin
                   contentEditable={
-                    <ContentEditable className={`content-editable black-outline ${isDraggingMD ? "dragging" : ""}`} onKeyDown={handleKeyInput} style={{backgroundColor:editorBColour, color:editorTColour}} data-placeholder="Write your Markdown here..."/>
+                    <ContentEditable className={`content-editable black-outline ${isDraggingMD ? "dragging" : ""}`} onKeyDown={handleKeyInput} style={{backgroundColor:editorBColour, color:editorTColour, fontSize:`${edFontSize}px`}} data-placeholder="Write your Markdown here..."/>
                   }
                   placeholder={<div className="placeholder">Write your Markdown here...</div>}
                   ErrorBoundary={LexicalErrorBoundary}
