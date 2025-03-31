@@ -132,7 +132,6 @@ function EditorContent() {
   const [isDraggingMD, setIsDraggingMD] = useState(false);
   // The following const(s) is for rendering the cursors of the *other* clients in the Text Editor during real-time collaboration:
   const [otherCursors, setOtherCursors] = useState([]);
-  const [cursorPositions, setCursorPositions] = useState([]);
 
   // -------------------------------------------------------------------------------------------------------------------------------
   // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach...
@@ -432,6 +431,11 @@ function EditorContent() {
       socket.off("update-cursors");
     };
   }, []);
+
+
+
+
+
 
   // "useEffect(()=>{...})" Hook #5 - This one exists in conjunction with Hook #4 (for listening to otherCursors state var changes):
   // NOTE: ^ This is also the useEffect hook where I will write code for the rendering of foreign cursors!!!
