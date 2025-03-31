@@ -442,28 +442,26 @@ function EditorContent() {
   useEffect(() => {
     console.log("DEBUG: The value of otherCursors is => [", otherCursors, "]");
     
-    editor.update(() => {
-      console.log("DEBUG-WAZOO: TESTING THAT THIS IS ENTERED!!!");
-      
-      const root = $getRoot();
-      console.log(root.getChildAtIndex(2), 0);
+    console.log("debug: The value of editor is => [", editor, "]");
 
+    if(!editor) return; // editor needs to be initialized or else none of this should execute.
 
+    // NOTE: "rootElement" apparently provided by Lexical for registerDecoratorListener?
+    const unregister = editor.registerDecoratorListener((rootElement) => {
+
+      console.log("ZAAAAAAAAAAAAAAAAAAAAAAAAAAHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+
+      if (!rootElement) {
+        console.log("rootElement is NULL homie...");
+        return;
+      }
+      console.log("OKAY THE DECORATOR LISTENER IS WORKING.");
     });
 
-    /*editorState.read(() => {
-      const root = $getRoot();
-      // Strategy here is to make DOM-based decorations out of the other client cursor coordinates:
-      const newCursors = otherCursors
-        .filter(cursor => cursor.id !== socket.id) // skip the cursor coordinates for *this* client.
-        .map(({cursorPos, id}) => {
-
-
-        })
-    });*/
-
-
-
+    return () => {
+      console.log("CLEANING UP DECORATOR LISTENER");
+      unregister();
+    };
   }, [otherCursors, editor]); // So this useEffect hook will run when the otherCursors state is updated (and I can begin re-rendering the webpage).
 
 

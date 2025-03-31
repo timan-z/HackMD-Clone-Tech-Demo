@@ -5,17 +5,17 @@ Functions I want to invoke across all my components (but mainly Editor.jsx and T
 
 // Function for finding the (absolute) cursor index position within the text editor (only called when cursor is present within the editor space):
 export function findCursorPos(paraNodes, anchorNode, anchorOffset) {
-    console.log("~~~Code Button Clicked (CBC) console.log statements BEGIN (mainly of relevance if no text is highlighted)~~~");
+    //console.log("~~~Code Button Clicked (CBC) console.log statements BEGIN (mainly of relevance if no text is highlighted)~~~");
 
     /* NOTE: anchorOffset is key to determining the absolute cursor position (ACP) in the text editor (its index position in the overall text display),
     but its use will depend on if anchorNode is a TextNode or not. If it does, anchorOffset gives the position of the cursor within the current
     text-editor line (a non-empty text line). Otherwise, the cursor position is on an empty line and anchorOffset's value is less immediately useful,
     but can still be used to determine ACP. */
-    if($isTextNode(anchorNode)) {
+    /*if($isTextNode(anchorNode)) {
         console.log("CBC: Anchor Node is a Text Node. The cursor is within a text line.");
     } else {
         console.log("CBC: Anchor Node is not a Text Node. The cursor is within an empty line.");
-    }
+    }*/
 
     /* Lexical does not store its text-editor content as a single string, rather it partitions its content into various paragraph nodes 
     (see param "paraNodes"), which can be iterated through and inspected (for its child nodes, which are mostly TextNodes and LineBreakNodes). 
@@ -72,7 +72,7 @@ export function findCursorPos(paraNodes, anchorNode, anchorOffset) {
         }
     }
 
-    console.log("CBC: The cursor position is currently on line: ", (lineBreakNodeC + 1));
+    //console.log("CBC: The cursor position is currently on line: ", (lineBreakNodeC + 1));
     
     // Calculating and returning the final absolute cursor position:
     if(keyMatch === true) {                
@@ -81,8 +81,8 @@ export function findCursorPos(paraNodes, anchorNode, anchorOffset) {
         absolutePosition = cursorPosition + (anchorOffset - textNodeCount);
     }
 
-    console.log("CBC: The absolute cursor position in the text editor is: ", absolutePosition);
-    console.log("~~~Code Button Clicked (CBC) console.log statements END~~~");
+    //console.log("CBC: The absolute cursor position in the text editor is: ", absolutePosition);
+    //console.log("~~~Code Button Clicked (CBC) console.log statements END~~~");
     return absolutePosition;
 }
 
