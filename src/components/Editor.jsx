@@ -6,7 +6,7 @@ import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useEffect, useState, useRef } from 'react';
-import { $getRoot, $getSelection, $isRangeSelection, $isTextNode, $isLineBreakNode, RootNode } from 'lexical';
+import { $getRoot, $getSelection, $isRangeSelection, $isTextNode, $isLineBreakNode, $createTextNode, RootNode } from 'lexical';
 import { parseMarkdown } from "./MDParser.jsx";
 import { findCursorPos } from './UtilityFuncs.js';
 import Toolbar from "./Toolbar.jsx";
@@ -15,6 +15,7 @@ import Toolbar from "./Toolbar.jsx";
 import { io } from "socket.io-client";
 import { throttle } from "lodash"; // Throttling needed to limit rate of function calls (specifically emits to the server).
 import DiffMatchPatch from "diff-match-patch";
+import { RemoteCursorNode } from './nodes/RemoteCursorNode.jsx';
 const socket = io("http://localhost:4000"); // NOTE: This is what I'm picking for server port location in Server.js (maybe change it, doesn't matter, who cares).
 const dmp = new DiffMatchPatch();
 
@@ -103,6 +104,7 @@ const initialConfig = {
   onError: (error) => {
     console.error('Lexical Error:', error);
   },
+  nodes: [RemoteCursorNode], // DEBUG: For foreign cursor rendering... (testing)
 };
 
 // Most of the "content" of the LexicalComposer component (Text Editor) will be in this child element here:
@@ -308,6 +310,29 @@ function EditorContent() {
   // NOTE: Decided to drop this feature above as of 3/12/2025 -- might come back to it later if I can think of a better approach.
   // -------------------------------------------------------------------------------------------------------------------------------
 
+
+
+  // PHASE-3: TEST FUNCTION - This will be for test inserting RemoteCursorNode/Component for the foreign cursor rendering:
+  const insertRemoteCursor = (editor, id, color, label, offset) => {
+    editor.update(() => {
+      //const root = $getRoot();
+      const cursorNode = new RemoteCursorNode(id, color, label); // Create the cursor node
+      const placeholder = $createTextNode(" "); // Dummy placeholder for now – just to give something to wrap around
+      // Append both nodes independently
+      //root.append(cursorNode);
+      //root.append(placeholder);
+
+      const selection = $getSelection();
+      if($isRangeSelection(selection)) {
+        selection.insertNodes([cursorNode]);
+      }
+    });
+  }
+
+
+
+
+
   // PHASE-3: Const below is for wrapping an emit from useEffect Hook #2 with Throttling:
   const sendTextToServer = throttle((text) => {
     socket.emit("send-text", text);
@@ -355,6 +380,9 @@ function EditorContent() {
         // Okay and now I'm going to write some code to detect the current line of the Text Editor!
         const paraNodes = $getRoot().getChildren();
         const selection = $getSelection();
+
+        if(!selection) return;  // DEBUG: <-- see if this fixes my RemoteCursorNode.jsx-related problem. 
+
         let {anchor} = selection;
         let anchorNode = anchor.getNode();
         let anchorOffset = anchor.offset;
@@ -443,6 +471,32 @@ function EditorContent() {
 
 
 
+  let hasInserted = false;
+
+  // "useEffect(()=>{...})" Hook #4.5 (This one's just a test hook -- for testing insertRemoteCursor!):
+  useEffect(() => {
+    if(!editor) return;
+    
+    const unregister = editor.registerUpdateListener(({editorState}) => {
+
+      if(hasInserted) return;
+
+      editor.update(() => {
+        console.log("TESTER: OKAY THIS THING IS ABOUT TO RUN!!!");
+        insertRemoteCursor(editor, "dummy-id", "blue", "Client A", 0);
+        hasInserted = true;
+      });
+    });
+  
+    return () => {
+      unregister();
+    };
+  }, [editor]);
+
+
+
+
+
 
 
 
@@ -473,7 +527,6 @@ function EditorContent() {
       unregister();
     };
   }, [otherCursors, editor]); // So this useEffect hook will run when the otherCursors state is updated (and I can begin re-rendering the webpage).
-  //}, [editor]);
 
 
 
