@@ -437,18 +437,28 @@ function EditorContent() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
   // "useEffect(()=>{...})" Hook #5 - This one exists in conjunction with Hook #4 (for listening to otherCursors state var changes):
   // NOTE: ^ This is also the useEffect hook where I will write code for the rendering of foreign cursors!!!
   useEffect(() => {
     console.log("DEBUG: The value of otherCursors is => [", otherCursors, "]");
-    
-    console.log("debug: The value of editor is => [", editor, "]");
+    console.log("FABIANO!!!!");
 
     if(!editor) return; // editor needs to be initialized or else none of this should execute.
 
     // NOTE: "rootElement" apparently provided by Lexical for registerDecoratorListener?
     const unregister = editor.registerDecoratorListener((rootElement) => {
-
+      console.log("WHY DOTH THIS NOT WORK!!!");
       console.log("ZAAAAAAAAAAAAAAAAAAAAAAAAAAHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
 
       if (!rootElement) {
@@ -463,6 +473,22 @@ function EditorContent() {
       unregister();
     };
   }, [otherCursors, editor]); // So this useEffect hook will run when the otherCursors state is updated (and I can begin re-rendering the webpage).
+  //}, [editor]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
