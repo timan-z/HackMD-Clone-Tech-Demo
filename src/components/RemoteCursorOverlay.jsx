@@ -23,6 +23,7 @@ export function RemoteCursorOverlay({editor, otherCursors, fontSize}) {
             }}
         >
             {/* Static Dummy Cursor: */}
+            {/* These dimensions below (mainly the Top, Width, and Height attributes) are perfect and exactly what I want for the cursor marker itself (GIVEN DEFAULT FONT). */}
             <div
                 style={{
                     position: "absolute",
