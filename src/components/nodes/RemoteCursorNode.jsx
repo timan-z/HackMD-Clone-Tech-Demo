@@ -1,9 +1,4 @@
-import {
-    DecoratorNode,
-    //LexicalEditor,
-    //DOMExportOutput,
-    //EditorConfig,
-} from "lexical";
+import { DecoratorNode } from "lexical";
 import * as React from "react";
 import RemoteCursorComponent from "../RemoteCursorComponent"; // We'll build this next
 
@@ -29,8 +24,10 @@ export class RemoteCursorNode extends DecoratorNode {
 
     createDOM(config) {
         const span = document.createElement("span");
-        span.style.display = "inline-block";
+        span.style.display = "inline";
         span.style.width = "0px";
+        span.style.height = "0px"; // makes sure this node won't take up any actual space in the editor (just want it to "float" like in Google Docs).
+        span.style.position = "relative";   // needed so the component can position absolutely.
         return span;
     }
 

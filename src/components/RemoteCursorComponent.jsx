@@ -1,5 +1,7 @@
 // This is the actual visual React element rendered by the RemoteCursorNode
 
+import {useEffect, useRef} from "react";
+
 function RemoteCursorComponent({ id, color, label }) {
     return (
         <div
@@ -32,4 +34,3 @@ function RemoteCursorComponent({ id, color, label }) {
 }
   
 export default RemoteCursorComponent;
-  

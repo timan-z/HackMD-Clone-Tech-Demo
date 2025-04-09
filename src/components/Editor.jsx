@@ -471,13 +471,15 @@ function EditorContent() {
 
 
 
+
+
   // PHASE-3: TEST FUNCTION - This will be for test inserting RemoteCursorNode/Component for the foreign cursor rendering:
   const insertRemoteCursor = (editor, id, color, label, offset) => {
     editor.update(() => {
       const root = $getRoot();
       const cursorNode = new RemoteCursorNode(id, color, label); // Create the cursor node
 
-      root.clear();
+      //root.clear();
 
       root.append(cursorNode);
       //const placeholder = $createTextNode(" "); // Dummy placeholder for now – just to give something to wrap around
@@ -491,19 +493,10 @@ function EditorContent() {
     });
   }
 
-  
-
-
-
-
-
-
   // "useEffect(()=>{...})" Hook #4.5 (This one's just a test hook -- for testing insertRemoteCursor!):
-  const hasInserted = useRef(false);
+  /*const hasInserted = useRef(false);
   useEffect(() => {
-
     console.log("DEBUG: useEffect Hook 4.5 is being entered...");
-
     const unregister = editor.registerUpdateListener(({ editorState }) => {
       if (!hasInserted.current) {
         hasInserted.current = true;
@@ -511,11 +504,10 @@ function EditorContent() {
         insertRemoteCursor(editor);
       }
     });
-  
     return () => {
       unregister();
     };
-  }, [editor]);
+  }, [editor]);*/
 
 
 
@@ -554,7 +546,7 @@ function EditorContent() {
 
   // "useEffect(()=>{...})" Hook #5 - This one exists in conjunction with Hook #4 (for listening to otherCursors state var changes):
   // NOTE: ^ This is also the useEffect hook where I will write code for the rendering of foreign cursors!!!
-  useEffect(() => {
+  /*useEffect(() => {
     console.log("DEBUG: The value of otherCursors is => [", otherCursors, "]");
     console.log("FABIANO!!!!");
 
@@ -576,7 +568,7 @@ function EditorContent() {
       console.log("CLEANING UP DECORATOR LISTENER");
       unregister();
     };
-  }, [otherCursors, editor]); // So this useEffect hook will run when the otherCursors state is updated (and I can begin re-rendering the webpage).
+  }, [otherCursors, editor]);*/ // So this useEffect hook will run when the otherCursors state is updated (and I can begin re-rendering the webpage).
 
 
 
@@ -790,6 +782,10 @@ function EditorContent() {
                 <option value="#C8E6C9">Soft Green</option>
               </select>
             </label>
+
+            {/* PHASE-3-DEBUG: Test button below for inserting DecoratorNode. */}
+            <button onClick={() => insertRemoteCursor(editor)}>ADD TEST CURSOR</button>
+
           </div>
           
           {/* "main-text-editor" is basically the wrapping for the actual editable text editor -- it exists mostly so that the line numbers 
