@@ -35,7 +35,9 @@ export function findCursorPos(paraNodes, anchorNode, anchorOffset) {
         // NOTE: Lexical appears to always (?) store its text-editor content in *one* specific paragraph node.
         for(const paragraph of paraNodes) {
 
-            // EDIT: Need this if-condition below because of the cursor renders...
+            /* EDIT: Need this if-condition below because of the cursor renders...
+            (Basically, when I insert a custom node into the Node Tree of Lexical, there will be times my UseEffect hook activates
+            this function which leads to a null paraNodes being sent in, or something like that, which will cause errors). */
             if(!$isParagraphNode(paragraph)) {
                 return;
             }

@@ -364,6 +364,7 @@ function EditorContent() {
         let anchorNode = anchor.getNode();
         let anchorOffset = anchor.offset;
         let absoluteCursorPos = findCursorPos(paraNodes, anchorNode, anchorOffset); // let's see!
+        console.log("DEBUG-PHASE-3: The value of absoluteCursorPos is: [", absoluteCursorPos, "]");
         let textContentTrunc = textContent.slice(0, absoluteCursorPos);
         let currentLine = textContentTrunc.split("\n").length;
         //console.log("The current line is: ", currentLine);
@@ -476,9 +477,7 @@ function EditorContent() {
       const root = $getRoot();
       const cursorNode = new RemoteCursorNode(id, color, label); // Create the cursor node
 
-      
       root.clear();
-
 
       root.append(cursorNode);
       //const placeholder = $createTextNode(" "); // Dummy placeholder for now – just to give something to wrap around
@@ -502,6 +501,8 @@ function EditorContent() {
   // "useEffect(()=>{...})" Hook #4.5 (This one's just a test hook -- for testing insertRemoteCursor!):
   const hasInserted = useRef(false);
   useEffect(() => {
+
+    console.log("DEBUG: useEffect Hook 4.5 is being entered...");
 
     const unregister = editor.registerUpdateListener(({ editorState }) => {
       if (!hasInserted.current) {
@@ -576,6 +577,18 @@ function EditorContent() {
       unregister();
     };
   }, [otherCursors, editor]); // So this useEffect hook will run when the otherCursors state is updated (and I can begin re-rendering the webpage).
+
+
+
+
+
+
+
+
+
+
+
+
 
   // The three following const functions are for the "draggable" divider line between the Text Editor and Preview Panel:
   const handleMouseDown = () => {
