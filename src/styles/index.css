@@ -39,6 +39,10 @@ I have set that shadow's colour to be a dark-bright yellow (NOTE: subject to cha
 
 
 
+.remote-cursor {
+  transition: left 0.1s ease, top 0.1s ease;
+}
+
 
 .editor-textBold {
   font-weight: bold;

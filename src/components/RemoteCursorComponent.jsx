@@ -1,17 +1,19 @@
 // This is the actual visual React element rendered by the RemoteCursorNode
 
-import {useEffect, useRef} from "react";
-
 function RemoteCursorComponent({ id, color, label }) {
-    return (
-        <div
+  return (
+    <div style={{ position: "relative" }}>
+      <div
         style={{
-          position: "relative",
-          display: "inline-block",
+          position: "absolute",
+          left: 0,
+          top: 0,
           width: "2px",
           height: "1em",
           backgroundColor: color,
           zIndex: 10,
+          pointerEvents: "none",
+          userSelect: "none",
         }}
         className="remote-cursor"
       >
@@ -25,12 +27,15 @@ function RemoteCursorComponent({ id, color, label }) {
             padding: "2px 4px",
             borderRadius: "4px",
             whiteSpace: "nowrap",
+            pointerEvents: "none",
+            userSelect: "none",
           }}
         >
           {label || id}
         </div>
       </div>
-    );
+    </div>
+  );
 }
-  
+
 export default RemoteCursorComponent;

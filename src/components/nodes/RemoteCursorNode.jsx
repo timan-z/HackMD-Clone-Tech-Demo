@@ -24,10 +24,13 @@ export class RemoteCursorNode extends DecoratorNode {
 
     createDOM(config) {
         const span = document.createElement("span");
-        span.style.display = "inline";
-        span.style.width = "0px";
-        span.style.height = "0px"; // makes sure this node won't take up any actual space in the editor (just want it to "float" like in Google Docs).
+        span.style.display = "inline-block";
+        span.style.width = "0";
+        span.style.height = "0"; // makes sure this node won't take up any actual space in the editor (just want it to "float" like in Google Docs).
         span.style.position = "relative";   // needed so the component can position absolutely.
+        span.style.pointerEvents = "none";
+        span.style.userSelect = "none";
+        span.style.overflow = "visible";
         return span;
     }
 
