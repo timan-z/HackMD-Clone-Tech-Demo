@@ -5,54 +5,61 @@ import {
     //EditorConfig,
 } from "lexical";
 import * as React from "react";
-//import RemoteCursorComponent from "../RemoteCursorComponent"; // We'll build this next
+import RemoteCursorComponent from "../RemoteCursorComponent"; // We'll build this next
 
 export class RemoteCursorNode extends DecoratorNode {
     __id;
-  __color;
-  __label;
+    __color;
+    __label;
 
-  static getType() {
-    return "remote-cursor";
-  }
+    constructor(id, color, label, key) {
+        super(key);
+        this.__id = id;
+        this.__color = color;
+        this.__label = label;
+    }
 
-  static clone(node) {
-    return new RemoteCursorNode(node.__id, node.__color, node.__label, node.__key);
-  }
+    static getType() {
+        return "remote-cursor";
+    }
 
-  createDOM(config) {
-    const span = document.createElement("span");
-    span.style.display = "inline-block";
-    span.style.width = "0px";
-    return span;
-  }
+    static clone(node) {
+        return new RemoteCursorNode(node.__id, node.__color, node.__label, node.__key);
+    }
 
-  updateDOM(prevNode, dom) {
-    return false;
-  }
+    createDOM(config) {
+        const span = document.createElement("span");
+        span.style.display = "inline-block";
+        span.style.width = "0px";
+        return span;
+    }
 
-  decorate(editor, config) {
-    return (
-      <RemoteCursorComponent
-        id={this.__id}
-        color={this.__color}
-        label={this.__label}
-      />
-    );
-  }
+    updateDOM(prevNode, dom) {
+        return false;
+    }
 
-  static importJSON(serializedNode) {
-    const { id, color, label } = serializedNode;
-    return new RemoteCursorNode(id, color, label);
-  }
+    decorate(editor, config) {
+        return (
+        <RemoteCursorComponent
+            id={this.__id}
+            color={this.__color}
+            label={this.__label}
+        />
+        );
+    }
 
-  exportJSON() {
-    return {
-      id: this.__id,
-      color: this.__color,
-      label: this.__label,
-      type: "remote-cursor",
-      version: 1,
-    };
-  }
+    static importJSON(serializedNode) {
+        const { id, color, label } = serializedNode;
+        return new RemoteCursorNode(id, color, label, undefined); // undefined so key is generated.
+    }
+
+    exportJSON() {
+        return {
+        id: this.__id,
+        color: this.__color,
+        label: this.__label,
+        type: "remote-cursor",
+        version: 1,
+        };
+    }
 }

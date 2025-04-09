@@ -310,29 +310,6 @@ function EditorContent() {
   // NOTE: Decided to drop this feature above as of 3/12/2025 -- might come back to it later if I can think of a better approach.
   // -------------------------------------------------------------------------------------------------------------------------------
 
-
-
-  // PHASE-3: TEST FUNCTION - This will be for test inserting RemoteCursorNode/Component for the foreign cursor rendering:
-  const insertRemoteCursor = (editor, id, color, label, offset) => {
-    editor.update(() => {
-      //const root = $getRoot();
-      const cursorNode = new RemoteCursorNode(id, color, label); // Create the cursor node
-      const placeholder = $createTextNode(" "); // Dummy placeholder for now – just to give something to wrap around
-      // Append both nodes independently
-      //root.append(cursorNode);
-      //root.append(placeholder);
-
-      const selection = $getSelection();
-      if($isRangeSelection(selection)) {
-        selection.insertNodes([cursorNode]);
-      }
-    });
-  }
-
-
-
-
-
   // PHASE-3: Const below is for wrapping an emit from useEffect Hook #2 with Throttling:
   const sendTextToServer = throttle((text) => {
     socket.emit("send-text", text);
@@ -471,27 +448,99 @@ function EditorContent() {
 
 
 
-  let hasInserted = false;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // PHASE-3: TEST FUNCTION - This will be for test inserting RemoteCursorNode/Component for the foreign cursor rendering:
+  const insertRemoteCursor = (editor, id, color, label, offset) => {
+    editor.update(() => {
+      const root = $getRoot();
+      const cursorNode = new RemoteCursorNode(id, color, label); // Create the cursor node
+
+      
+      root.clear();
+
+
+      root.append(cursorNode);
+      //const placeholder = $createTextNode(" "); // Dummy placeholder for now – just to give something to wrap around
+      // Append both nodes independently
+      //root.append(cursorNode);
+      //root.append(placeholder);
+      //const selection = $getSelection();
+      //if($isRangeSelection(selection)) {
+      //  selection.insertNodes([cursorNode]);
+      //}
+    });
+  }
+
+  
+
+
+
+
+
 
   // "useEffect(()=>{...})" Hook #4.5 (This one's just a test hook -- for testing insertRemoteCursor!):
+  const hasInserted = useRef(false);
   useEffect(() => {
-    if(!editor) return;
-    
-    const unregister = editor.registerUpdateListener(({editorState}) => {
 
-      if(hasInserted) return;
-
-      editor.update(() => {
-        console.log("TESTER: OKAY THIS THING IS ABOUT TO RUN!!!");
-        insertRemoteCursor(editor, "dummy-id", "blue", "Client A", 0);
-        hasInserted = true;
-      });
+    const unregister = editor.registerUpdateListener(({ editorState }) => {
+      if (!hasInserted.current) {
+        hasInserted.current = true;
+        //insertRemoteCursor(editor, "dummy-id", "blue", "Client A");
+        insertRemoteCursor(editor);
+      }
     });
   
     return () => {
       unregister();
     };
   }, [editor]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -527,26 +576,6 @@ function EditorContent() {
       unregister();
     };
   }, [otherCursors, editor]); // So this useEffect hook will run when the otherCursors state is updated (and I can begin re-rendering the webpage).
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   // The three following const functions are for the "draggable" divider line between the Text Editor and Preview Panel:
   const handleMouseDown = () => {

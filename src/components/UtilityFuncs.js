@@ -1,4 +1,4 @@
-import { $isTextNode } from 'lexical';
+import { $isParagraphNode, $isTextNode } from 'lexical';
 /* 
 Functions I want to invoke across all my components (but mainly Editor.jsx and Toolbar.jsx).
 */
@@ -34,6 +34,12 @@ export function findCursorPos(paraNodes, anchorNode, anchorOffset) {
 
         // NOTE: Lexical appears to always (?) store its text-editor content in *one* specific paragraph node.
         for(const paragraph of paraNodes) {
+
+            // EDIT: Need this if-condition below because of the cursor renders...
+            if(!$isParagraphNode(paragraph)) {
+                return;
+            }
+
             if(paragraph.getChildren()) {
                 const paraChildren = paragraph.getChildren();
 
