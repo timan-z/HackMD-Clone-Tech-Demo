@@ -15,7 +15,8 @@ import Toolbar from "./Toolbar.jsx";
 import { io } from "socket.io-client";
 import { throttle } from "lodash"; // Throttling needed to limit rate of function calls (specifically emits to the server).
 import DiffMatchPatch from "diff-match-patch";
-import { RemoteCursorNode } from './nodes/RemoteCursorNode.jsx';
+import { RemoteCursorNode } from './nodes/RemoteCursorNode.jsx'; // <-- DEBUG: ngl i might not need this one anymore now that i'm relaying on an overlay instead...
+import { RemoteCursorOverlay } from './RemoteCursorOverlay.jsx';
 const socket = io("http://localhost:4000"); // NOTE: This is what I'm picking for server port location in Server.js (maybe change it, doesn't matter, who cares).
 const dmp = new DiffMatchPatch();
 
@@ -479,7 +480,9 @@ function EditorContent() {
       const root = $getRoot();
       const cursorNode = new RemoteCursorNode(id, color, label); // Create the cursor node
 
-      //root.clear();
+
+      console.log("PHASE-3-DEBUG: DOES THIS WORK?: The value of editor.getRoot");
+
 
       root.append(cursorNode);
       //const placeholder = $createTextNode(" "); // Dummy placeholder for now – just to give something to wrap around
@@ -808,15 +811,23 @@ function EditorContent() {
             onDrop={handleFileUploadDD}>
                 <Toolbar />
 
-                {/* Need to wrap the ContentEditable inside the PlainTextPlugin (I didn't do this originally, that's why the Placeholder wasn't working). */}
-                <PlainTextPlugin
-                  contentEditable={
-                    <ContentEditable className={`content-editable black-outline ${isDraggingMD ? "dragging" : ""}`} onKeyDown={handleKeyInput} style={{backgroundColor:editorBColour, color:editorTColour, fontSize:`${edFontSize}px`}} data-placeholder="Write your Markdown here..."/>
-                  }
-                  placeholder={<div className="placeholder">Write your Markdown here...</div>}
-                  ErrorBoundary={LexicalErrorBoundary}
-                />                
-                <HistoryPlugin/> {/* <-- Needed for Undo/Redo functionality in the Toolbar... (enables tracking or smth) */}
+                {/* NOTE: This <div> below I have wrapping the <PlainTextPlugin/> etc is the overlay on which the foreign cursor markers
+                will be dynamically rendered when multiple people are editing the same editor. I want it to be the same dimensions and
+                everything as the contentEditable (which is why it has the same class), just want it to positioned relatively instead, which
+                is why I have the "style={{position:"relative"}} tossed in (it overrides that one aspect). */}
+
+                <div className={'content-editable'} style={{position:"relative"}}> 
+                  {/* Need to wrap the ContentEditable inside the PlainTextPlugin (I didn't do this originally, that's why the Placeholder wasn't working). */}
+                  <PlainTextPlugin
+                    contentEditable={
+                      <ContentEditable className={`content-editable black-outline ${isDraggingMD ? "dragging" : ""}`} onKeyDown={handleKeyInput} style={{backgroundColor:editorBColour, color:editorTColour, fontSize:`${edFontSize}px`}} data-placeholder="Write your Markdown here..."/>
+                    }
+                    placeholder={<div className="placeholder">Write your Markdown here...</div>}
+                    ErrorBoundary={LexicalErrorBoundary}
+                  />
+                  <RemoteCursorOverlay editor={editor}/> {/* <-- PHASE-3-DEBUG: Testing some stuff... */}
+                  <HistoryPlugin/> {/* <-- Needed for Undo/Redo functionality in the Toolbar... (enables tracking or smth) */}
+                </div>
                 
                 <div>Line Count: {lineCount} | Current Line: {currentLine}</div>
             </div>
