@@ -1,39 +1,36 @@
 // This will be the overlay over the Text Editor contentEditable where the cursor markers will be placed (dynamically):
 import React, {useEffect, useRef} from "react";
 
+// NOTE: MAYBE I SHOULD THROTTLE THIS FUNCTION (DON'T NEED 100%-100% ACCURATE TIMING TBH).
 export function RemoteCursorOverlay({editor, otherCursors, fontSize}) {
     const overlayRef = useRef(null);
 
     useEffect(() => {
-        console.log("Overlay mounted");
-
+        console.log("OVERLAY MOUNTED (THIS IS WHERE FOREIGN CURSORS ARE RENDERED).");
         if(!editor || !overlayRef.current) return;
         
-        const editorRoot = editor.getRootElement();
-        if(!editorRoot) return;
+        /* This "updateOverlay" function below will be what consistently refreshes with each update of otherCursors in Editor.jsx.
+        It's this function that'll re-position and re-"draw" the cursor markers signalling where the other users are in the Text Editor. 
+        (The editor listener I register for this function will call this).*/
 
-        // clear current overlay contents:
-        const overlay = overlayRef.current;
-        overlay.innerHTML = "";
+        const updateOverlay = () => {
+            const editorRoot = editor.getRootElement();
+            if(!editorRoot) return;
+            const overlay = overlayRef.current;
+            overlay.innerHTML = ""; // Wipe current overlay state (get rid of current positioning if applicable).
+            
+            //console.log("DEBUG: Running read() — attempting to insert dummy cursor...");            
+            editor.getEditorState().read(()=> {
+                const dom = editorRoot.ownerDocument || document;
 
-
-
-        console.log("DEBUG: Running read() — attempting to insert dummy cursor...");
-        // DEBUG: Testing generating a cursor marker at a specific offset:
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-
-                editor.getEditorState().read(()=> {
-                    const dummyCursorOffset = 10; // DEBUG: TEST VALUE!!!
-
-                    console.log("DEBUG: THE READ HAS BEEN ENTERED!!!");
-
-                    const dom = editorRoot.ownerDocument || document;
+                // MAKE THE TO-BE-RENDERED CURSORS BASED ON otherCursors INFORMATION:
+                otherCursors.forEach(cursor => {
+                    const {cursorPos, id} = cursor; // GETTING THE CURSOR POSITION AND ID OF THIS CURSOR (LET'S KEEP IT SIMPLE, THAT'S ALL I WANT).
                     const range = dom.createRange();
                     const walker = dom.createTreeWalker(editorRoot, NodeFilter.SHOW_TEXT);
-
                     let node = walker.nextNode();
-                    let offsetRemaining = dummyCursorOffset;
+                    let offsetRemaining = cursorPos;
+
                     while (node && offsetRemaining > node.textContent.length) {
                         offsetRemaining -= node.textContent.length;
                         node = walker.nextNode();
@@ -49,29 +46,25 @@ export function RemoteCursorOverlay({editor, otherCursors, fontSize}) {
 
                     const rect = range.getBoundingClientRect();
                     const editorRect = editorRoot.getBoundingClientRect();
-
-
-                    console.log("DEBUG: rect:", rect);
-                    console.log("DEBUG: editorRect:", editorRect);
-
-
                     const left = rect.left - editorRect.left + editorRoot.scrollLeft;
                     const top = rect.top - editorRect.top + editorRoot.scrollTop;
+
+                    // This is the veritcal line that appears:
                     const cursorEl = document.createElement("div");
                     cursorEl.style.position = "absolute";
                     cursorEl.style.left = `${left}px`;
                     cursorEl.style.top = `${top}px`;
                     cursorEl.style.width = "2px";
                     cursorEl.style.height = "1.1em";
-                    cursorEl.style.backgroundColor = "blue";
+                    cursorEl.style.backgroundColor = "red"; // I like red.
                     cursorEl.style.zIndex = 10;
-
+                    // This is the horizontal ID-tag that appears next to the vert line.
                     const label = document.createElement("div");
-                    label.textContent = "offset 10";
+                    label.textContent = id;
                     label.style.position = "absolute";
                     label.style.top = "-1.5em";
                     label.style.left = "4px";
-                    label.style.backgroundColor = "yellow";
+                    label.style.backgroundColor = "yellow"; // NOTE: Maybe change this to yellow but with red border.
                     label.style.fontSize = "10px";
                     label.style.padding = "2px 4px";
                     label.style.borderRadius = "4px";
@@ -81,12 +74,19 @@ export function RemoteCursorOverlay({editor, otherCursors, fontSize}) {
                     overlay.appendChild(cursorEl);
                 });
             });
+        };
+
+        // Initial draw:
+        updateOverlay();
+        // listener needed:
+        const unsubscribe = editor.registerUpdateListener(() => {
+            updateOverlay();
         });
-    }, [editor]);
-    
 
-
-
+        return () => {
+            unsubscribe();
+        }
+    }, [editor, otherCursors]);
 
     return (
         <div
@@ -103,6 +103,5 @@ export function RemoteCursorOverlay({editor, otherCursors, fontSize}) {
         />
     );
 }
-
 
 export default RemoteCursorOverlay;

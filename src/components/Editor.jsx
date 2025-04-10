@@ -483,7 +483,7 @@ function EditorContent() {
 
       console.log("PHASE-3-DEBUG: DOES THIS WORK?: The value of editor.getRootElement() is: [", editor.getRootElement(), "]");
 
-      
+
       root.append(cursorNode);
       //const placeholder = $createTextNode(" "); // Dummy placeholder for now – just to give something to wrap around
       // Append both nodes independently
@@ -825,7 +825,7 @@ function EditorContent() {
                     placeholder={<div className="placeholder">Write your Markdown here...</div>}
                     ErrorBoundary={LexicalErrorBoundary}
                   />
-                  <RemoteCursorOverlay editor={editor}/> {/* <-- PHASE-3-DEBUG: Testing some stuff... */}
+                  <RemoteCursorOverlay editor={editor} otherCursors={otherCursors} /> {/* <-- PHASE-3-DEBUG: Testing some stuff... */}
                   <HistoryPlugin/> {/* <-- Needed for Undo/Redo functionality in the Toolbar... (enables tracking or smth) */}
                 </div>
                 
