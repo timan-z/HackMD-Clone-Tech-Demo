@@ -481,9 +481,9 @@ function EditorContent() {
       const cursorNode = new RemoteCursorNode(id, color, label); // Create the cursor node
 
 
-      console.log("PHASE-3-DEBUG: DOES THIS WORK?: The value of editor.getRoot");
+      console.log("PHASE-3-DEBUG: DOES THIS WORK?: The value of editor.getRootElement() is: [", editor.getRootElement(), "]");
 
-
+      
       root.append(cursorNode);
       //const placeholder = $createTextNode(" "); // Dummy placeholder for now – just to give something to wrap around
       // Append both nodes independently
