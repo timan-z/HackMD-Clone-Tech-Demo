@@ -135,6 +135,8 @@ function EditorContent() {
   const [isDraggingMD, setIsDraggingMD] = useState(false);
   // The following const(s) is for rendering the cursors of the *other* clients in the Text Editor during real-time collaboration:
   const [otherCursors, setOtherCursors] = useState([]);
+  const [socketID, setSocketID] = useState("");
+
 
   // -------------------------------------------------------------------------------------------------------------------------------
   // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach...
@@ -327,6 +329,7 @@ function EditorContent() {
   useEffect(() => {
     socket.on("load-document", (serverData) => {
       setEditorContent(serverData);
+      setSocketID(socketID);
       // setting the text editor content to whatever was on the server (NOTE: Not exactly really relevant to me yet (?) but might be very soon):
       editor.update(() => {
         const root = $getRoot();
@@ -430,7 +433,7 @@ function EditorContent() {
     socket.on("update-cursors", (cursors) => {
       console.log("DEBUG: Received clientCursors update! cursors = [", cursors, "]");
       console.log("Debug: Also btw the value of socket.id is: ", socket.id);
-      setOtherCursors(cursors);
+      setOtherCursors(cursors.filter(cursor => cursor.id !== socket.id)); // The "=> cursor.id !== socket.id" part is for not including *this* client's ID.
       /* otherCursors won't automatically update to "cursors" immediately, will need to wait for the next time
       the Editor renders (which I can catch with another useEffect hook dedicated to detecting when otherCursors changes). */      
     });
@@ -479,11 +482,6 @@ function EditorContent() {
     editor.update(() => {
       const root = $getRoot();
       const cursorNode = new RemoteCursorNode(id, color, label); // Create the cursor node
-
-
-      console.log("PHASE-3-DEBUG: DOES THIS WORK?: The value of editor.getRootElement() is: [", editor.getRootElement(), "]");
-
-
       root.append(cursorNode);
       //const placeholder = $createTextNode(" "); // Dummy placeholder for now – just to give something to wrap around
       // Append both nodes independently
@@ -825,7 +823,7 @@ function EditorContent() {
                     placeholder={<div className="placeholder">Write your Markdown here...</div>}
                     ErrorBoundary={LexicalErrorBoundary}
                   />
-                  <RemoteCursorOverlay editor={editor} otherCursors={otherCursors} /> {/* <-- PHASE-3-DEBUG: Testing some stuff... */}
+                  <RemoteCursorOverlay editor={editor} otherCursors={otherCursors} fontSize={edFontSize}/> {/* <-- PHASE-3-DEBUG: Testing some stuff... */}
                   <HistoryPlugin/> {/* <-- Needed for Undo/Redo functionality in the Toolbar... (enables tracking or smth) */}
                 </div>
                 

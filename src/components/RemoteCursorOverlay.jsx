@@ -7,8 +7,11 @@ export function RemoteCursorOverlay({editor, otherCursors, fontSize}) {
 
     useEffect(() => {
         console.log("OVERLAY MOUNTED (THIS IS WHERE FOREIGN CURSORS ARE RENDERED).");
-        if(!editor || !overlayRef.current) return;
         
+        console.log("daaaaaaaaaaaaa - THE VALUE OF fontSize IS: [", fontSize, "]");
+
+        if(!editor || !overlayRef.current) return;
+
         /* This "updateOverlay" function below will be what consistently refreshes with each update of otherCursors in Editor.jsx.
         It's this function that'll re-position and re-"draw" the cursor markers signalling where the other users are in the Text Editor. 
         (The editor listener I register for this function will call this).*/
@@ -26,52 +29,55 @@ export function RemoteCursorOverlay({editor, otherCursors, fontSize}) {
                 // MAKE THE TO-BE-RENDERED CURSORS BASED ON otherCursors INFORMATION:
                 otherCursors.forEach(cursor => {
                     const {cursorPos, id} = cursor; // GETTING THE CURSOR POSITION AND ID OF THIS CURSOR (LET'S KEEP IT SIMPLE, THAT'S ALL I WANT).
-                    const range = dom.createRange();
-                    const walker = dom.createTreeWalker(editorRoot, NodeFilter.SHOW_TEXT);
-                    let node = walker.nextNode();
-                    let offsetRemaining = cursorPos;
+                    
+                    if(id !== null) {
+                        const range = dom.createRange();
+                        const walker = dom.createTreeWalker(editorRoot, NodeFilter.SHOW_TEXT);
+                        let node = walker.nextNode();
+                        let offsetRemaining = cursorPos;
 
-                    while (node && offsetRemaining > node.textContent.length) {
-                        offsetRemaining -= node.textContent.length;
-                        node = walker.nextNode();
+                        while (node && offsetRemaining > node.textContent.length) {
+                            offsetRemaining -= node.textContent.length;
+                            node = walker.nextNode();
+                        }
+                        if (!node) return;
+
+                        try {
+                            range.setStart(node, offsetRemaining);
+                            range.setEnd(node, offsetRemaining);
+                        } catch {
+                            return;
+                        }
+
+                        const rect = range.getBoundingClientRect();
+                        const editorRect = editorRoot.getBoundingClientRect();
+                        const left = rect.left - editorRect.left + editorRoot.scrollLeft;
+                        const top = rect.top - editorRect.top + editorRoot.scrollTop;
+
+                        // This is the veritcal line that appears:
+                        const cursorEl = document.createElement("div");
+                        cursorEl.style.position = "absolute";
+                        cursorEl.style.left = `${left}px`;
+                        cursorEl.style.top = `${top}px`;
+                        cursorEl.style.width = "2px";
+                        cursorEl.style.height = "1.1em";
+                        cursorEl.style.backgroundColor = "red"; // I like red.
+                        cursorEl.style.zIndex = 10;
+                        // This is the horizontal ID-tag that appears next to the vert line.
+                        const label = document.createElement("div");
+                        label.textContent = id;
+                        label.style.position = "absolute";
+                        label.style.top = "-1.5em";
+                        label.style.left = "4px";
+                        label.style.backgroundColor = "yellow"; // NOTE: Maybe change this to yellow but with red border.
+                        label.style.fontSize = "10px";
+                        label.style.padding = "2px 4px";
+                        label.style.borderRadius = "4px";
+                        label.style.whiteSpace = "nowrap";
+
+                        cursorEl.appendChild(label);
+                        overlay.appendChild(cursorEl);
                     }
-                    if (!node) return;
-
-                    try {
-                        range.setStart(node, offsetRemaining);
-                        range.setEnd(node, offsetRemaining);
-                    } catch {
-                        return;
-                    }
-
-                    const rect = range.getBoundingClientRect();
-                    const editorRect = editorRoot.getBoundingClientRect();
-                    const left = rect.left - editorRect.left + editorRoot.scrollLeft;
-                    const top = rect.top - editorRect.top + editorRoot.scrollTop;
-
-                    // This is the veritcal line that appears:
-                    const cursorEl = document.createElement("div");
-                    cursorEl.style.position = "absolute";
-                    cursorEl.style.left = `${left}px`;
-                    cursorEl.style.top = `${top}px`;
-                    cursorEl.style.width = "2px";
-                    cursorEl.style.height = "1.1em";
-                    cursorEl.style.backgroundColor = "red"; // I like red.
-                    cursorEl.style.zIndex = 10;
-                    // This is the horizontal ID-tag that appears next to the vert line.
-                    const label = document.createElement("div");
-                    label.textContent = id;
-                    label.style.position = "absolute";
-                    label.style.top = "-1.5em";
-                    label.style.left = "4px";
-                    label.style.backgroundColor = "yellow"; // NOTE: Maybe change this to yellow but with red border.
-                    label.style.fontSize = "10px";
-                    label.style.padding = "2px 4px";
-                    label.style.borderRadius = "4px";
-                    label.style.whiteSpace = "nowrap";
-
-                    cursorEl.appendChild(label);
-                    overlay.appendChild(cursorEl);
                 });
             });
         };
