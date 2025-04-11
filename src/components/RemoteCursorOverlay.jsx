@@ -30,6 +30,12 @@ export function RemoteCursorOverlay({editor, otherCursors, fontSize}) {
                 otherCursors.forEach(cursor => {
                     const {cursorPos, id} = cursor; // GETTING THE CURSOR POSITION AND ID OF THIS CURSOR (LET'S KEEP IT SIMPLE, THAT'S ALL I WANT).
                     
+                    let dummyVal = 1.1;
+                    console.log("DEBUG-1: The value of dummyVal is = ", dummyVal);
+                    dummyVal += 1;
+                    console.log("DEBUG-2: The value of dummyVal is = ", dummyVal);
+                    console.log("DEBUG-3: The value of fontSize is = ", fontSize);
+
                     if(id !== null) {
                         const range = dom.createRange();
                         const walker = dom.createTreeWalker(editorRoot, NodeFilter.SHOW_TEXT);
@@ -53,14 +59,20 @@ export function RemoteCursorOverlay({editor, otherCursors, fontSize}) {
                         const editorRect = editorRoot.getBoundingClientRect();
                         const left = rect.left - editorRect.left + editorRoot.scrollLeft;
                         const top = rect.top - editorRect.top + editorRoot.scrollTop;
+                        // default values for the foreign cursor decorator node -- assuming default font size (16px): 
+                        const defWidth = 2;
+                        const defHeight = 1.1; // <--for every font +2 above 16, I should add the amount x 0.15
+                        // following two consts are for helping adjust the cursor dec node dimensions for tweaked font size (i.e., zoom in / out).
+                        const defFontDiff = fontSize - 16;
+                        const heightAdj = (defFontDiff / 2) * 0.15; // 0.15 is the sweet spot, yeah. (.1 doesn't go far enough, .2 too much for larger fonts).
 
                         // This is the veritcal line that appears:
                         const cursorEl = document.createElement("div");
                         cursorEl.style.position = "absolute";
                         cursorEl.style.left = `${left}px`;
                         cursorEl.style.top = `${top}px`;
-                        cursorEl.style.width = "2px";
-                        cursorEl.style.height = "1.1em";
+                        cursorEl.style.width = `${defWidth}px`;
+                        cursorEl.style.height = `${defHeight+heightAdj}em`;
                         cursorEl.style.backgroundColor = "red"; // I like red.
                         cursorEl.style.zIndex = 10;
                         // This is the horizontal ID-tag that appears next to the vert line.
@@ -92,7 +104,7 @@ export function RemoteCursorOverlay({editor, otherCursors, fontSize}) {
         return () => {
             unsubscribe();
         }
-    }, [editor, otherCursors]);
+    }, [editor, otherCursors, fontSize]);
 
     return (
         <div
