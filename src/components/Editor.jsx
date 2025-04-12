@@ -137,6 +137,7 @@ function EditorContent() {
   const [otherCursors, setOtherCursors] = useState([]);
   const [socketID, setSocketID] = useState("");
   const [cursorPos, setCursorPos] = useState(0); // NOTE: This is needed for maintaining cursor position post-changes in collaborative editing.
+  //const cursorPos = useRef(0);
 
   // -------------------------------------------------------------------------------------------------------------------------------
   // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach...
@@ -369,6 +370,8 @@ function EditorContent() {
         let anchorOffset = anchor.offset;
         let absoluteCursorPos = findCursorPos(paraNodes, anchorNode, anchorOffset); // let's see!
         setCursorPos(absoluteCursorPos);  // <-- DEBUG: Probably fine to keep, but might not be needed *here* in relation to keeping cursor pos after foreign edits.
+        //cursorPos.current = absoluteCursorPos;  // <-- DEBUG: ^ trying this instead now...
+        
         console.log("DEBUG-PHASE-3: The value of absoluteCursorPos is: [", absoluteCursorPos, "]");
         let textContentTrunc = textContent.slice(0, absoluteCursorPos);
         let currentLine = textContentTrunc.split("\n").length;
@@ -406,6 +409,10 @@ function EditorContent() {
     socket.on("receive-text", (serverData) => {
       // Before replacing the current Text Editor content, I need to save the current client's cursor position within the Editor:
       // NOTE:+PHASE-3-DEBUG: ^ Going to just try and rely on the setCursorPos state var stuff for now... if it's not reliable, COME BACK HERE!!!
+
+
+      console.log("RAAAAAAAAAAAAAAAAAAAAH: The value of cursorPos is: ", cursorPos);
+
 
       // So updates will come in the form of the Text Editor content in its entirety (replacing the existing one):
       setEditorContent((editorContent) => {
@@ -462,12 +469,11 @@ function EditorContent() {
             const offset = lastChild.getTextContent().length;
             newSelection.anchor.set(lastChild.getKey(), offset);
             newSelection.focus.set(lastChild.getKey(), offset);
-            $setSelection(newSelection);
           } else {
             newSelection.anchor.set(node.getKey(), 0);
             newSelection.focus.set(node.getKey(), 0);
-            $setSelection(newSelection);
           }
+          $setSelection(newSelection);
         });
 
         // Return the new text editor content:
