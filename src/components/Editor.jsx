@@ -6,7 +6,7 @@ import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useEffect, useState, useRef } from 'react';
-import { $getRoot, $getSelection, $isRangeSelection, $isTextNode, $isLineBreakNode, $createTextNode, RootNode } from 'lexical';
+import { $getRoot, $getSelection, $isRangeSelection, $isTextNode, $setSelection, $isLineBreakNode, $createTextNode, RootNode, $isParagraphNode, $createRangeSelection } from 'lexical';
 import { parseMarkdown } from "./MDParser.jsx";
 import { findCursorPos } from './UtilityFuncs.js';
 import Toolbar from "./Toolbar.jsx";
@@ -136,7 +136,7 @@ function EditorContent() {
   // The following const(s) is for rendering the cursors of the *other* clients in the Text Editor during real-time collaboration:
   const [otherCursors, setOtherCursors] = useState([]);
   const [socketID, setSocketID] = useState("");
-
+  const [cursorPos, setCursorPos] = useState(0); // NOTE: This is needed for maintaining cursor position post-changes in collaborative editing.
 
   // -------------------------------------------------------------------------------------------------------------------------------
   // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach...
@@ -368,6 +368,7 @@ function EditorContent() {
         let anchorNode = anchor.getNode();
         let anchorOffset = anchor.offset;
         let absoluteCursorPos = findCursorPos(paraNodes, anchorNode, anchorOffset); // let's see!
+        setCursorPos(absoluteCursorPos);  // <-- DEBUG: Probably fine to keep, but might not be needed *here* in relation to keeping cursor pos after foreign edits.
         console.log("DEBUG-PHASE-3: The value of absoluteCursorPos is: [", absoluteCursorPos, "]");
         let textContentTrunc = textContent.slice(0, absoluteCursorPos);
         let currentLine = textContentTrunc.split("\n").length;
@@ -403,6 +404,9 @@ function EditorContent() {
   useEffect(() => {
     // Receiving Text Editor updates from real-time clients:
     socket.on("receive-text", (serverData) => {
+      // Before replacing the current Text Editor content, I need to save the current client's cursor position within the Editor:
+      // NOTE:+PHASE-3-DEBUG: ^ Going to just try and rely on the setCursorPos state var stuff for now... if it's not reliable, COME BACK HERE!!!
+
       // So updates will come in the form of the Text Editor content in its entirety (replacing the existing one):
       setEditorContent((editorContent) => {
         if(editorContent === serverData) {
@@ -417,7 +421,56 @@ function EditorContent() {
           root.clear(); // gets rid of current existing text.
           const selection = $getSelection();
           selection.insertText(patchedText);
+
+          // NOTE: Over here is where I reposition the cursor pos of the current client!!!
+          // DEBUG: Seems like I'm going to need to manually traverse to find the location...
+          const paragraph = root.getFirstChild();
+          if(!$isParagraphNode(paragraph)) return;
+
+          let charCount = 0;
+          for(const node of paragraph.getChildren()) {
+            if($isTextNode(node)) {
+              const text = node.getTextContent();
+              const textLength = text.length;
+
+              if(charCount + textLength >= cursorPos) {
+                const nodeOffset = cursorPos - charCount;
+                // DEBUG: Alright, these next few lines are what do it -- come back if they don't work!
+                const newSelection = $createRangeSelection();
+                newSelection.anchor.set(node.getKey(), nodeOffset);
+                newSelection.focus.set(node.getKey(), nodeOffset);
+                $setSelection(newSelection);
+                return;
+              }
+              charCount += textLength;
+            } else if ($isLineBreakNode(node)) {
+              // if cursorPos is at a new line...
+              if(charCount === cursorPos) {
+                const newSelection = $createRangeSelection();
+                newSelection.anchor.set(node.getKey(), 0);
+                newSelection.focus.set(node.getKey(), 0);
+                $setSelection(newSelection);
+                return;
+              }
+              charCount += 1;
+            }
+          }
+          // if cursorPos exceeds the text length, it's just going to be at the end of the text content:
+          const lastChild = paragraph.getLastChild();
+          const newSelection = $createRangeSelection();
+          if($isTextNode(lastChild)) {
+            const offset = lastChild.getTextContent().length;
+            newSelection.anchor.set(lastChild.getKey(), offset);
+            newSelection.focus.set(lastChild.getKey(), offset);
+            $setSelection(newSelection);
+          } else {
+            newSelection.anchor.set(node.getKey(), 0);
+            newSelection.focus.set(node.getKey(), 0);
+            $setSelection(newSelection);
+          }
         });
+
+        // Return the new text editor content:
         return patchedText;
       }); 
     });
