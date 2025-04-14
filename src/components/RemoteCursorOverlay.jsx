@@ -6,9 +6,8 @@ export function RemoteCursorOverlay({editor, otherCursors, fontSize}) {
     const overlayRef = useRef(null);
 
     useEffect(() => {
-        console.log("OVERLAY MOUNTED (THIS IS WHERE FOREIGN CURSORS ARE RENDERED).");
-        
-        console.log("daaaaaaaaaaaaa - THE VALUE OF fontSize IS: [", fontSize, "]");
+        //console.log("DEBUG: OVERLAY MOUNTED (THIS IS WHERE FOREIGN CURSORS ARE RENDERED).");
+        //console.log("DEBUG: daaaaaaaaaaaaa - THE VALUE OF fontSize IS: [", fontSize, "]");
 
         if(!editor || !overlayRef.current) return;
 
@@ -31,10 +30,10 @@ export function RemoteCursorOverlay({editor, otherCursors, fontSize}) {
                     const {cursorPos, id} = cursor; // GETTING THE CURSOR POSITION AND ID OF THIS CURSOR (LET'S KEEP IT SIMPLE, THAT'S ALL I WANT).
                     
                     let dummyVal = 1.1;
-                    console.log("DEBUG-1: The value of dummyVal is = ", dummyVal);
+                    //console.log("DEBUG-1: The value of dummyVal is = ", dummyVal);
                     dummyVal += 1;
-                    console.log("DEBUG-2: The value of dummyVal is = ", dummyVal);
-                    console.log("DEBUG-3: The value of fontSize is = ", fontSize);
+                    //console.log("DEBUG-2: The value of dummyVal is = ", dummyVal);
+                    //console.log("DEBUG-3: The value of fontSize is = ", fontSize);
 
                     if(id !== null) {
                         const range = dom.createRange();

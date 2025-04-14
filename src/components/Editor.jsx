@@ -372,7 +372,7 @@ function EditorContent() {
         setCursorPos(absoluteCursorPos);  // <-- DEBUG: Probably fine to keep, but might not be needed *here* in relation to keeping cursor pos after foreign edits.
         //cursorPos.current = absoluteCursorPos;  // <-- DEBUG: ^ trying this instead now...
         
-        console.log("DEBUG-PHASE-3: The value of absoluteCursorPos is: [", absoluteCursorPos, "]");
+        //console.log("DEBUG-PHASE-3: The value of absoluteCursorPos is: [", absoluteCursorPos, "]");
         let textContentTrunc = textContent.slice(0, absoluteCursorPos);
         let currentLine = textContentTrunc.split("\n").length;
         //console.log("The current line is: ", currentLine);
@@ -410,9 +410,7 @@ function EditorContent() {
       // Before replacing the current Text Editor content, I need to save the current client's cursor position within the Editor:
       // NOTE:+PHASE-3-DEBUG: ^ Going to just try and rely on the setCursorPos state var stuff for now... if it's not reliable, COME BACK HERE!!!
 
-
-      console.log("RAAAAAAAAAAAAAAAAAAAAH: The value of cursorPos is: ", cursorPos);
-
+      console.log("RAAAAAAAAAAAAAAAAAAAAH-1: The value of cursorPos is: ", cursorPos);
 
       // So updates will come in the form of the Text Editor content in its entirety (replacing the existing one):
       setEditorContent((editorContent) => {
@@ -422,6 +420,10 @@ function EditorContent() {
         // Using diff-match-patch to check for differences:
         const diffs = dmp.diff_main(editorContent, serverData);
         const [patchedText] = dmp.patch_apply(dmp.patch_make(editorContent, diffs), editorContent);
+        
+        
+        
+        
         // DEBUG: Oh I'm so stupid dude I forgot to update the Text Editor content.
         editor.update(() => {
           const root = $getRoot();
@@ -429,9 +431,11 @@ function EditorContent() {
           const selection = $getSelection();
           selection.insertText(patchedText);
 
+          console.log("RAAAAAAAAAAAAAAAAAAAAH-2: The value of cursorPos is: ", cursorPos);
+
           // NOTE: Over here is where I reposition the cursor pos of the current client!!!
           // DEBUG: Seems like I'm going to need to manually traverse to find the location...
-          const paragraph = root.getFirstChild();
+          /*const paragraph = root.getFirstChild();
           if(!$isParagraphNode(paragraph)) return;
 
           let charCount = 0;
@@ -473,12 +477,16 @@ function EditorContent() {
             newSelection.anchor.set(node.getKey(), 0);
             newSelection.focus.set(node.getKey(), 0);
           }
-          $setSelection(newSelection);
+          $setSelection(newSelection);*/
         });
+
 
         // Return the new text editor content:
         return patchedText;
-      }); 
+      });
+
+
+
     });
 
     return () => {
@@ -490,8 +498,8 @@ function EditorContent() {
   useEffect(() => {
     // Receiving clientCursors (the cursor positions and IDs of all *other* clients editing the document):
     socket.on("update-cursors", (cursors) => {
-      console.log("DEBUG: Received clientCursors update! cursors = [", cursors, "]");
-      console.log("Debug: Also btw the value of socket.id is: ", socket.id);
+      //console.log("DEBUG: Received clientCursors update! cursors = [", cursors, "]");
+      //console.log("Debug: Also btw the value of socket.id is: ", socket.id);
       setOtherCursors(cursors.filter(cursor => cursor.id !== socket.id)); // The "=> cursor.id !== socket.id" part is for not including *this* client's ID.
       /* otherCursors won't automatically update to "cursors" immediately, will need to wait for the next time
       the Editor renders (which I can catch with another useEffect hook dedicated to detecting when otherCursors changes). */      
