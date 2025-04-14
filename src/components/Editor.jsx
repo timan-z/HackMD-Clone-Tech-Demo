@@ -372,7 +372,7 @@ function EditorContent() {
         let absoluteCursorPos = findCursorPos(paraNodes, anchorNode, anchorOffset); // let's see!
         //setCursorPos(absoluteCursorPos);  // <-- DEBUG: Probably fine to keep, but might not be needed *here* in relation to keeping cursor pos after foreign edits.
         cursorPos.current = absoluteCursorPos;
-        console.log("PHASE-3-DEBUG: The value of cursorPos.current is = ", cursorPos.current);
+        //console.log("PHASE-3-DEBUG: The value of cursorPos.current is = ", cursorPos.current);
 
         //cursorPos.current = absoluteCursorPos;  // <-- DEBUG: ^ trying this instead now...
         
@@ -414,8 +414,6 @@ function EditorContent() {
       // Before replacing the current Text Editor content, I need to save the current client's cursor position within the Editor:
       // NOTE:+PHASE-3-DEBUG: ^ Going to just try and rely on the setCursorPos state var stuff for now... if it's not reliable, COME BACK HERE!!!
 
-      console.log("RAAAAAAAAAAAAAAAAAAAAH-1: The value of cursorPos is: ", cursorPos);
-
       // So updates will come in the form of the Text Editor content in its entirety (replacing the existing one):
       setEditorContent((editorContent) => {
         if(editorContent === serverData) {
@@ -430,7 +428,7 @@ function EditorContent() {
 
 
 
-          console.log("DEBUG: The value of cursorPos is: ", cursorPos);
+          console.log("DEBUG: The value of cursorPos is: ", cursorPos.current);
 
 
 
@@ -441,6 +439,13 @@ function EditorContent() {
 
           // NOTE: Over here is where I reposition the cursor pos of the current client!!!
           // DEBUG: Seems like I'm going to need to manually traverse to find the location...
+          /* DEBUG: ^ OKAY -- so the code I have here for repositioning cursor pos is definitely problematic and needs to be changed
+          and re-done from the bottom up. 
+          - Lots of problems and it's def because of how I'm approaching it, sometimes the cursor will jump massively and ik that's because
+          a lot of the code below is structured around Selection which is NOT representative of the full Text Editor content. So, yeah, I'll
+          need to come back here!
+
+          */
           const paragraph = root.getFirstChild();
           if(!$isParagraphNode(paragraph)) return;
 
@@ -450,8 +455,8 @@ function EditorContent() {
               const text = node.getTextContent();
               const textLength = text.length;
 
-              if(charCount + textLength >= cursorPos) {
-                const nodeOffset = cursorPos - charCount;
+              if(charCount + textLength >= cursorPos.current) {
+                const nodeOffset = cursorPos.current - charCount;
                 // DEBUG: Alright, these next few lines are what do it -- come back if they don't work!
                 const newSelection = $createRangeSelection();
                 newSelection.anchor.set(node.getKey(), nodeOffset);
@@ -462,7 +467,7 @@ function EditorContent() {
               charCount += textLength;
             } else if ($isLineBreakNode(node)) {
               // if cursorPos is at a new line...
-              if(charCount === cursorPos) {
+              if(charCount === cursorPos.current) {
                 const newSelection = $createRangeSelection();
                 newSelection.anchor.set(node.getKey(), 0);
                 newSelection.focus.set(node.getKey(), 0);
