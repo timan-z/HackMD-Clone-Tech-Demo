@@ -136,8 +136,9 @@ function EditorContent() {
   // The following const(s) is for rendering the cursors of the *other* clients in the Text Editor during real-time collaboration:
   const [otherCursors, setOtherCursors] = useState([]);
   const [socketID, setSocketID] = useState("");
-  const [cursorPos, setCursorPos] = useState(0); // NOTE: This is needed for maintaining cursor position post-changes in collaborative editing.
-  //const cursorPos = useRef(0);
+  //const [cursorPos, setCursorPos] = useState(0); // NOTE: This is needed for maintaining cursor position post-changes in collaborative editing.
+  //const cursorPosTEST = useRef(0);
+  const cursorPos = useRef(0);
 
   // -------------------------------------------------------------------------------------------------------------------------------
   // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach...
@@ -369,7 +370,10 @@ function EditorContent() {
         let anchorNode = anchor.getNode();
         let anchorOffset = anchor.offset;
         let absoluteCursorPos = findCursorPos(paraNodes, anchorNode, anchorOffset); // let's see!
-        setCursorPos(absoluteCursorPos);  // <-- DEBUG: Probably fine to keep, but might not be needed *here* in relation to keeping cursor pos after foreign edits.
+        //setCursorPos(absoluteCursorPos);  // <-- DEBUG: Probably fine to keep, but might not be needed *here* in relation to keeping cursor pos after foreign edits.
+        cursorPos.current = absoluteCursorPos;
+        console.log("PHASE-3-DEBUG: The value of cursorPos.current is = ", cursorPos.current);
+
         //cursorPos.current = absoluteCursorPos;  // <-- DEBUG: ^ trying this instead now...
         
         //console.log("DEBUG-PHASE-3: The value of absoluteCursorPos is: [", absoluteCursorPos, "]");
@@ -421,21 +425,23 @@ function EditorContent() {
         const diffs = dmp.diff_main(editorContent, serverData);
         const [patchedText] = dmp.patch_apply(dmp.patch_make(editorContent, diffs), editorContent);
         
-        
-        
-        
         // DEBUG: Oh I'm so stupid dude I forgot to update the Text Editor content.
         editor.update(() => {
+
+
+
+          console.log("DEBUG: The value of cursorPos is: ", cursorPos);
+
+
+
           const root = $getRoot();
           root.clear(); // gets rid of current existing text.
           const selection = $getSelection();
           selection.insertText(patchedText);
 
-          console.log("RAAAAAAAAAAAAAAAAAAAAH-2: The value of cursorPos is: ", cursorPos);
-
           // NOTE: Over here is where I reposition the cursor pos of the current client!!!
           // DEBUG: Seems like I'm going to need to manually traverse to find the location...
-          /*const paragraph = root.getFirstChild();
+          const paragraph = root.getFirstChild();
           if(!$isParagraphNode(paragraph)) return;
 
           let charCount = 0;
@@ -477,9 +483,8 @@ function EditorContent() {
             newSelection.anchor.set(node.getKey(), 0);
             newSelection.focus.set(node.getKey(), 0);
           }
-          $setSelection(newSelection);*/
+          $setSelection(newSelection);
         });
-
 
         // Return the new text editor content:
         return patchedText;
