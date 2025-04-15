@@ -213,6 +213,7 @@ I have set that shadow's colour to be a dark-bright yellow (NOTE: subject to cha
   flex-grow: 1; /* should make it full stretch fully in the vertical direction? */
   flex-direction: row;
   height:100%;
+  overflow:auto;
 }
 
 .editor-container {
