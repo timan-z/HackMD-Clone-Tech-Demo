@@ -430,100 +430,25 @@ function EditorContent() {
           const selection = $getSelection();
           selection.insertText(patchedText);
 
-
-          // DEBUG:[START]-------------------------------------------------------------------------------------
-          // NOTE: Over here BELOW is where I reposition the cursor pos of the current client!!!
-          // NOTE: Perhaps I can throttle just the cursor repositioning part of the code? (That's far less important than the Text patching).
-          // --------------------------------------------------------------------------------------------------
-          
-          
-
-
-          // NOTICE: OLD CODE BELOW!!!
-          console.log("DEBUG: The value of cursorPos.current is: ", cursorPos.current);
+          // Code below is for repositioning the cursor positions of foreign clients (post-re-render):
           const paragraph = root.getFirstChild();
           if(!$isParagraphNode(paragraph)) return;
-          let {anchor, focus} = selection;
+          let {anchor} = selection;
           let anchorNode = anchor.getNode();
-
-
-          let charCount = 0;
-          for(const node of paragraph.getChildren()) {
-            if($isTextNode(node)) {
-              const text = node.getTextContent();
-              const textLength = text.length;
-              //console.log("DEBUG: The value of node.getTextContent() is => ", text);
-
-              // DEBUG: if-branch #1 
-              if(charCount + textLength >= cursorPos.current) {
-
-                console.log("DEBUG: if-branch #1 being entered!!!");
-
-                const nodeOffset = cursorPos.current - charCount;
-
-                console.log("debug: The value of charCount is: ", charCount);
-                console.log("debug: The value of nodeOffset is: ", nodeOffset);
-                console.log("debug: The value of node.getKey() is: ", node.getKey());
-
-                // DEBUG: Alright, these next few lines are what do it -- come back if they don't work!
-                const newSelection = $createRangeSelection();
-                //newSelection.anchor.set(node.getKey(), nodeOffset);
-                //newSelection.focus.set(node.getKey(), nodeOffset);
-                newSelection.setTextNodeRange(anchorNode, cursorPos.current, anchorNode, cursorPos.current);
-                
-                $setSelection(newSelection);
-                return;
-              }
-              charCount += textLength;
-            
-            // DEBUG: if-branch #2
-            } else if ($isLineBreakNode(node)) {
-              // if cursorPos is at a new line...
-              if(charCount === cursorPos.current) {
-                
-                console.log("debug: if-branch #2 being entered!!!");
-
-                const newSelection = $createRangeSelection();
-                newSelection.anchor.set(node.getKey(), 0);
-                newSelection.focus.set(node.getKey(), 0);
-                $setSelection(newSelection);
-                return;
-              }
-              charCount += 1;
-            }
-          }
-          // if cursorPos exceeds the text length, it's just going to be at the end of the text content:
-          const lastChild = paragraph.getLastChild();
+          
+          const node = paragraph.getFirstChild();
+          if(!$isTextNode(node)) return;
+          const text = node.getTextContent();
+          const textLength = text.length;
+          console.log("The value of text is: ", text);
           const newSelection = $createRangeSelection();
-
-          // DEBUG: if-branch #3 <-- this is the other branch where bullshit is happening...
-          if($isTextNode(lastChild)) {
-
-            console.log("debug: if-branch #3 being entered!!!");
-
-            console.log("The value of lastChild.getTextContent() is: ", lastChild.getTextContent());
-            const offset = lastChild.getTextContent().length;
-            //newSelection.anchor.set(lastChild.getKey(), offset);
-            //newSelection.focus.set(lastChild.getKey(), offset);
-            newSelection.setTextNodeRange(anchorNode, offset, anchorNode, offset);
-
-
-          // DEBUG: if-branch #4
+          if(!(cursorPos.current > textLength)) {
+            newSelection.setTextNodeRange(anchorNode, cursorPos.current, anchorNode, cursorPos.current);
           } else {
-
-            console.log("debug: if-branch #4 being entered!!!");
-
-            newSelection.anchor.set(node.getKey(), 0);
-            newSelection.focus.set(node.getKey(), 0);
+            newSelection.setTextNodeRange(anchorNode, textLength, anchorNode, textLength);
           }
           $setSelection(newSelection);
-          // NOTICE: OLD CODE ABOVE!!!
         });
-        // DEBUG:[END]-------------------------------------------------------------------------------------
-
-
-
-
 
         // Return the new text editor content:
         return patchedText;
