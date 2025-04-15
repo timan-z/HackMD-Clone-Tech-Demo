@@ -407,6 +407,7 @@ function EditorContent() {
     };
   }, [editor]);
 
+
   // "useEffect(()=>{...})" Hook #3 - For listening for incoming Text Editor updates from other clients during real-time collaboration:
   useEffect(() => {
     // Receiving Text Editor updates from real-time clients:
@@ -423,51 +424,65 @@ function EditorContent() {
         const diffs = dmp.diff_main(editorContent, serverData);
         const [patchedText] = dmp.patch_apply(dmp.patch_make(editorContent, diffs), editorContent);
         
-        // DEBUG: Oh I'm so stupid dude I forgot to update the Text Editor content.
         editor.update(() => {
-
-
-
-          console.log("DEBUG: The value of cursorPos is: ", cursorPos.current);
-
-
-
           const root = $getRoot();
           root.clear(); // gets rid of current existing text.
           const selection = $getSelection();
           selection.insertText(patchedText);
 
-          // NOTE: Over here is where I reposition the cursor pos of the current client!!!
-          // DEBUG: Seems like I'm going to need to manually traverse to find the location...
-          /* DEBUG: ^ OKAY -- so the code I have here for repositioning cursor pos is definitely problematic and needs to be changed
-          and re-done from the bottom up. 
-          - Lots of problems and it's def because of how I'm approaching it, sometimes the cursor will jump massively and ik that's because
-          a lot of the code below is structured around Selection which is NOT representative of the full Text Editor content. So, yeah, I'll
-          need to come back here!
 
-          */
+          // DEBUG:[START]-------------------------------------------------------------------------------------
+          // NOTE: Over here BELOW is where I reposition the cursor pos of the current client!!!
+          // NOTE: Perhaps I can throttle just the cursor repositioning part of the code? (That's far less important than the Text patching).
+          // --------------------------------------------------------------------------------------------------
+          
+          
+
+
+          // NOTICE: OLD CODE BELOW!!!
+          console.log("DEBUG: The value of cursorPos.current is: ", cursorPos.current);
           const paragraph = root.getFirstChild();
           if(!$isParagraphNode(paragraph)) return;
+          let {anchor, focus} = selection;
+          let anchorNode = anchor.getNode();
+
 
           let charCount = 0;
           for(const node of paragraph.getChildren()) {
             if($isTextNode(node)) {
               const text = node.getTextContent();
               const textLength = text.length;
+              //console.log("DEBUG: The value of node.getTextContent() is => ", text);
 
+              // DEBUG: if-branch #1 
               if(charCount + textLength >= cursorPos.current) {
+
+                console.log("DEBUG: if-branch #1 being entered!!!");
+
                 const nodeOffset = cursorPos.current - charCount;
+
+                console.log("debug: The value of charCount is: ", charCount);
+                console.log("debug: The value of nodeOffset is: ", nodeOffset);
+                console.log("debug: The value of node.getKey() is: ", node.getKey());
+
                 // DEBUG: Alright, these next few lines are what do it -- come back if they don't work!
                 const newSelection = $createRangeSelection();
-                newSelection.anchor.set(node.getKey(), nodeOffset);
-                newSelection.focus.set(node.getKey(), nodeOffset);
+                //newSelection.anchor.set(node.getKey(), nodeOffset);
+                //newSelection.focus.set(node.getKey(), nodeOffset);
+                newSelection.setTextNodeRange(anchorNode, cursorPos.current, anchorNode, cursorPos.current);
+                
                 $setSelection(newSelection);
                 return;
               }
               charCount += textLength;
+            
+            // DEBUG: if-branch #2
             } else if ($isLineBreakNode(node)) {
               // if cursorPos is at a new line...
               if(charCount === cursorPos.current) {
+                
+                console.log("debug: if-branch #2 being entered!!!");
+
                 const newSelection = $createRangeSelection();
                 newSelection.anchor.set(node.getKey(), 0);
                 newSelection.focus.set(node.getKey(), 0);
@@ -480,23 +495,39 @@ function EditorContent() {
           // if cursorPos exceeds the text length, it's just going to be at the end of the text content:
           const lastChild = paragraph.getLastChild();
           const newSelection = $createRangeSelection();
+
+          // DEBUG: if-branch #3 <-- this is the other branch where bullshit is happening...
           if($isTextNode(lastChild)) {
+
+            console.log("debug: if-branch #3 being entered!!!");
+
+            console.log("The value of lastChild.getTextContent() is: ", lastChild.getTextContent());
             const offset = lastChild.getTextContent().length;
-            newSelection.anchor.set(lastChild.getKey(), offset);
-            newSelection.focus.set(lastChild.getKey(), offset);
+            //newSelection.anchor.set(lastChild.getKey(), offset);
+            //newSelection.focus.set(lastChild.getKey(), offset);
+            newSelection.setTextNodeRange(anchorNode, offset, anchorNode, offset);
+
+
+          // DEBUG: if-branch #4
           } else {
+
+            console.log("debug: if-branch #4 being entered!!!");
+
             newSelection.anchor.set(node.getKey(), 0);
             newSelection.focus.set(node.getKey(), 0);
           }
           $setSelection(newSelection);
+          // NOTICE: OLD CODE ABOVE!!!
         });
+        // DEBUG:[END]-------------------------------------------------------------------------------------
+
+
+
+
 
         // Return the new text editor content:
         return patchedText;
       });
-
-
-
     });
 
     return () => {
@@ -524,136 +555,14 @@ function EditorContent() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // PHASE-3: TEST FUNCTION - This will be for test inserting RemoteCursorNode/Component for the foreign cursor rendering:
-  const insertRemoteCursor = (editor, id, color, label, offset) => {
+  // NOTE: THIS BELOW IS MY DEBUG BUTTON <-- DEBUG: Should have it removed when I'm finished everything else in the site.
+  const debugFunction = (editor, id, color, label, offset) => {
     editor.update(() => {
-      const root = $getRoot();
-      const cursorNode = new RemoteCursorNode(id, color, label); // Create the cursor node
-      root.append(cursorNode);
-      //const placeholder = $createTextNode(" "); // Dummy placeholder for now – just to give something to wrap around
-      // Append both nodes independently
-      //root.append(cursorNode);
-      //root.append(placeholder);
-      //const selection = $getSelection();
-      //if($isRangeSelection(selection)) {
-      //  selection.insertNodes([cursorNode]);
-      //}
+      console.log("test");
+
+
     });
   }
-
-  // "useEffect(()=>{...})" Hook #4.5 (This one's just a test hook -- for testing insertRemoteCursor!):
-  /*const hasInserted = useRef(false);
-  useEffect(() => {
-    console.log("DEBUG: useEffect Hook 4.5 is being entered...");
-    const unregister = editor.registerUpdateListener(({ editorState }) => {
-      if (!hasInserted.current) {
-        hasInserted.current = true;
-        //insertRemoteCursor(editor, "dummy-id", "blue", "Client A");
-        insertRemoteCursor(editor);
-      }
-    });
-    return () => {
-      unregister();
-    };
-  }, [editor]);*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // "useEffect(()=>{...})" Hook #5 - This one exists in conjunction with Hook #4 (for listening to otherCursors state var changes):
-  // NOTE: ^ This is also the useEffect hook where I will write code for the rendering of foreign cursors!!!
-  /*useEffect(() => {
-    console.log("DEBUG: The value of otherCursors is => [", otherCursors, "]");
-    console.log("FABIANO!!!!");
-
-    if(!editor) return; // editor needs to be initialized or else none of this should execute.
-
-    // NOTE: "rootElement" apparently provided by Lexical for registerDecoratorListener?
-    const unregister = editor.registerDecoratorListener((rootElement) => {
-      console.log("WHY DOTH THIS NOT WORK!!!");
-      console.log("ZAAAAAAAAAAAAAAAAAAAAAAAAAAHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
-
-      if (!rootElement) {
-        console.log("rootElement is NULL homie...");
-        return;
-      }
-      console.log("OKAY THE DECORATOR LISTENER IS WORKING.");
-    });
-
-    return () => {
-      console.log("CLEANING UP DECORATOR LISTENER");
-      unregister();
-    };
-  }, [otherCursors, editor]);*/ // So this useEffect hook will run when the otherCursors state is updated (and I can begin re-rendering the webpage).
-
-
-
-
-
-
-
 
 
 
@@ -862,7 +771,7 @@ function EditorContent() {
             </label>
 
             {/* PHASE-3-DEBUG: Test button below for inserting DecoratorNode. */}
-            <button onClick={() => insertRemoteCursor(editor)}>ADD TEST CURSOR</button>
+            <button onClick={() => debugFunction(editor)}>DEBUG BUTTON</button>
 
           </div>
           
