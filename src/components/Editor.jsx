@@ -729,7 +729,12 @@ function EditorContent() {
                   {/* Need to wrap the ContentEditable inside the PlainTextPlugin (I didn't do this originally, that's why the Placeholder wasn't working). */}
                   <PlainTextPlugin
                     contentEditable={
-                      <ContentEditable className={`content-editable black-outline ${isDraggingMD ? "dragging" : ""}`} onKeyDown={handleKeyInput} style={{backgroundColor:editorBColour, color:editorTColour, fontSize:`${edFontSize}px`}} data-placeholder="Write your Markdown here..."/>
+                      <ContentEditable className={`content-editable black-outline ${isDraggingMD ? "dragging" : ""}`} onKeyDown={handleKeyInput} 
+                      style={{
+                        backgroundColor:editorBColour, 
+                        color:editorTColour, 
+                        fontSize:`${edFontSize}px`,
+                      }} data-placeholder="Write your Markdown here..."/>
                     }
                     placeholder={<div className="placeholder">Write your Markdown here...</div>}
                     ErrorBoundary={LexicalErrorBoundary}
