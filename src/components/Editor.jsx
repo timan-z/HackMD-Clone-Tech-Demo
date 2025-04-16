@@ -6,7 +6,7 @@ import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useEffect, useState, useRef } from 'react';
-import { $getRoot, $getSelection, $isRangeSelection, $isTextNode, $setSelection, $isLineBreakNode, $createTextNode, RootNode, $isParagraphNode, $createRangeSelection } from 'lexical';
+import { $getRoot, $getSelection, $isRangeSelection, $isTextNode, $setSelection, $isParagraphNode, $createRangeSelection } from 'lexical';
 import { parseMarkdown } from "./MDParser.jsx";
 import { findCursorPos } from './UtilityFuncs.js';
 import Toolbar from "./Toolbar.jsx";
@@ -252,24 +252,6 @@ function EditorContent() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // PHASE-3: Function below is for adjusting cursor position when foreign edits occur from behind that may warp/delay where it should be:
   const adjustCursorOffset = (originalOffset, diffs) => {
     // note: this function seems to work fine.
@@ -301,15 +283,6 @@ function EditorContent() {
     }
     return adjustedOffset;
   };
-
-
-
-
-
-
-
-
-
 
 
 
@@ -460,11 +433,6 @@ function EditorContent() {
     };
   }, []);
 
-
-
-
-
-
   // NOTE: THIS BELOW IS MY DEBUG BUTTON <-- DEBUG: Should have it removed when I'm finished everything else in the site.
   const debugFunction = (editor, id, color, label, offset) => {
     editor.update(() => {
@@ -479,16 +447,8 @@ function EditorContent() {
         console.log("DEBUG: Damn it be a newline.");
       }*/
 
-
-      
-
-
-
     });
   }
-
-
-
 
 
 
