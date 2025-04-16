@@ -424,6 +424,8 @@ function EditorContent() {
         const diffs = dmp.diff_main(editorContent, serverData);
         const [patchedText] = dmp.patch_apply(dmp.patch_make(editorContent, diffs), editorContent);
         
+
+
         editor.update(() => {
           const root = $getRoot();
           root.clear(); // gets rid of current existing text.
@@ -440,11 +442,22 @@ function EditorContent() {
           if(!$isTextNode(node)) return;
           const text = node.getTextContent();
           const textLength = text.length;
-          console.log("The value of text is: ", text);
+          console.log("debug: The value of cursorPos.current is: ", cursorPos.current);
+          //console.log("debug: The value of text is: ", text);
           const newSelection = $createRangeSelection();
+
+          console.log("DEBUG: The value of text(cursorPos.current) is => [", text.charAt(cursorPos.current), "]");
+
           if(!(cursorPos.current > textLength)) {
+
+            if(text.charAt(cursorPos.current) === "\n") {
+              console.log("debug: DAMN it be a newline!!!");
+            }
+            console.log("DEBUGGER: WHAT IS HAPPENING HERE TO CAUSE THE ISSUE");
+
             newSelection.setTextNodeRange(anchorNode, cursorPos.current, anchorNode, cursorPos.current);
           } else {
+            console.log("debug: my stupid ass");
             newSelection.setTextNodeRange(anchorNode, textLength, anchorNode, textLength);
           }
           $setSelection(newSelection);
@@ -484,6 +497,16 @@ function EditorContent() {
   const debugFunction = (editor, id, color, label, offset) => {
     editor.update(() => {
       console.log("test");
+
+      console.log("DEBUG: The value of cursorPos.current is => [", cursorPos.current, "]");
+      const text = $getRoot().getTextContent();
+      console.log("DEBUG: The value of Text Editor content is => [", text, "]");
+      const theChar = text.charAt(cursorPos.current);
+      console.log("DEBUG: The value of theChar is => [", theChar, "]");
+      if(theChar === "\n") {
+        console.log("DEBUG: Damn it be a newline.");
+      }
+
 
 
     });
