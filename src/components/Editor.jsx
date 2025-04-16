@@ -136,19 +136,7 @@ function EditorContent() {
   // The following const(s) is for rendering the cursors of the *other* clients in the Text Editor during real-time collaboration:
   const [otherCursors, setOtherCursors] = useState([]);
   const [socketID, setSocketID] = useState("");
-  //const [cursorPos, setCursorPos] = useState(0); // NOTE: This is needed for maintaining cursor position post-changes in collaborative editing.
-  //const cursorPosTEST = useRef(0);
-  const cursorPos = useRef(0);
-
-  // -------------------------------------------------------------------------------------------------------------------------------
-  // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach...
-  // DEBUG: Below is for the enabling of the Table configuration tools:
-  const [tableToolsActive, setTableToolsActive] = useState(false);
-  const [currentTableRow, setCurrentTableRow] = useState(null);
-  const [currentTableCol, setCurrentTableCol] = useState(null);
-  // DEBUG: Above is for the enabling of the Table configuration tools...
-  // NOTE: Decided to drop this feature above as of 3/12/2025 -- might come back to it later if I can think of a better approach...
-  // -------------------------------------------------------------------------------------------------------------------------------
+  const cursorPos = useRef(0); // NOTE: This is needed for maintaining cursor position post-changes in collaborative editing.
 
   // Function for handling the webpage view toggle between the Text Editor and Preview Panel (Split, Editor, Preview):
   const handleViewChange = (mode) => {
@@ -248,73 +236,6 @@ function EditorContent() {
     });
   };
 
-  // -------------------------------------------------------------------------------------------------------------------------------
-  // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach.
-  // DEBUG: Function below is for adding the additional Table configurations:
-  const checkWithinTable = (selection) => {
-
-    const selectionText = selection.getTextContent();
-        console.log("TABLE-DEBUG: The value of selectionText is: [", selectionText, "]");
-
-        if($isRangeSelection(selection) && selectionText === "") {
-          let selectionNodes = selection.getNodes(); // When selectionText === "", there should only be one node I'm retrieving here...
-          let selectionNode = selectionNodes[0];
-          console.log("1.table-debug: The value of selectionNode.getKey() is: [", selectionNode.getKey(), "]");
-
-          // ... And that one node I'm retrieving should be a text node (if it exists within a valid table structure).
-          if($isTextNode(selectionNode)) {
-            let selectionNodeText = selectionNode.getTextContent(); // Getting the line of text that the cursor is on.
-            console.log("TABLE-DEBUG: The value of selectionNodeText is: [", selectionNodeText, "]");
-            
-            /* Now I want to check to see if the current line has a "|" count >= 2 (if so, there's a possibility
-            that this line is part of a Table structure). 
-            NOTE: It may not actually be a *line* that I'm retrieving here, if the Table was pasted as a multi-line
-            text statement, what I'm "getting" here won't just be a line -- so my logic here might just not work...
-          
-            */
-
-            // NOTE: AS OF 3/12/2025 -- I HAVE MOMENTARILY DECIDED TO DROP WORKING ON THE TABLE CONFIGURATIONS IMPLEMENTATION
-            // ^ MAYBE I RETURN TO IT AFTERWARDS, BUT IT'S JUST NOT WORTH SPENDING THIS MUCH TIME ON, BETTER TO MOVE ON! (FOR NOW)
-
-            /*const vertLineCount = (selectionNodeText.match(/\|/g) || []).length; // Count `|`
-            if(vertLineCount < 2) {
-              setTableToolsActive(false);
-              return false;
-            }*/ 
-            // DEBUG: ^ Have this commented out temporarily...
-
-            // okay so I can use ".getNextSibling()" and ".getPreviousSibling()" from selectionNode...
-            // ^ play around with that and see where it can take me.
-            let prevSibling = selectionNode.getPreviousSibling();
-            console.log("TABLE-DEBUG: Test prevSibling = [", prevSibling, "]");
-            let nextSibling = selectionNode.getNextSibling();
-            console.log("TABLE-DEBUG: Test nextSibling = [", nextSibling, "]");
-
-            /* 
-            Seems that the next or previous sibling will always be newline?
-            */
-
-            // Find current cursor position:
-            /*const paraNodes = $getRoot().getChildren();
-            let {anchor} = selection;
-            let anchorNode = anchor.getNode();
-            let anchorOffset = anchor.offset;
-            let absoluteCursorPos = findCursorPos(paraNodes, anchorNode, anchorOffset);
-            console.log("TABLE-DEBUG: The value of absoluteCursorPos is: [", absoluteCursorPos, "]");*/
-
-          } else {
-            setTableToolsActive(false);
-            return false;
-          }
-        } else {
-          setTableToolsActive(false);
-          return false;
-        }
-  };
-  // DEBUG: Function above is for adding the additional Table configurations...
-  // NOTE: Decided to drop this feature above as of 3/12/2025 -- might come back to it later if I can think of a better approach.
-  // -------------------------------------------------------------------------------------------------------------------------------
-
   // PHASE-3: Const below is for wrapping an emit from useEffect Hook #2 with Throttling:
   const sendTextToServer = throttle((text) => {
     socket.emit("send-text", text);
@@ -324,6 +245,77 @@ function EditorContent() {
   const sendCursorToServer = throttle((cursorPos) => {
     socket.emit("send-cursor-pos", cursorPos, socket.id);
   }, 100);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // PHASE-3: Function below is for adjusting cursor position when foreign edits occur from behind that may warp/delay where it should be:
+  const adjustCursorOffset = (originalOffset, diffs) => {
+    // note: this function seems to work fine.
+    let cursorIndex = 0;
+    let adjustedOffset = originalOffset;
+
+    console.log("DEBUG: FUNCTION \"adjustCursorOffset\" HAS BEEN ENTERED!!!");
+    console.log("DEBUG: The value of diffs is => [", diffs, "]");
+
+    for(let i = 0; i < diffs.length; i++) {
+      const [op, text] = diffs[i];
+      const len = text.length;
+      
+      if(op === 0) {
+        // equality:
+        cursorIndex += len;
+      } else if(op === -1) {
+        // deletion:
+        if(cursorIndex < adjustedOffset) {
+          adjustedOffset = Math.max(adjustedOffset - len, cursorIndex);
+        } 
+      } else if(op === 1) {
+        // insertion before cursor:
+        if(cursorIndex <= adjustedOffset) {
+          adjustedOffset += len;
+        }
+        cursorIndex += len;
+      }
+    }
+    return adjustedOffset;
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // PHASE-3 UPDATE: Introducing two new "useEffect(()=>{...})" hooks for clarity as per how the Socket.IO Client-Server logic will work:
   // NOTE: Hook #1 is only supposed to run ONCE I'm pretty sure...
@@ -390,14 +382,6 @@ function EditorContent() {
         setEditorContent(textContent);
         setParsedContent(parseMarkdown(textContent));
 
-        // -------------------------------------------------------------------------------------------------------------------------------
-        // NOTE: Decided to drop this feature below as of 3/12/2025 -- might come back to it later if I can think of a better approach.
-        // TABLE-DEBUG: ALL OF THE STUFF BELOW IS FOR CHECKING TO SEE IF CURRENT CURSOR IS WITHIN APPROPRIATE TABLE BOUNDS!!!
-        // Should probably make it so that Table Tools are only made active when selection = non-highlighted text... (creative choice).
-        /*const selection = $getSelection();
-        let cursorInTable = checkWithinTable(selection);*/
-        // NOTE: Decided to drop this feature above as of 3/12/2025 -- might come back to it later if I can think of a better approach.
-        // -------------------------------------------------------------------------------------------------------------------------------
       });
     });
 
@@ -406,7 +390,6 @@ function EditorContent() {
       unregister();
     };
   }, [editor]);
-
 
   // "useEffect(()=>{...})" Hook #3 - For listening for incoming Text Editor updates from other clients during real-time collaboration:
   useEffect(() => {
@@ -423,8 +406,6 @@ function EditorContent() {
         // Using diff-match-patch to check for differences:
         const diffs = dmp.diff_main(editorContent, serverData);
         const [patchedText] = dmp.patch_apply(dmp.patch_make(editorContent, diffs), editorContent);
-        
-
 
         editor.update(() => {
           const root = $getRoot();
@@ -446,18 +427,9 @@ function EditorContent() {
           //console.log("debug: The value of text is: ", text);
           const newSelection = $createRangeSelection();
 
-          console.log("DEBUG: The value of text(cursorPos.current) is => [", text.charAt(cursorPos.current), "]");
-
           if(!(cursorPos.current > textLength)) {
-
-            if(text.charAt(cursorPos.current) === "\n") {
-              console.log("debug: DAMN it be a newline!!!");
-            }
-            console.log("DEBUGGER: WHAT IS HAPPENING HERE TO CAUSE THE ISSUE");
-
             newSelection.setTextNodeRange(anchorNode, cursorPos.current, anchorNode, cursorPos.current);
           } else {
-            console.log("debug: my stupid ass");
             newSelection.setTextNodeRange(anchorNode, textLength, anchorNode, textLength);
           }
           $setSelection(newSelection);
@@ -498,14 +470,17 @@ function EditorContent() {
     editor.update(() => {
       console.log("test");
 
-      console.log("DEBUG: The value of cursorPos.current is => [", cursorPos.current, "]");
+      /*console.log("DEBUG: The value of cursorPos.current is => [", cursorPos.current, "]");
       const text = $getRoot().getTextContent();
       console.log("DEBUG: The value of Text Editor content is => [", text, "]");
       const theChar = text.charAt(cursorPos.current);
       console.log("DEBUG: The value of theChar is => [", theChar, "]");
       if(theChar === "\n") {
         console.log("DEBUG: Damn it be a newline.");
-      }
+      }*/
+
+
+      
 
 
 
