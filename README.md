@@ -1,8 +1,1 @@
-# React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+All there is in this repository is, in essence, a _tech demo_ for my ["<b>HackMD Clone</b>"](https://github.com/timan-z/HackMD-Clone-CMDE-Project) project. What you can find here is a very primitive Text Editor that mimics the majority of the functionalities of HackMD's Text Editor page. You can find code where I foolishly attempted to manually—all by myself—implement real-time collaborative editing with UseEffect hooks and Socket.IO emits. To be frank, I don't really know why I kept this repository but I guess I thought there was some value to it somewhere. Maybe there's something interesting in there that I abandoned and forgot about.
